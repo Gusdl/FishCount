@@ -1,0 +1,14 @@
+# Normalize text files and help Git avoid false binary detections.
+* text=auto
+
+# Keep Swift sources and Xcode project files as UTF-8 text with friendly diffs.
+*.swift text diff=swift
+*.swiftui text diff=swift
+*.plist text
+*.pbxproj text merge=union
+*.xcscheme text
+*.xcconfig text
+
+# Treat asset catalog metadata as text as well.
+*.xcassets/Contents.json text
+*.colorset/Contents.json text

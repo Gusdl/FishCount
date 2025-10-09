@@ -56,6 +56,12 @@ FishCountApp/
 
 Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt auf `macos-14` mit Xcode 15.4. Der Job führt `xcodebuild` gegen das geteilte Schema aus und deaktiviert Codesigning, so dass ein schneller Plausibilitäts-Check für Pull Requests entsteht.
 
+## Git & Merge-Tipps
+
+- Die Datei `.gitattributes` erzwingt Text-Diffs für Swift- und Xcode-Projektdateien (`*.pbxproj`, `*.xcscheme` etc.). Dadurch werden sie nicht mehr als Binärdateien erkannt und Standard-Merge-Strategien wie `merge=union` greifen, so dass simple Konflikte automatisch aufgelöst werden.
+- Sollte Xcode dennoch eine manuelle Auflösung fordern, hilft ein `git merge --abort` gefolgt von `git pull --rebase` sowie das erneute Öffnen des Projekts in Xcode. Dort können Konflikte im Projekt-Navigator bereinigt und anschließend über `git status` überprüft werden.
+- Prüfe nach einem Merge mit `xcodebuild -resolvePackageDependencies` bzw. einem kurzen Build in Xcode, ob das Schema weiterhin kompilierbar ist.
+
 ## Assets & App Icon
 
 Damit dieser Beispiel-Repo vollständig textbasiert bleibt, ist kein App-Icon-Bitmap enthalten. Xcode zeigt deshalb beim ersten Öffnen eine Warnung an. Für den Produktivbetrieb kannst du im Asset-Katalog (`FishCountApp/Resources/Assets.xcassets`) jederzeit ein eigenes Icon hinzufügen oder auf SF Symbols zurückgreifen.
