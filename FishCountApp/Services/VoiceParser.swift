@@ -14,17 +14,31 @@ enum VoiceCommand: Equatable {
 }
 
 struct VoiceParser {
-    let aliases: [String: String]
+    private let aliasLookup: [String: String]
+    private let aliasCandidates: [String]
+    private let canonicalSpecies: [String]
 
-    init(speciesAliases: [String: [String]] = [:]) {
+    init(speciesList: [String] = SpeciesCatalog.allSpecies, speciesAliases: [String: [String]] = [:]) {
+        canonicalSpecies = speciesList
         var lookup: [String: String] = [:]
+        var candidateSet: Set<String> = []
+
+        for species in speciesList {
+            lookup[FuzzyMatcher.normalize(species)] = species
+            candidateSet.insert(species)
+        }
+
         for (canonical, variants) in speciesAliases {
-            lookup[canonical.lowercased()] = canonical
+            lookup[FuzzyMatcher.normalize(canonical)] = canonical
+            candidateSet.insert(canonical)
             for variant in variants {
-                lookup[variant.lowercased()] = canonical
+                lookup[FuzzyMatcher.normalize(variant)] = canonical
+                candidateSet.insert(variant)
             }
         }
-        aliases = lookup
+
+        aliasLookup = lookup
+        aliasCandidates = Array(candidateSet).sorted()
     }
 
     func parse(text: String) -> VoiceCommand {
@@ -54,6 +68,10 @@ struct VoiceParser {
 
         let entry = ParsedEntry(species: species, sizeClass: normalizedSize.capitalizedSizeLabel(), count: count, comment: comment)
         return .add(entry)
+    }
+
+    func canonicalSpecies(from text: String) -> String {
+        return resolveSpecies(from: text)
     }
 
     private func detectSizeClass(in text: String) -> String? {
@@ -102,10 +120,22 @@ struct VoiceParser {
     }
 
     private func resolveSpecies(from text: String) -> String {
-        let lower = text.lowercased()
-        if let canonical = aliases[lower] {
+        let normalized = FuzzyMatcher.normalize(text)
+        if let canonical = aliasLookup[normalized] {
             return canonical
         }
+
+        if let aliasMatch = FuzzyMatcher.bestMatch(for: text, in: aliasCandidates, threshold: 0.7) {
+            let normalizedAlias = FuzzyMatcher.normalize(aliasMatch)
+            if let canonical = aliasLookup[normalizedAlias] {
+                return canonical
+            }
+        }
+
+        if let canonicalMatch = FuzzyMatcher.bestMatch(for: text, in: canonicalSpecies, threshold: 0.65) {
+            return canonicalMatch
+        }
+
         return text.capitalized
     }
 
