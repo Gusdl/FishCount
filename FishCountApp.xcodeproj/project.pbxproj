@@ -1,0 +1,425 @@
+// !$*UTF8*$!
+{
+archiveVersion = 1;
+classes = {};
+objectVersion = 56;
+objects = {
+
+/* Begin PBXBuildFile section */
+5F15C9202B1EFD1C009A2F11 /* FishCountApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */; };
+5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */; };
+5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9032B1EFD1C009A2F11 /* Survey.swift */; };
+5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */; };
+5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9052B1EFD1C009A2F11 /* Exporters.swift */; };
+5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */; };
+5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */; };
+5F15C9272B1EFD1C009A2F11 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9082B1EFD1C009A2F11 /* AppTheme.swift */; };
+5F15C9282B1EFD1C009A2F11 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9092B1EFD1C009A2F11 /* CaptureView.swift */; };
+5F15C9292B1EFD1C009A2F11 /* ManualEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90A2B1EFD1C009A2F11 /* ManualEntrySheet.swift */; };
+5F15C92A2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90B2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift */; };
+5F15C92B2B1EFD1C009A2F11 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90C2B1EFD1C009A2F11 /* ExportView.swift */; };
+5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90D2B1EFD1C009A2F11 /* SettingsView.swift */; };
+5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */; };
+5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */; };
+5F15C92F2B1EFD1C009A2F11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+5F15C8F12B1EFD1C009A2F11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FishCountApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishCountApp.swift; sourceTree = "<group>"; };
+5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
+5F15C9032B1EFD1C009A2F11 /* Survey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Survey.swift; sourceTree = "<group>"; };
+5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
+5F15C9052B1EFD1C009A2F11 /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
+5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesCatalog.swift; sourceTree = "<group>"; };
+5F15C9082B1EFD1C009A2F11 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+5F15C9092B1EFD1C009A2F11 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+5F15C90A2B1EFD1C009A2F11 /* ManualEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualEntrySheet.swift; sourceTree = "<group>"; };
+5F15C90B2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyBreakdownChart.swift; sourceTree = "<group>"; };
+5F15C90C2B1EFD1C009A2F11 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+5F15C90D2B1EFD1C009A2F11 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyDetailView.swift; sourceTree = "<group>"; };
+5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyListView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+5F15C8FC2B1EFD1C009A2F11 /* Frameworks */ = {
+isa = PBXFrameworksBuildPhase;
+buildActionMask = 2147483647;
+files = (
+);
+runOnlyForDeploymentPostprocessing = 0;
+};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+5F15C8E62B1EFD1C009A2F11 = {
+isa = PBXGroup;
+children = (
+5F15C8E82B1EFD1C009A2F11 /* FishCountApp */,
+5F15C8E72B1EFD1C009A2F11 /* Products */
+);
+sourceTree = "<group>";
+};
+5F15C8E72B1EFD1C009A2F11 /* Products */ = {
+isa = PBXGroup;
+children = (
+5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */
+);
+name = Products;
+sourceTree = "<group>";
+};
+5F15C8E82B1EFD1C009A2F11 /* FishCountApp */ = {
+isa = PBXGroup;
+children = (
+5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */,
+5F15C8E92B1EFD1C009A2F11 /* Managers */,
+5F15C8EA2B1EFD1C009A2F11 /* Models */,
+5F15C8EB2B1EFD1C009A2F11 /* Services */,
+5F15C8EC2B1EFD1C009A2F11 /* Utilities */,
+5F15C8ED2B1EFD1C009A2F11 /* Views */,
+5F15C8EF2B1EFD1C009A2F11 /* Resources */
+);
+path = FishCountApp;
+sourceTree = "<group>";
+};
+5F15C8E92B1EFD1C009A2F11 /* Managers */ = {
+isa = PBXGroup;
+children = (
+5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */
+);
+name = Managers;
+path = Managers;
+sourceTree = "<group>";
+};
+5F15C8EA2B1EFD1C009A2F11 /* Models */ = {
+isa = PBXGroup;
+children = (
+5F15C9032B1EFD1C009A2F11 /* Survey.swift */
+);
+name = Models;
+path = Models;
+sourceTree = "<group>";
+};
+5F15C8EB2B1EFD1C009A2F11 /* Services */ = {
+isa = PBXGroup;
+children = (
+5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */
+);
+name = Services;
+path = Services;
+sourceTree = "<group>";
+};
+5F15C8EC2B1EFD1C009A2F11 /* Utilities */ = {
+isa = PBXGroup;
+children = (
+5F15C9052B1EFD1C009A2F11 /* Exporters.swift */,
+5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */,
+5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */,
+5F15C9082B1EFD1C009A2F11 /* AppTheme.swift */
+);
+name = Utilities;
+path = Utilities;
+sourceTree = "<group>";
+};
+5F15C8ED2B1EFD1C009A2F11 /* Views */ = {
+isa = PBXGroup;
+children = (
+5F15C9092B1EFD1C009A2F11 /* CaptureView.swift */,
+5F15C90C2B1EFD1C009A2F11 /* ExportView.swift */,
+5F15C90D2B1EFD1C009A2F11 /* SettingsView.swift */,
+5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */,
+5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */,
+5F15C8EE2B1EFD1C009A2F11 /* Components */
+);
+name = Views;
+path = Views;
+sourceTree = "<group>";
+};
+5F15C8EE2B1EFD1C009A2F11 /* Components */ = {
+isa = PBXGroup;
+children = (
+5F15C90A2B1EFD1C009A2F11 /* ManualEntrySheet.swift */,
+5F15C90B2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift */
+);
+name = Components;
+path = Components;
+sourceTree = "<group>";
+};
+5F15C8EF2B1EFD1C009A2F11 /* Resources */ = {
+isa = PBXGroup;
+children = (
+5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */,
+5F15C8F12B1EFD1C009A2F11 /* Info.plist */
+);
+name = Resources;
+path = Resources;
+sourceTree = "<group>";
+};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+5F15C8F92B1EFD1C009A2F11 /* FishCountApp */ = {
+isa = PBXNativeTarget;
+buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "FishCountApp" */;
+buildPhases = (
+5F15C8FB2B1EFD1C009A2F11 /* Sources */,
+5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
+5F15C8FD2B1EFD1C009A2F11 /* Resources */
+);
+buildRules = (
+);
+dependencies = (
+);
+name = FishCountApp;
+productName = FishCountApp;
+productReference = 5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */;
+productType = "com.apple.product-type.application";
+};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+5F15C8E52B1EFD1C009A2F11 /* Project object */ = {
+isa = PBXProject;
+attributes = {
+LastSwiftUpdateCheck = 1540;
+LastUpgradeCheck = 1540;
+TargetAttributes = {
+5F15C8F92B1EFD1C009A2F11 = {
+CreatedOnToolsVersion = 15.4;
+};
+};
+};
+buildConfigurationList = 5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "FishCountApp" */;
+compatibilityVersion = "Xcode 15.0";
+developmentRegion = en;
+hasScannedForEncodings = 0;
+knownRegions = (
+en,
+Base
+);
+mainGroup = 5F15C8E62B1EFD1C009A2F11;
+productRefGroup = 5F15C8E72B1EFD1C009A2F11 /* Products */;
+projectDirPath = "";
+projectRoot = "";
+targets = (
+5F15C8F92B1EFD1C009A2F11 /* FishCountApp */
+);
+};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+5F15C8FD2B1EFD1C009A2F11 /* Resources */ = {
+isa = PBXResourcesBuildPhase;
+buildActionMask = 2147483647;
+files = (
+5F15C92F2B1EFD1C009A2F11 /* Assets.xcassets in Resources */
+);
+runOnlyForDeploymentPostprocessing = 0;
+};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+5F15C8FB2B1EFD1C009A2F11 /* Sources */ = {
+isa = PBXSourcesBuildPhase;
+buildActionMask = 2147483647;
+files = (
+5F15C9202B1EFD1C009A2F11 /* FishCountApp.swift in Sources */,
+5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
+5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
+5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */,
+5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */,
+5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */,
+5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */,
+5F15C9272B1EFD1C009A2F11 /* AppTheme.swift in Sources */,
+5F15C9282B1EFD1C009A2F11 /* CaptureView.swift in Sources */,
+5F15C9292B1EFD1C009A2F11 /* ManualEntrySheet.swift in Sources */,
+5F15C92A2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift in Sources */,
+5F15C92B2B1EFD1C009A2F11 /* ExportView.swift in Sources */,
+5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */,
+5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */,
+5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */
+);
+runOnlyForDeploymentPostprocessing = 0;
+};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+5F15C9122B1EFD1C009A2F11 /* Debug */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ALWAYS_SEARCH_USER_PATHS = NO;
+CLANG_ANALYZER_NONNULL = YES;
+CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+CLANG_ENABLE_MODULES = YES;
+CLANG_ENABLE_OBJC_ARC = YES;
+CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+CLANG_WARN_BOOL_CONVERSION = YES;
+CLANG_WARN_COMMA = YES;
+CLANG_WARN_CONSTANT_CONVERSION = YES;
+CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+CLANG_WARN_EMPTY_BODY = YES;
+CLANG_WARN_ENUM_CONVERSION = YES;
+CLANG_WARN_INFINITE_RECURSION = YES;
+CLANG_WARN_INT_CONVERSION = YES;
+CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+CLANG_WARN_STRICT_PROTOTYPES = YES;
+CLANG_WARN_SUSPICIOUS_MOVE = YES;
+CLANG_WARN_UNREACHABLE_CODE = YES;
+CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+ENABLE_STRICT_OBJC_MSGSEND = YES;
+ENABLE_TESTABILITY = YES;
+GCC_C_LANGUAGE_STANDARD = gnu11;
+GCC_DYNAMIC_NO_PIC = NO;
+GCC_NO_COMMON_BLOCKS = YES;
+GCC_OPTIMIZATION_LEVEL = 0;
+GCC_PREPROCESSOR_DEFINITIONS = (
+"DEBUG=1",
+"$(inherited)"
+);
+GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+GCC_WARN_UNDECLARED_SELECTOR = YES;
+GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+GCC_WARN_UNUSED_FUNCTION = YES;
+GCC_WARN_UNUSED_VARIABLE = YES;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+ONLY_ACTIVE_ARCH = YES;
+SDKROOT = iphoneos;
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+SWIFT_VERSION = 5.0;
+};
+name = Debug;
+};
+5F15C9132B1EFD1C009A2F11 /* Release */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ALWAYS_SEARCH_USER_PATHS = NO;
+CLANG_ANALYZER_NONNULL = YES;
+CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+CLANG_ENABLE_MODULES = YES;
+CLANG_ENABLE_OBJC_ARC = YES;
+CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+CLANG_WARN_BOOL_CONVERSION = YES;
+CLANG_WARN_COMMA = YES;
+CLANG_WARN_CONSTANT_CONVERSION = YES;
+CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+CLANG_WARN_EMPTY_BODY = YES;
+CLANG_WARN_ENUM_CONVERSION = YES;
+CLANG_WARN_INFINITE_RECURSION = YES;
+CLANG_WARN_INT_CONVERSION = YES;
+CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+CLANG_WARN_STRICT_PROTOTYPES = YES;
+CLANG_WARN_SUSPICIOUS_MOVE = YES;
+CLANG_WARN_UNREACHABLE_CODE = YES;
+CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+ENABLE_NS_ASSERTIONS = NO;
+ENABLE_STRICT_OBJC_MSGSEND = YES;
+GCC_C_LANGUAGE_STANDARD = gnu11;
+GCC_NO_COMMON_BLOCKS = YES;
+GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+GCC_WARN_UNDECLARED_SELECTOR = YES;
+GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+GCC_WARN_UNUSED_FUNCTION = YES;
+GCC_WARN_UNUSED_VARIABLE = YES;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+MTL_ENABLE_DEBUG_INFO = NO;
+SDKROOT = iphoneos;
+SWIFT_OPTIMIZATION_LEVEL = "-O";
+SWIFT_VERSION = 5.0;
+VALIDATE_PRODUCT = YES;
+};
+name = Release;
+};
+5F15C9152B1EFD1C009A2F11 /* Debug */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+CODE_SIGN_STYLE = Automatic;
+CURRENT_PROJECT_VERSION = 1;
+DEVELOPMENT_ASSET_PATHS = "";
+DEVELOPMENT_TEAM = "";
+INFOPLIST_FILE = FishCountApp/Resources/Info.plist;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+LD_RUNPATH_SEARCH_PATHS = (
+"$(inherited)",
+"@executable_path/Frameworks"
+);
+MARKETING_VERSION = 1.0;
+PRODUCT_BUNDLE_IDENTIFIER = dev.eigenwerk.FishCountApp;
+PRODUCT_NAME = "$(TARGET_NAME)";
+SUPPORTS_MACCATALYST = NO;
+SWIFT_EMIT_LOC_STRINGS = YES;
+SWIFT_VERSION = 5.0;
+TARGETED_DEVICE_FAMILY = "1,2";
+};
+name = Debug;
+};
+5F15C9162B1EFD1C009A2F11 /* Release */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+CODE_SIGN_STYLE = Automatic;
+CURRENT_PROJECT_VERSION = 1;
+DEVELOPMENT_ASSET_PATHS = "";
+DEVELOPMENT_TEAM = "";
+INFOPLIST_FILE = FishCountApp/Resources/Info.plist;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+LD_RUNPATH_SEARCH_PATHS = (
+"$(inherited)",
+"@executable_path/Frameworks"
+);
+MARKETING_VERSION = 1.0;
+PRODUCT_BUNDLE_IDENTIFIER = dev.eigenwerk.FishCountApp;
+PRODUCT_NAME = "$(TARGET_NAME)";
+SUPPORTS_MACCATALYST = NO;
+SWIFT_EMIT_LOC_STRINGS = YES;
+SWIFT_VERSION = 5.0;
+TARGETED_DEVICE_FAMILY = "1,2";
+};
+name = Release;
+};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "FishCountApp" */ = {
+isa = XCConfigurationList;
+buildConfigurations = (
+5F15C9122B1EFD1C009A2F11 /* Debug */,
+5F15C9132B1EFD1C009A2F11 /* Release */
+);
+defaultConfigurationIsVisible = 0;
+defaultConfigurationName = Release;
+};
+5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "FishCountApp" */ = {
+isa = XCConfigurationList;
+buildConfigurations = (
+5F15C9152B1EFD1C009A2F11 /* Debug */,
+5F15C9162B1EFD1C009A2F11 /* Release */
+);
+defaultConfigurationIsVisible = 0;
+defaultConfigurationName = Release;
+};
+/* End XCConfigurationList section */
+};
+rootObject = 5F15C8E52B1EFD1C009A2F11 /* Project object */;
+}

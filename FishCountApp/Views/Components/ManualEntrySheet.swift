@@ -37,6 +37,9 @@ struct ManualEntrySheet: View {
                 }
             }
             .navigationTitle("Manueller Eintrag")
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.backgroundGradient.ignoresSafeArea())
+            .tint(AppTheme.primaryAccent)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") {

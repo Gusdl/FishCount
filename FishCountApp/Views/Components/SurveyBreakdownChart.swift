@@ -17,6 +17,7 @@ struct SurveyBreakdownChart: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Verteilung")
                 .font(.headline)
+                .foregroundStyle(.white)
             Chart(totals) { entry in
                 BarMark(
                     x: .value("Größenklasse", entry.sizeClass),

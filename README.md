@@ -4,11 +4,11 @@ Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am 
 
 ## Highlights
 
-- **Sprachaufnahme & Parser**: Deutscher Sprachsupport mit Voice-Kommandos ("Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische") inklusive `rückgängig`.
-- **Manuelle Eingabe**: Schnellzugriff über Buttons, Picker für Größenklassen sowie optionaler Kommentar.
-- **Analyse**: Übersichten nach Art & Größenklasse, Balkendiagramm mit Swift Charts.
+- **Sprachaufnahme & Parser**: Deutscher Sprachsupport mit Voice-Kommandos ("Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische") inklusive `rückgängig` und Live-Feedback.
+- **Manuelle Eingabe**: Schnellzugriff über glassmorphe Cards, Picker für Größenklassen sowie optionaler Kommentar.
+- **Analyse**: Übersichten nach Art & Größenklasse, Balkendiagramm mit Swift Charts in einem aufgeräumten Dashboard.
 - **Export**: CSV-/JSON-Export via Share-Sheet, temporäre Dateien werden automatisch entfernt.
-- **Anpassung**: Größenklassen-Verwaltung, kleiner Artkatalog mit Synonymen.
+- **Anpassung & Style**: Größenklassen-Verwaltung, kleiner Artkatalog mit Synonymen sowie ein maritim abgestimmtes UI mit hellem Dark-Mode-Look.
 
 ## Projektstruktur
 
@@ -47,10 +47,24 @@ FishCountApp/
 
 ## Erste Schritte
 
-1. Projektordner in Xcode öffnen (`FishCountApp` als neues SwiftUI-App-Projekt verwenden oder bestehenden Projektquellcode integrieren).
-2. SwiftData-Persistenz aktivieren (Xcode generiert automatisch das Model-Container-Setup).
-3. Berechtigungs-Strings in der `Info.plist` ergänzen.
+1. `FishCountApp.xcodeproj` in Xcode 15 (oder neuer) öffnen.
+2. Ziel-Schema `FishCountApp` auswählen.
+3. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
 4. Auf einem iOS 17 Gerät oder Simulator ausführen.
+
+## Continuous Integration
+
+Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt auf `macos-14` mit Xcode 15.4. Der Job führt `xcodebuild` gegen das geteilte Schema aus und deaktiviert Codesigning, so dass ein schneller Plausibilitäts-Check für Pull Requests entsteht.
+
+## Git & Merge-Tipps
+
+- Die Datei `.gitattributes` erzwingt Text-Diffs für Swift- und Xcode-Projektdateien (`*.pbxproj`, `*.xcscheme` etc.). Dadurch werden sie nicht mehr als Binärdateien erkannt und Standard-Merge-Strategien wie `merge=union` greifen, so dass simple Konflikte automatisch aufgelöst werden.
+- Sollte Xcode dennoch eine manuelle Auflösung fordern, hilft ein `git merge --abort` gefolgt von `git pull --rebase` sowie das erneute Öffnen des Projekts in Xcode. Dort können Konflikte im Projekt-Navigator bereinigt und anschließend über `git status` überprüft werden.
+- Prüfe nach einem Merge mit `xcodebuild -resolvePackageDependencies` bzw. einem kurzen Build in Xcode, ob das Schema weiterhin kompilierbar ist.
+
+## Assets & App Icon
+
+Damit dieser Beispiel-Repo vollständig textbasiert bleibt, ist kein App-Icon-Bitmap enthalten. Xcode zeigt deshalb beim ersten Öffnen eine Warnung an. Für den Produktivbetrieb kannst du im Asset-Katalog (`FishCountApp/Resources/Assets.xcassets`) jederzeit ein eigenes Icon hinzufügen oder auf SF Symbols zurückgreifen.
 
 ## Roadmap-Ideen
 

@@ -17,6 +17,8 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Einstellungen")
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.backgroundGradient.ignoresSafeArea())
         }
     }
 }
@@ -35,14 +37,16 @@ private struct SizeClassManagementView: View {
                 if sizeClasses.isEmpty {
                     ContentUnavailableView("Keine Klassen", systemImage: "ruler",
                                            description: Text("Füge deine ersten Größenklassen hinzu."))
+                    .foregroundStyle(.white)
                 } else {
                     ForEach(sizeClasses) { preset in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(preset.label)
                                 .font(.headline)
+                                .foregroundStyle(.white)
                             Text(boundsText(for: preset))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(AppTheme.subtleText)
                         }
                     }
                     .onDelete { indexSet in
@@ -54,12 +58,16 @@ private struct SizeClassManagementView: View {
 
             Section(header: Text("Neue Klasse")) {
                 TextField("Bezeichnung", text: $label)
+                    .foregroundStyle(.white)
                 HStack {
                     TextField("ab", text: $lowerBound)
                         .keyboardType(.numberPad)
+                        .foregroundStyle(.white)
                     Text("bis")
+                        .foregroundStyle(AppTheme.subtleText)
                     TextField("bis", text: $upperBound)
                         .keyboardType(.numberPad)
+                        .foregroundStyle(.white)
                 }
                 Button("Hinzufügen") {
                     addPreset()
@@ -67,11 +75,15 @@ private struct SizeClassManagementView: View {
                 .disabled(label.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
         .navigationTitle("Größenklassen")
-        .toolbar { EditButton() }
+        .toolbar { EditButton().tint(.white) }
         .task {
             await ensureDefaultSizeClasses()
         }
+        .background(AppTheme.backgroundGradient.ignoresSafeArea())
     }
 
     private func addPreset() {

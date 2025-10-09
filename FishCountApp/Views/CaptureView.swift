@@ -20,18 +20,22 @@ struct CaptureView: View {
     @State private var locationError: String?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                header
-                transcriptCard
-                actionButtons
-                quickAddPanel
-                entryList
+        ZStack {
+            AppTheme.backgroundGradient
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    header
+                    transcriptCard
+                    actionButtons
+                    quickAddPanel
+                    entryList
+                }
+                .padding(.vertical, 32)
+                .padding(.horizontal)
             }
-            .padding(.vertical, 24)
-            .padding(.horizontal)
         }
-        .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -69,43 +73,48 @@ struct CaptureView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(survey.title)
-                .font(.largeTitle).fontWeight(.bold)
+                .font(.largeTitle.bold())
+                .foregroundStyle(.white)
             Text(survey.date, style: .date)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.subtleText)
             if let locationName = survey.locationName, !locationName.isEmpty {
                 Label(locationName, systemImage: "mappin.and.ellipse")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.subtleText)
             }
             if let weather = survey.weatherNote, !weather.isEmpty {
                 Label(weather, systemImage: "cloud.sun")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.subtleText)
             }
         }
+        .glassCard()
     }
 
     private var transcriptCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
                 .font(.headline)
+                .foregroundStyle(AppTheme.mutedText)
             Text(liveTranscript.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : liveTranscript)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     if speechManager.isRecording {
                         RecordingIndicator()
                             .padding(12)
                     }
                 }
+                .foregroundStyle(.white)
             if let infoBanner {
                 InfoBanner(text: infoBanner)
                     .transition(.opacity)
             }
         }
         .animation(.easeInOut, value: infoBanner)
+        .glassCard()
     }
 
     private var actionButtons: some View {
@@ -131,41 +140,47 @@ struct CaptureView: View {
                     .font(.title3.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(speechManager.isRecording ? Color.red.gradient : Color.accentColor.gradient,
-                                in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .background(
+                        speechManager.isRecording ? Color.red.gradient : AppTheme.buttonGradient,
+                        in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    )
                     .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.25), radius: 8, y: 6)
             }
             .buttonStyle(.plain)
-            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
             HStack(spacing: 16) {
                 Button {
                     undoLastEntry()
                 } label: {
                     Label("Rückgängig", systemImage: "arrow.uturn.backward")
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .foregroundStyle(.white)
                 }
 
                 Button {
                     showManualInput = true
                 } label: {
                     Label("Manuell", systemImage: "square.and.pencil")
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(.systemGray5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .foregroundStyle(.white)
                 }
             }
         }
+        .glassCard()
     }
 
     private var quickAddPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Schnellzugriff", systemImage: "bolt.fill")
                 .font(.headline)
+                .foregroundStyle(AppTheme.mutedText)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(SpeciesCatalog.featuredSpecies, id: \.self) { species in
@@ -175,8 +190,9 @@ struct CaptureView: View {
                             Text(species)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
-                                .background(Color(.systemBackground), in: Capsule())
-                                .overlay(Capsule().stroke(Color.accentColor.opacity(0.6)))
+                                .background(Color.white.opacity(0.15), in: Capsule())
+                                .overlay(Capsule().stroke(AppTheme.primaryAccent.opacity(0.6)))
+                                .foregroundStyle(.white)
                         }
                     }
                 }
@@ -185,12 +201,14 @@ struct CaptureView: View {
 
             sizeClassPicker
         }
+        .glassCard()
     }
 
     private var sizeClassPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Größenklasse")
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.mutedText)
             Menu {
                 ForEach(sizeClassPresets) { preset in
                     Button(action: { selectedSizeClassID = preset.persistentModelID }) {
@@ -204,8 +222,8 @@ struct CaptureView: View {
                     Image(systemName: "chevron.up.chevron.down")
                 }
                 .padding()
-                .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+                .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .foregroundStyle(.white)
             }
         }
     }
@@ -214,10 +232,12 @@ struct CaptureView: View {
         VStack(alignment: .leading, spacing: 16) {
             Label("Erfasste Einträge", systemImage: "fish.fill")
                 .font(.headline)
+                .foregroundStyle(AppTheme.mutedText)
             if survey.entries.isEmpty {
                 ContentUnavailableView("Noch keine Fische erfasst",
                                        systemImage: "fish",
                                        description: Text("Starte die Aufnahme oder füge manuell Einträge hinzu."))
+                .foregroundStyle(.white)
             } else {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(survey.entries.sorted(by: { $0.createdAt > $1.createdAt })) { entry in
@@ -231,6 +251,7 @@ struct CaptureView: View {
                 }
             }
         }
+        .glassCard()
     }
 
     private func handleVoice(_ text: String) {
@@ -313,12 +334,12 @@ private struct EntryCard: View {
                 Spacer()
                 Text(entry.createdAt, style: .time)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.subtleText)
             }
             Text(entry.sizeClass)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
-            HStack {
+                .foregroundStyle(AppTheme.subtleText)
+            HStack(spacing: 8) {
                 Label("\(entry.count) Stück", systemImage: "number")
                 if let comment = entry.comment, !comment.isEmpty {
                     Divider().frame(height: 12)
@@ -327,14 +348,15 @@ private struct EntryCard: View {
                 }
             }
             .font(.footnote)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(AppTheme.subtleText)
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.primary.opacity(0.05))
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.white.opacity(0.08))
         )
+        .foregroundStyle(.white)
     }
 }
 

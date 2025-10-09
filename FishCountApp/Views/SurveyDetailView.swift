@@ -8,26 +8,36 @@ struct SurveyDetailView: View {
     @State private var selection: DetailSection = .capture
 
     var body: some View {
-        VStack(spacing: 0) {
-            Picker("Bereich", selection: $selection) {
-                ForEach(DetailSection.allCases, id: \.self) { section in
-                    Text(section.title).tag(section)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding([.horizontal, .top])
+        ZStack {
+            AppTheme.backgroundGradient
+                .ignoresSafeArea()
 
-            TabView(selection: $selection) {
-                CaptureView(survey: survey)
-                    .tag(DetailSection.capture)
-                AnalysisContainerView(survey: survey)
-                    .tag(DetailSection.analysis)
-                ExportView(survey: survey)
-                    .tag(DetailSection.export)
+            VStack(spacing: 24) {
+                Picker("Bereich", selection: $selection) {
+                    ForEach(DetailSection.allCases, id: \.self) { section in
+                        Text(section.title).tag(section)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(10)
+                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .padding(.horizontal)
+                .padding(.top, 12)
+
+                TabView(selection: $selection) {
+                    CaptureView(survey: survey)
+                        .tag(DetailSection.capture)
+                    AnalysisContainerView(survey: survey)
+                        .tag(DetailSection.analysis)
+                    ExportView(survey: survey)
+                        .tag(DetailSection.export)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .padding(.top)
         }
         .navigationTitle(survey.title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     enum DetailSection: CaseIterable {
@@ -55,15 +65,18 @@ private struct AnalysisContainerView: View {
                     ContentUnavailableView("Noch keine Daten",
                                            systemImage: "chart.bar.fill",
                                            description: Text("Sobald Einträge vorhanden sind, siehst du hier die Auswertung."))
+                        .foregroundStyle(.white)
                 } else {
                     SurveyBreakdownChart(entries: survey.entries)
-                    Divider()
+                        .glassCard()
                     GroupedList(entries: survey.entries)
+                        .glassCard()
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 32)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.clear)
     }
 }
 
@@ -78,11 +91,13 @@ private struct GroupedList: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Aufschlüsselung")
                 .font(.headline)
+                .foregroundStyle(.white)
             ForEach(grouped.keys.sorted(), id: \.self) { species in
                 let speciesEntries = grouped[species] ?? []
                 VStack(alignment: .leading, spacing: 6) {
                     Text(species)
                         .font(.headline)
+                        .foregroundStyle(.white)
                     ForEach(speciesEntries.sorted(by: { $0.sizeClass < $1.sizeClass })) { entry in
                         HStack {
                             Text(entry.sizeClass)
@@ -90,11 +105,11 @@ private struct GroupedList: View {
                             Text("\(entry.count)")
                         }
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.subtleText)
                     }
                 }
                 .padding()
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
         }
     }

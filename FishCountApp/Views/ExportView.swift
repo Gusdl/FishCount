@@ -7,33 +7,38 @@ struct ExportView: View {
     @State private var exportFormat: ExportFormat?
 
     var body: some View {
-        VStack(spacing: 24) {
-            illustration
-            Text("Teile deine Zählung als CSV oder JSON über das Share-Sheet. Die Dateien werden temporär gespeichert und nach dem Teilen automatisch entfernt.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal)
+        ScrollView {
+            VStack(spacing: 24) {
+                illustration
+                    .glassCard()
 
-            VStack(spacing: 16) {
-                Button {
-                    exportFormat = .csv
-                    exportCSV()
-                } label: {
-                    ExportButtonLabel(title: "CSV exportieren", subtitle: "Für Excel und Tabellen", systemImage: "tablecells")
-                }
+                Text("Teile deine Zählung als CSV oder JSON über das Share-Sheet. Die Dateien werden temporär gespeichert und nach dem Teilen automatisch entfernt.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(AppTheme.subtleText)
+                    .padding(.horizontal)
 
-                Button {
-                    exportFormat = .json
-                    exportJSON()
-                } label: {
-                    ExportButtonLabel(title: "JSON exportieren", subtitle: "Für APIs und Weiterverarbeitung", systemImage: "curlybraces")
+                VStack(spacing: 16) {
+                    Button {
+                        exportFormat = .csv
+                        exportCSV()
+                    } label: {
+                        ExportButtonLabel(title: "CSV exportieren", subtitle: "Für Excel und Tabellen", systemImage: "tablecells")
+                    }
+
+                    Button {
+                        exportFormat = .json
+                        exportJSON()
+                    } label: {
+                        ExportButtonLabel(title: "JSON exportieren", subtitle: "Für APIs und Weiterverarbeitung", systemImage: "curlybraces")
+                    }
                 }
+                .glassCard()
             }
             .padding(.horizontal)
-            Spacer()
+            .padding(.top, 40)
+            .padding(.bottom, 60)
         }
-        .padding(.top, 40)
         .sheet(isPresented: $sharePresented, onDismiss: cleanupExport) {
             if let exportURL {
                 ShareSheet(activityItems: [exportURL])
@@ -45,9 +50,10 @@ struct ExportView: View {
         VStack(spacing: 12) {
             Image(systemName: "square.and.arrow.up")
                 .font(.system(size: 56))
-                .foregroundStyle(.accent)
+                .foregroundStyle(AppTheme.primaryAccent)
             Text("Export & Teilen")
                 .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
         }
     }
 
@@ -94,17 +100,18 @@ private struct ExportButtonLabel: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
+                    .foregroundStyle(.white)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.subtleText)
             }
             Spacer()
             Image(systemName: systemImage)
                 .font(.title3)
+                .foregroundStyle(AppTheme.primaryAccent)
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+        .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
