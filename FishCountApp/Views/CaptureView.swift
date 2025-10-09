@@ -9,7 +9,8 @@ struct CaptureView: View {
     @Bindable var survey: Survey
 
     @StateObject private var speechManager = SpeechManager()
-    @State private var parser = VoiceParser(speciesAliases: SpeciesCatalog.aliases)
+    @State private var parser = VoiceParser(speciesList: SpeciesCatalog.allSpecies,
+                                           speciesAliases: SpeciesCatalog.aliases)
     @State private var liveTranscript: String = ""
     @State private var infoBanner: String?
     @State private var showManualInput = false
@@ -181,6 +182,9 @@ struct CaptureView: View {
             Label("Schnellzugriff", systemImage: "bolt.fill")
                 .font(.headline)
                 .foregroundStyle(AppTheme.mutedText)
+            Text("Aktive Größenklasse: \(currentSizeClassLabel)")
+                .font(.caption)
+                .foregroundStyle(AppTheme.subtleText)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(SpeciesCatalog.featuredSpecies, id: \.self) { species in

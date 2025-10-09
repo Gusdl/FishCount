@@ -14,7 +14,7 @@ enum AppTheme {
     static let primaryAccent = Color(red: 0.12, green: 0.71, blue: 0.81)
     static let secondaryAccent = Color(red: 0.18, green: 0.82, blue: 0.67)
 
-    static let glassBackground = .ultraThinMaterial
+    static let glassBackground: Material = .ultraThin
     static let cardStroke = Color.white.opacity(0.12)
     static let mutedText = Color.white.opacity(0.78)
     static let subtleText = Color.white.opacity(0.6)

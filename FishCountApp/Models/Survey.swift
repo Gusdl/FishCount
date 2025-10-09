@@ -3,9 +3,9 @@ import SwiftData
 
 @Model
 final class Survey {
-    var id: UUID = .init()
+    var id: UUID = UUID()
     var title: String
-    var date: Date = .now
+    var date: Date = Date()
     var locationName: String?
     var latitude: Double?
     var longitude: Double?
@@ -20,12 +20,12 @@ final class Survey {
 
 @Model
 final class CountEntry {
-    var id: UUID = .init()
+    var id: UUID = UUID()
     var species: String
     var sizeClass: String
     var count: Int
     var comment: String?
-    var createdAt: Date = .now
+    var createdAt: Date = Date()
 
     init(species: String, sizeClass: String, count: Int, comment: String? = nil) {
         self.species = species
@@ -37,7 +37,7 @@ final class CountEntry {
 
 @Model
 final class SizeClassPreset {
-    var id: UUID = .init()
+    var id: UUID = UUID()
     var label: String
     var lowerBound: Int?
     var upperBound: Int?
