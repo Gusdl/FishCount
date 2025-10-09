@@ -1,4 +1,4 @@
-name: Fischbestand
+name: FishCount TestFlight
 
 on:
   push: { branches: [ main ] }
@@ -32,18 +32,51 @@ jobs:
           MOBILEPROVISION_BASE64: ${{ secrets.MOBILEPROVISION }}
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          echo "$MOBILEPROVISION_BASE64" | base64 --decode \
+            > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Ensure AppIcon exists (placeholder)
+        run: |
+          set -euxo pipefail
+          ICONSET="FishCountApp/Resources/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$ICONSET"
+          /usr/bin/sips -s format png --resampleWidth 1024 \
+            /System/Library/CoreServices/DefaultDesktop.jpg \
+            --out "$ICONSET/Icon-App-1024x1024@1x.png"
+          for size in 20 29 40 60; do
+            for scale in 2 3; do
+              px=$((size * scale))
+              /usr/bin/sips -s format png --resampleWidth "$px" \
+                "$ICONSET/Icon-App-1024x1024@1x.png" \
+                --out "$ICONSET/Icon-App-${size}x${size}@${scale}x.png"
+            done
+          done
+          cat > "$ICONSET/Contents.json" <<'JSON'
+          { "images": [
+            { "idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-App-20x20@2x.png"},
+            { "idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-App-20x20@3x.png"},
+            { "idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-App-29x29@2x.png"},
+            { "idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-App-29x29@3x.png"},
+            { "idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-App-40x40@2x.png"},
+            { "idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-App-40x40@3x.png"},
+            { "idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-App-60x60@2x.png"},
+            { "idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-App-60x60@3x.png"},
+            { "idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-App-1024x1024@1x.png"}
+          ], "info": { "version":1, "author":"xcode" } }
+          JSON
 
       - name: Archive
         run: |
           xcodebuild \
-            -scheme "Fischbestand" \
+            -project FishCountApp.xcodeproj \
+            -scheme "FishCountApp" \
             -configuration Release \
-            -sdk iphoneos \
-            -archivePath $PWD/build/Fischbestand.xcarchive \
+            -destination 'generic/platform=iOS' \
+            -archivePath $PWD/build/FishCountApp.xcarchive \
             clean archive \
             DEVELOPMENT_TEAM=XDLCKT3P87 \
-            PRODUCT_BUNDLE_IDENTIFIER=com.simonmaiwald.fischbestand
+            PRODUCT_BUNDLE_IDENTIFIER=dev.eigenwerk.FishCountApp \
+            SUPPORTED_PLATFORMS=iphoneos
 
       - name: Export IPA
         run: |
@@ -52,13 +85,13 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store</string>
-            <key>teamID</key><string>YOUR_TEAM_ID</string>
+            <key>teamID</key><string>XDLCKT3P87</string>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
           </dict></plist>
           PLIST
           xcodebuild -exportArchive \
-            -archivePath $PWD/build/Fischbestand.xcarchive \
+            -archivePath $PWD/build/FishCountApp.xcarchive \
             -exportPath  $PWD/build \
             -exportOptionsPlist ExportOptions.plist
           ls -la build
@@ -85,7 +118,7 @@ jobs:
                 issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
                 key_content: ENV["APP_STORE_CONNECT_API_KEY"],
               )
-              pilot(api_key: api_key, ipa: "build/Fischbestand.ipa", skip_waiting_for_build_processing: true)
+              pilot(api_key: api_key, ipa: "build/FishCountApp.ipa", skip_waiting_for_build_processing: true)
             end
           end
           RUBY
