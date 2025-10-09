@@ -28,19 +28,24 @@ struct SurveyListView: View {
                         .textCase(nil)
                     }
 
-                    Section(header: Text("Meine Sessions").foregroundStyle(.white)) {
+                    Section {
                         ForEach(surveys) { survey in
                             NavigationLink(value: survey) {
                                 SurveyRow(survey: survey)
                             }
-                            .listRowBackground(Color.white.opacity(0.1))
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                             .listRowSeparator(.hidden)
                         }
                         .onDelete(perform: delete)
+                    } header: {
+                        SectionHeader(title: "Meine Sessions")
                     }
                 }
                 .listStyle(.insetGrouped)
+                .listSectionSpacing(.fixed(24))
                 .scrollContentBackground(.hidden)
+                .scrollIndicators(.hidden)
                 .overlay {
                     if surveys.isEmpty {
                         ContentUnavailableView("Noch keine Zählung",
@@ -106,29 +111,45 @@ private struct SurveyRow: View {
     let survey: Survey
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(survey.title)
-                .font(.headline)
-                .foregroundStyle(.white)
-            HStack(spacing: 12) {
-                Label {
-                    Text(survey.date, style: .date)
-                } icon: {
-                    Image(systemName: "calendar")
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(survey.title)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Label(survey.date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.subtleText)
                 }
-                if !survey.entries.isEmpty {
-                    Label {
-                        Text("\(survey.entries.count) Einträge")
-                    } icon: {
-                        Image(systemName: "fish")
-                    }
-                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(AppTheme.subtleText)
             }
-            .labelStyle(.titleAndIcon)
-            .font(.caption)
-            .foregroundStyle(AppTheme.subtleText)
+
+            if !survey.entries.isEmpty {
+                HStack(spacing: 16) {
+                    MetricPill(icon: "fish", label: "Einträge", value: survey.entries.count)
+                    MetricPill(icon: "leaf", label: "Arten", value: Set(survey.entries.map(\.species)).count)
+                }
+            } else {
+                Text("Noch keine Einträge")
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.subtleText)
+            }
         }
-        .padding(.vertical, 12)
+        .padding(18)
+        .background(
+            LinearGradient(colors: [Color.white.opacity(0.14), Color.white.opacity(0.06)],
+                           startPoint: .topLeading,
+                           endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.15))
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
@@ -149,8 +170,17 @@ private struct HeroHeader: View {
                 MetricCard(title: "Arten", value: uniqueSpecies)
             }
         }
-        .padding(20)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(24)
+        .background(
+            LinearGradient(colors: [AppTheme.primaryAccent.opacity(0.45), Color.white.opacity(0.08)],
+                           startPoint: .topLeading,
+                           endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 28, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.white.opacity(0.12))
+        )
     }
 }
 
@@ -168,8 +198,52 @@ private struct MetricCard: View {
                 .foregroundStyle(AppTheme.subtleText)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .padding(.vertical, 18)
+        .background(
+            LinearGradient(colors: [Color.white.opacity(0.16), Color.white.opacity(0.05)],
+                           startPoint: .top,
+                           endPoint: .bottom),
+            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.white.opacity(0.1))
+        )
+    }
+}
+
+private struct MetricPill: View {
+    let icon: String
+    let label: String
+    let value: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption.weight(.semibold))
+            Text("\(value) \(label)")
+                .font(.caption.weight(.semibold))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.12), in: Capsule(style: .continuous))
+        .foregroundStyle(.white)
+    }
+}
+
+private struct SectionHeader: View {
+    let title: String
+
+    var body: some View {
+        HStack {
+            Label(title, systemImage: "list.bullet")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(AppTheme.mutedText)
+            Spacer()
+        }
+        .padding(.leading, 12)
+        .padding(.bottom, 4)
+        .textCase(nil)
     }
 }
 

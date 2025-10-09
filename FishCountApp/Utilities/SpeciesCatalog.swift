@@ -18,4 +18,13 @@ enum SpeciesCatalog {
         "Rotauge": ["Rotaugen"],
         "Zander": ["Sander"]
     ]
+
+    static var searchableNames: [String] {
+        var names: Set<String> = Set(allSpecies)
+        for (canonical, variants) in aliases {
+            names.insert(canonical)
+            variants.forEach { names.insert($0) }
+        }
+        return Array(names)
+    }
 }
