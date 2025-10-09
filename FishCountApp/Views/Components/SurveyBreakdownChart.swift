@@ -38,6 +38,8 @@ struct SurveyBreakdownChart: View {
                 AxisMarks(position: .leading)
             }
         }
+        .padding()
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private struct ChartEntry: Identifiable {
