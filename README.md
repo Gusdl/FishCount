@@ -1,4 +1,4 @@
-# FishCount
+# Fischbestand
 
 Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am Wasser. Die App setzt auf SwiftData (iOS 17+) und bietet eine Offline-first-Erfassung, Auswertung und Export der Daten.
 
@@ -13,8 +13,8 @@ Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am 
 ## Projektstruktur
 
 ```
-FishCountApp/
-├── FishCountApp.swift          // App-Einstieg & SwiftData-Konfiguration
+Fischbestand/
+├── FischbestandApp.swift       // App-Einstieg & SwiftData-Konfiguration
 ├── Managers/
 │   └── SpeechManager.swift     // Steuerung der Spracherkennung (de-DE)
 ├── Models/
@@ -47,8 +47,8 @@ FishCountApp/
 
 ## Erste Schritte
 
-1. `FishCountApp.xcodeproj` in Xcode 15 (oder neuer) öffnen.
-2. Ziel-Schema `FishCountApp` auswählen.
+1. `Fischbestand.xcodeproj` in Xcode 15 (oder neuer) öffnen.
+2. Ziel-Schema `Fischbestand` auswählen.
 3. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
 4. Auf einem iOS 17 Gerät oder Simulator ausführen.
 
@@ -64,7 +64,7 @@ Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt au
 
 ## Assets & App Icon
 
-Damit dieser Beispiel-Repo vollständig textbasiert bleibt, ist kein App-Icon-Bitmap enthalten. Xcode zeigt deshalb beim ersten Öffnen eine Warnung an. Für den Produktivbetrieb kannst du im Asset-Katalog (`FishCountApp/Resources/Assets.xcassets`) jederzeit ein eigenes Icon hinzufügen oder auf SF Symbols zurückgreifen.
+Damit dieser Beispiel-Repo vollständig textbasiert bleibt, ist kein App-Icon-Bitmap enthalten. Xcode zeigt deshalb beim ersten Öffnen eine Warnung an. Für den Produktivbetrieb kannst du im Asset-Katalog (`Fischbestand/Resources/Assets.xcassets`) jederzeit ein eigenes Icon hinzufügen oder auf SF Symbols zurückgreifen.
 
 ## Roadmap-Ideen
 

@@ -17,7 +17,7 @@ jobs:
       - name: Ensure AppIcon exists (placeholder)
         run: |
           set -euxo pipefail
-          ICONSET="FishCountApp/Resources/Assets.xcassets/AppIcon.appiconset"
+          ICONSET="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
           mkdir -p "$ICONSET"
           # 1024er Platzhalter
           /usr/bin/sips -s format png --resampleWidth 1024 /System/Library/CoreServices/DefaultDesktop.jpg --out "$ICONSET/Icon-App-1024.png"
@@ -71,7 +71,7 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -sdk iphoneos \
-            -archivePath $PWD/build/FishCountApp.xcarchive \
+            -archivePath $PWD/build/Fischbestand.xcarchive \
             clean archive \
             DEVELOPMENT_TEAM=XDLCKT3P87 \
             PRODUCT_BUNDLE_IDENTIFIER=com.simonmaiwald.fischbestand \
@@ -91,7 +91,7 @@ jobs:
           </dict></plist>
           PLIST
           xcodebuild -exportArchive \
-            -archivePath $PWD/build/FishCountApp.xcarchive \
+            -archivePath $PWD/build/Fischbestand.xcarchive \
             -exportPath  $PWD/build \
             -exportOptionsPlist ExportOptions.plist
           ls -la build
@@ -117,7 +117,7 @@ jobs:
                 issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
                 key_content: ENV["APP_STORE_CONNECT_API_KEY"]
               )
-              pilot(api_key: api_key, ipa: "build/FishCountApp.ipa", skip_waiting_for_build_processing: true)
+              pilot(api_key: api_key, ipa: "build/Fischbestand.ipa", skip_waiting_for_build_processing: true)
             end
           end
           RUBY

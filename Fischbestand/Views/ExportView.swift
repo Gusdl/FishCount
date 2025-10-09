@@ -60,7 +60,7 @@ struct ExportView: View {
     private func exportCSV() {
         do {
             let csv = CSVExporter.makeCSV(from: survey)
-            exportURL = try FileManager.default.writeTemporary(data: csv.data(using: .utf8)!, fileName: "FishCount-\(survey.title).csv")
+            exportURL = try FileManager.default.writeTemporary(data: csv.data(using: .utf8)!, fileName: "Fischbestand-\(survey.title).csv")
             sharePresented = true
         } catch {
             print("CSV export failed: \(error)")
@@ -70,7 +70,7 @@ struct ExportView: View {
     private func exportJSON() {
         do {
             let json = try JSONExporter.makeJSON(from: survey)
-            exportURL = try FileManager.default.writeTemporary(data: json, fileName: "FishCount-\(survey.title).json")
+            exportURL = try FileManager.default.writeTemporary(data: json, fileName: "Fischbestand-\(survey.title).json")
             sharePresented = true
         } catch {
             print("JSON export failed: \(error)")

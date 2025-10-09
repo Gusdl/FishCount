@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5F15C8F92B1EFD1C009A2F11"
-               BuildableName = "FishCountApp.app"
-               BlueprintName = "FishCountApp"
-               ReferencedContainer = "container:FishCountApp.xcodeproj">
+               BuildableName = "Fischbestand.app"
+               BlueprintName = "Fischbestand"
+               ReferencedContainer = "container:Fischbestand.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5F15C8F92B1EFD1C009A2F11"
-            BuildableName = "FishCountApp.app"
-            BlueprintName = "FishCountApp"
-            ReferencedContainer = "container:FishCountApp.xcodeproj">
+            BuildableName = "Fischbestand.app"
+            BlueprintName = "Fischbestand"
+            ReferencedContainer = "container:Fischbestand.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -59,9 +59,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5F15C8F92B1EFD1C009A2F11"
-            BuildableName = "FishCountApp.app"
-            BlueprintName = "FishCountApp"
-            ReferencedContainer = "container:FishCountApp.xcodeproj">
+            BuildableName = "Fischbestand.app"
+            BlueprintName = "Fischbestand"
+            ReferencedContainer = "container:Fischbestand.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

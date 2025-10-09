@@ -6,7 +6,7 @@ objectVersion = 56;
 objects = {
 
 /* Begin PBXBuildFile section */
-5F15C9202B1EFD1C009A2F11 /* FishCountApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */; };
+5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */; };
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */; };
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9032B1EFD1C009A2F11 /* Survey.swift */; };
 5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */; };
@@ -29,8 +29,8 @@ objects = {
 /* Begin PBXFileReference section */
 5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 5F15C8F12B1EFD1C009A2F11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FishCountApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishCountApp.swift; sourceTree = "<group>"; };
+5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fischbestand.app; sourceTree = BUILT_PRODUCTS_DIR; };
+5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FischbestandApp.swift; sourceTree = "<group>"; };
 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
 5F15C9032B1EFD1C009A2F11 /* Survey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Survey.swift; sourceTree = "<group>"; };
 5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
@@ -64,7 +64,7 @@ runOnlyForDeploymentPostprocessing = 0;
 5F15C8E62B1EFD1C009A2F11 = {
 isa = PBXGroup;
 children = (
-5F15C8E82B1EFD1C009A2F11 /* FishCountApp */,
+5F15C8E82B1EFD1C009A2F11 /* Fischbestand */,
 5F15C8E72B1EFD1C009A2F11 /* Products */,
 3362A9CA409D4B3AAE9C7E86 /* Frameworks */
 );
@@ -73,15 +73,15 @@ sourceTree = "<group>";
 5F15C8E72B1EFD1C009A2F11 /* Products */ = {
 isa = PBXGroup;
 children = (
-5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */
+5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */
 );
 name = Products;
 sourceTree = "<group>";
 };
-5F15C8E82B1EFD1C009A2F11 /* FishCountApp */ = {
+5F15C8E82B1EFD1C009A2F11 /* Fischbestand */ = {
 isa = PBXGroup;
 children = (
-5F15C9012B1EFD1C009A2F11 /* FishCountApp.swift */,
+5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */,
 5F15C8E92B1EFD1C009A2F11 /* Managers */,
 5F15C8EA2B1EFD1C009A2F11 /* Models */,
 5F15C8EB2B1EFD1C009A2F11 /* Services */,
@@ -89,7 +89,7 @@ children = (
 5F15C8ED2B1EFD1C009A2F11 /* Views */,
 5F15C8EF2B1EFD1C009A2F11 /* Resources */
 );
-path = FishCountApp;
+path = Fischbestand;
 sourceTree = "<group>";
 };
 5F15C8E92B1EFD1C009A2F11 /* Managers */ = {
@@ -177,9 +177,9 @@ sourceTree = "<group>";
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-5F15C8F92B1EFD1C009A2F11 /* FishCountApp */ = {
+5F15C8F92B1EFD1C009A2F11 /* Fischbestand */ = {
 isa = PBXNativeTarget;
-buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "FishCountApp" */;
+buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "Fischbestand" */;
 buildPhases = (
 5F15C8FB2B1EFD1C009A2F11 /* Sources */,
 5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
@@ -189,9 +189,9 @@ buildRules = (
 );
 dependencies = (
 );
-name = FishCountApp;
-productName = FishCountApp;
-productReference = 5F15C8F32B1EFD1C009A2F11 /* FishCountApp.app */;
+name = Fischbestand;
+productName = Fischbestand;
+productReference = 5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */;
 productType = "com.apple.product-type.application";
 };
 /* End PBXNativeTarget section */
@@ -208,7 +208,7 @@ CreatedOnToolsVersion = 15.4;
 };
 };
 };
-buildConfigurationList = 5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "FishCountApp" */;
+buildConfigurationList = 5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "Fischbestand" */;
 compatibilityVersion = "Xcode 15.0";
 developmentRegion = en;
 hasScannedForEncodings = 0;
@@ -221,7 +221,7 @@ productRefGroup = 5F15C8E72B1EFD1C009A2F11 /* Products */;
 projectDirPath = "";
 projectRoot = "";
 targets = (
-5F15C8F92B1EFD1C009A2F11 /* FishCountApp */
+5F15C8F92B1EFD1C009A2F11 /* Fischbestand */
 );
 };
 /* End PBXProject section */
@@ -242,7 +242,7 @@ runOnlyForDeploymentPostprocessing = 0;
 isa = PBXSourcesBuildPhase;
 buildActionMask = 2147483647;
 files = (
-5F15C9202B1EFD1C009A2F11 /* FishCountApp.swift in Sources */,
+5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */,
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
 5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */,
@@ -372,15 +372,15 @@ ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 CODE_SIGN_STYLE = Automatic;
 CURRENT_PROJECT_VERSION = 1;
 DEVELOPMENT_ASSET_PATHS = "";
-DEVELOPMENT_TEAM = "";
-INFOPLIST_FILE = FishCountApp/Resources/Info.plist;
+DEVELOPMENT_TEAM = XDLCKT3P87;
+INFOPLIST_FILE = Fischbestand/Resources/Info.plist;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = (
 "$(inherited)",
 "@executable_path/Frameworks"
 );
 MARKETING_VERSION = 1.0;
-PRODUCT_BUNDLE_IDENTIFIER = dev.eigenwerk.FishCountApp;
+PRODUCT_BUNDLE_IDENTIFIER = com.simonmaiwald.fischbestand;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SUPPORTS_MACCATALYST = NO;
 SWIFT_EMIT_LOC_STRINGS = YES;
@@ -397,15 +397,15 @@ ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 CODE_SIGN_STYLE = Automatic;
 CURRENT_PROJECT_VERSION = 1;
 DEVELOPMENT_ASSET_PATHS = "";
-DEVELOPMENT_TEAM = "";
-INFOPLIST_FILE = FishCountApp/Resources/Info.plist;
+DEVELOPMENT_TEAM = XDLCKT3P87;
+INFOPLIST_FILE = Fischbestand/Resources/Info.plist;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = (
 "$(inherited)",
 "@executable_path/Frameworks"
 );
 MARKETING_VERSION = 1.0;
-PRODUCT_BUNDLE_IDENTIFIER = dev.eigenwerk.FishCountApp;
+PRODUCT_BUNDLE_IDENTIFIER = com.simonmaiwald.fischbestand;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SUPPORTS_MACCATALYST = NO;
 SWIFT_EMIT_LOC_STRINGS = YES;
@@ -417,7 +417,7 @@ name = Release;
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "FishCountApp" */ = {
+5F15C9112B1EFD1C009A2F11 /* Build configuration list for PBXProject "Fischbestand" */ = {
 isa = XCConfigurationList;
 buildConfigurations = (
 5F15C9122B1EFD1C009A2F11 /* Debug */,
@@ -426,7 +426,7 @@ buildConfigurations = (
 defaultConfigurationIsVisible = 0;
 defaultConfigurationName = Release;
 };
-5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "FishCountApp" */ = {
+5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "Fischbestand" */ = {
 isa = XCConfigurationList;
 buildConfigurations = (
 5F15C9152B1EFD1C009A2F11 /* Debug */,

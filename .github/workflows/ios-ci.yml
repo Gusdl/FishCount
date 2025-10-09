@@ -14,11 +14,11 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '15.4'
-      - name: Build FishCountApp
+      - name: Build Fischbestand
         run: |
           xcodebuild \
-            -project FishCountApp.xcodeproj \
-            -scheme FishCountApp \
+            -project Fischbestand.xcodeproj \
+            -scheme Fischbestand \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \

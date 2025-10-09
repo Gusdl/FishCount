@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct FishCountApp: App {
+struct FischbestandApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Survey.self,
