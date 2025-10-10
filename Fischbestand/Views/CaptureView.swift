@@ -142,7 +142,7 @@ struct CaptureView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
-                        speechManager.isRecording ? Color.red.gradient : AppTheme.buttonGradient,
+                        recordingButtonBackground,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous)
                     )
                     .foregroundStyle(.white)
@@ -175,6 +175,16 @@ struct CaptureView: View {
             }
         }
         .glassCard()
+    }
+
+    private var recordingButtonBackground: LinearGradient {
+        if speechManager.isRecording {
+            return LinearGradient(colors: [Color.red, Color.red.opacity(0.7)],
+                                  startPoint: .topLeading,
+                                  endPoint: .bottomTrailing)
+        } else {
+            return AppTheme.buttonGradient
+        }
     }
 
     private var quickAddPanel: some View {

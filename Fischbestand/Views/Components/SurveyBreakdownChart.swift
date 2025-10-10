@@ -6,10 +6,10 @@ struct SurveyBreakdownChart: View {
 
     private var totals: [ChartEntry] {
         let grouped = Dictionary(grouping: entries) { entry in
-            (entry.sizeClass, entry.species)
+            ChartKey(sizeClass: entry.sizeClass, species: entry.species)
         }
         return grouped.map { key, values in
-            ChartEntry(sizeClass: key.0, species: key.1, total: values.reduce(0) { $0 + $1.count })
+            ChartEntry(sizeClass: key.sizeClass, species: key.species, total: values.reduce(0) { $0 + $1.count })
         }
     }
 
@@ -47,5 +47,10 @@ struct SurveyBreakdownChart: View {
         let sizeClass: String
         let species: String
         let total: Int
+    }
+
+    private struct ChartKey: Hashable {
+        let sizeClass: String
+        let species: String
     }
 }
