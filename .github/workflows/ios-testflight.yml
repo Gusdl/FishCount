@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 
 env:
-  # 👉 HIER anpassen
-  SCHEME: Fischbestand
-  TEAM_ID: XDLCKT3P87          # z.B. ABC123DEF4
-  BUNDLE_ID: com.simonmaiwald.fischbestand      # z.B. com.gusdl.fischbestand
+  # 🔧 HIER ANPASSEN
+  SCHEME: Fischbestand                  # Shared Scheme-Name (genau wie in Xcode)
+  TEAM_ID: YOUR_TEAM_ID_HERE            # z.B. ABC123DEF4
+  BUNDLE_ID: YOUR.BUNDLE.ID.HERE        # z.B. com.gusdl.fischbestand
 
 jobs:
   build-and-upload:
@@ -24,15 +24,17 @@ jobs:
         with:
           xcode-version: "15.4"
 
-      # -------- AppIcon-Placeholder (sicher, ohne Heredoc/Abhängigkeiten) --------
+      # ============ AppIcon-Placeholder (sicher & simpel) ============
       - name: Ensure AppIcon exists (placeholder, safe)
         run: |
           set -euxo pipefail
           ICONSET="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
           mkdir -p "$ICONSET"
-          # 1x1-PNG (Base64) -> 1024 Master
+
+          # 1x1 PNG als Base64 -> 1024 Master
           printf '%s' iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg== | base64 -d > "$ICONSET/_base.png"
           /usr/bin/sips -s format png --resampleWidth 1024 "$ICONSET/_base.png" --out "$ICONSET/Icon-1024.png"
+
           # iPhone-Icons: 20/29/40/60 @2x/@3x
           for size in 20 29 40 60; do
             for scale in 2 3; do
@@ -40,7 +42,8 @@ jobs:
               /usr/bin/sips -s format png --resampleWidth "$px" "$ICONSET/Icon-1024.png" --out "$ICONSET/Icon-iphone-${size}x${size}@${scale}x.png"
             done
           done
-          # Contents.json via Python schreiben (keine Heredoc-Fallen)
+
+          # Contents.json ohne Heredoc-Fallen
           /usr/bin/python3 - <<'PY'
           import json, os
           iconset="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
@@ -59,28 +62,30 @@ jobs:
           with open(os.path.join(iconset,"Contents.json"),"w") as f: json.dump(data,f,indent=2)
           PY
 
-      # -------- Zertifikat-Import (robust: aus p12 extrahieren & getrennt importieren) --------
+      # ============ Zertifikat importieren (robust: aus p12 extrahieren) ============
       - name: Install certificates (extract & import separately)
         env:
           P12_BASE64: ${{ secrets.CERT_P12 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
           set -euxo pipefail
+          # p12 aus Secret
           printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
 
+          # Keychain vorbereiten
           KEYCHAIN=$RUNNER_TEMP/app.keychain-db
           security create-keychain -p "" "$KEYCHAIN"
           security default-keychain -s "$KEYCHAIN"
           security unlock-keychain -p "" "$KEYCHAIN"
 
-          # modern -> legacy Fallback nur zum Prüfen
+          # p12 kurz prüfen (modern -> wenn nötig legacy)
           if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
             LEGACY=1
           else
             LEGACY=0
           fi
 
-          # extrahieren
+          # Key & Cert extrahieren
           if [ "$LEGACY" = "1" ]; then
             openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
             openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
@@ -89,17 +94,21 @@ jobs:
             openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
           fi
 
-          # import separat
+          # Zertifikat importieren
           security import cert.pem -A -t cert -k "$KEYCHAIN"
-          if grep -q "ENCRYPTED" key.pem; then
-            security import key.pem -A -t priv -f pem -k "$KEYCHAIN" -P "$P12_PASSWORD"
-          else
-            security import key.pem -A -t priv -f pem -k "$KEYCHAIN"
+
+          # Private Key importieren (PEM-Sequence) + Toolzugriff
+          if ! security import key.pem -k "$KEYCHAIN" -t priv -f pemseq -A \
+               -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild ; then
+            # Fallback: explizit zu PKCS#8 konvertieren und importieren
+            openssl pkcs8 -topk8 -nocrypt -in key.pem -out key-pkcs8.pem
+            security import key-pkcs8.pem -k "$KEYCHAIN" -t priv -f pkcs8 -A \
+              -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
           fi
+
           security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
 
-
-      # -------- Provisioning Profile installieren --------
+      # ============ Provisioning Profile ============
       - name: Install provisioning profile
         env:
           MOBILEPROVISION_BASE64: ${{ secrets.MOBILEPROVISION }}
@@ -108,7 +117,17 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           printf '%s' "$MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
-      # -------- Archive (Release, iphoneos) – iPhone-only & AppIcon erzwingen --------
+      # (Optional) Buildnummer auto-bump, falls du CURRENT_PROJECT_VERSION nutzt
+      # - name: Bump build number
+      #   run: |
+      #     PROJ=$(find . -name "*.xcodeproj" | head -n1)
+      #     INFO=$(/usr/bin/xcodebuild -showBuildSettings -project "$PROJ" -scheme "$SCHEME" -json | /usr/bin/python3 - <<'PY'
+      # import json,sys; j=json.load(sys.stdin); print(j[0]["buildSettings"]["INFOPLIST_FILE"])
+      # PY
+      #     )
+      #     /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" "$INFO"
+
+      # ============ Archive (Release/iphoneos) ============
       - name: Archive (device, Release)
         run: |
           set -euxo pipefail
@@ -143,7 +162,7 @@ jobs:
             -exportOptionsPlist ExportOptions.plist
           ls -la build
 
-      # -------- Upload nach TestFlight (Fastlane) --------
+      # ============ Upload nach TestFlight ============
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
