@@ -54,19 +54,27 @@ jobs:
           ], "info": { "version":1, "author":"xcode" } }
           JSON
 
-      - name: Install certificates
+      - name: Install certificates (robust)
         env:
           P12_BASE64: ${{ secrets.CERT_P12 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
           set -euxo pipefail
+          # Base64 -> p12 (printf statt echo, um Sonderzeichen/Zeilen sauber zu handhaben)
+          printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
+
+          # Passwort/Datei prüfen (scheitert früh mit klarer Meldung)
+          if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
+            echo "::error::Wrong P12 password or corrupt CERT_P12"; exit 1
+          fi
+
           KEYCHAIN=$RUNNER_TEMP/app.keychain-db
-          security create-keychain -p "" $KEYCHAIN
-          security default-keychain -s $KEYCHAIN
-          security unlock-keychain -p "" $KEYCHAIN
-          echo "$P12_BASE64" | base64 --decode > cert.p12
-          security import cert.p12 -P "$P12_PASSWORD" -A -t agg -f pkcs12 -k $KEYCHAIN
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" $KEYCHAIN
+          security create-keychain -p "" "$KEYCHAIN"
+          security default-keychain -s "$KEYCHAIN"
+          security unlock-keychain -p "" "$KEYCHAIN"
+          security import cert.p12 -P "$P12_PASSWORD" -A -t agg -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
+
 
       - name: Install provisioning profile
         env:
