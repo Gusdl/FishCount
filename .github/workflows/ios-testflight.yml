@@ -191,13 +191,26 @@ jobs:
       - name: Install fastlane
         run: gem install fastlane
 
-      - name: Upload to TestFlight
+      - name: Upload to TestFlight (non-interactive)
         env:
           APP_STORE_CONNECT_KEY_ID:     ${{ secrets.ASC_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID:  ${{ secrets.ASC_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY:    ${{ secrets.ASC_API_KEY_CONTENTS }}
+          CI: true
+          FASTLANE_DISABLE_COLORS: 1
+          FASTLANE_SKIP_UPDATE_CHECK: 1
+          FASTLANE_OPT_OUT_USAGE: 1
         run: |
-          cat > Fastfile <<'RUBY'
+          set -euxo pipefail
+
+          # Sicherstellen, dass die IPA da ist
+          ls -la build || true
+          test -f "build/${SCHEME}.ipa" || { echo "::error::IPA fehlt unter build/${SCHEME}.ipa"; exit 1; }
+
+          # Fastfile im standard Pfad anlegen (fastlane/Fastfile)
+          mkdir -p fastlane
+          cat > fastlane/Fastfile <<'RUBY'
+          opt_out_usage
           default_platform(:ios)
           platform :ios do
             lane :beta do
@@ -206,8 +219,14 @@ jobs:
                 issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
                 key_content: ENV["APP_STORE_CONNECT_API_KEY"]
               )
-              pilot(api_key: api_key, ipa: "build/#{ENV['SCHEME']}.ipa", skip_waiting_for_build_processing: true)
+              pilot(
+                api_key: api_key,
+                ipa: "build/#{ENV['SCHEME']}.ipa",
+                skip_waiting_for_build_processing: true
+              )
             end
           end
           RUBY
-          fastlane ios beta
+
+          # Non-interactive aufrufen
+          fastlane ios beta --non-interactive
