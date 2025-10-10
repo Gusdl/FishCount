@@ -1,0 +1,5 @@
+# Generated App Icon bitmaps (recreated via scripts/generate_fish_icons.py)
+Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-*.png
+
+# Xcode user state
+*.xcuserstate

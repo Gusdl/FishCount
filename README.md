@@ -64,7 +64,9 @@ Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt au
 
 ## Assets & App Icon
 
-Damit dieser Beispiel-Repo vollständig textbasiert bleibt, ist kein App-Icon-Bitmap enthalten. Xcode zeigt deshalb beim ersten Öffnen eine Warnung an. Für den Produktivbetrieb kannst du im Asset-Katalog (`Fischbestand/Resources/Assets.xcassets`) jederzeit ein eigenes Icon hinzufügen oder auf SF Symbols zurückgreifen.
+Das App Icon wird bei jedem Build automatisch aus dem Skript `scripts/generate_fish_icons.py` erzeugt. Die generierten PNGs liegen deshalb **nicht** im Git-Repository, sondern werden während des Xcode-Builds (Run Script Phase) sowie in der CI-Pipeline frisch erstellt. Dadurch gibt es keine binären Änderungen mehr beim Pushen.
+
+Wenn du ein anderes Motiv wünschst, passe das Skript an und führe anschließend `python scripts/generate_fish_icons.py` aus – die Icons landen wieder direkt im Asset-Katalog. Achte darauf, dass die erzeugten Bitmaps vollständig opak bleiben, damit App Store Connect den Upload akzeptiert.
 
 ## Roadmap-Ideen
 

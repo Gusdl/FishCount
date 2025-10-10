@@ -183,6 +183,7 @@ buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list fo
 buildPhases = (
 5F15C8FB2B1EFD1C009A2F11 /* Sources */,
 5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
+5F4F6B002B2A4A5B00F5CF7B /* Generate App Icon */,
 5F15C8FD2B1EFD1C009A2F11 /* Resources */
 );
 buildRules = (
@@ -236,6 +237,42 @@ files = (
 runOnlyForDeploymentPostprocessing = 0;
 };
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+5F4F6B002B2A4A5B00F5CF7B /* Generate App Icon */ = {
+    isa = PBXShellScriptBuildPhase;
+    buildActionMask = 2147483647;
+    files = (
+    );
+    inputFileListPaths = (
+    );
+    inputPaths = (
+        "$(SRCROOT)/scripts/generate_fish_icons.py",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
+    );
+    name = "Generate App Icon";
+    outputFileListPaths = (
+    );
+    outputPaths = (
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-20.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-29.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-40.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-58.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-60.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-76.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-80.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-87.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-1024.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-120.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-152.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-167.png",
+        "$(SRCROOT)/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-180.png",
+    );
+    runOnlyForDeploymentPostprocessing = 0;
+    shellPath = /bin/sh;
+    shellScript = "set -euo pipefail\\ncd \"${SRCROOT}\"\\npython3 scripts/generate_fish_icons.py >/dev/null\\n";
+};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 5F15C8FB2B1EFD1C009A2F11 /* Sources */ = {
