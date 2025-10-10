@@ -66,23 +66,21 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
           set -euxo pipefail
-          # p12 aus Secret
           printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
 
-          # Keychain vorbereiten
           KEYCHAIN=$RUNNER_TEMP/app.keychain-db
           security create-keychain -p "" "$KEYCHAIN"
           security default-keychain -s "$KEYCHAIN"
           security unlock-keychain -p "" "$KEYCHAIN"
 
-          # p12 vorab prüfen (modern -> legacy Fallback)
+          # modern -> legacy Fallback nur zum Prüfen
           if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
             LEGACY=1
           else
             LEGACY=0
           fi
 
-          # Key & Cert extrahieren (umgeht MAC-Fehler bei security import)
+          # extrahieren
           if [ "$LEGACY" = "1" ]; then
             openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
             openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
@@ -91,10 +89,15 @@ jobs:
             openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
           fi
 
-          # Separat importieren
+          # import separat
           security import cert.pem -A -t cert -k "$KEYCHAIN"
-          security import key.pem  -A -t priv -f pem -P "" -k "$KEYCHAIN"
+          if grep -q "ENCRYPTED" key.pem; then
+            security import key.pem -A -t priv -f pem -k "$KEYCHAIN" -P "$P12_PASSWORD"
+          else
+            security import key.pem -A -t priv -f pem -k "$KEYCHAIN"
+          fi
           security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
+
 
       # -------- Provisioning Profile installieren --------
       - name: Install provisioning profile
