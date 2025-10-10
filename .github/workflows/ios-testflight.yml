@@ -8,8 +8,8 @@ on:
 env:
   # 🔧 HIER ANPASSEN
   SCHEME: Fischbestand                  # Shared Scheme-Name (genau wie in Xcode)
-  TEAM_ID: YOUR_TEAM_ID_HERE            # z.B. ABC123DEF4
-  BUNDLE_ID: YOUR.BUNDLE.ID.HERE        # z.B. com.gusdl.fischbestand
+  TEAM_ID: XDLCKT3P87            # z.B. ABC123DEF4
+  BUNDLE_ID: com.simonmaiwald.fischbestand        # z.B. com.gusdl.fischbestand
 
 jobs:
   build-and-upload:
