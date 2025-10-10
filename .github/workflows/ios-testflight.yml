@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 
 env:
-  # 👉 Deine Werte
+  # 👉 HIER anpassen
   SCHEME: Fischbestand
-  TEAM_ID: XDLCKT3P87
-  BUNDLE_ID: com.simonmaiwald.fischbestand
+  TEAM_ID: XDLCKT3P87          # z.B. ABC123DEF4
+  BUNDLE_ID: com.simonmaiwald.fischbestand      # z.B. com.gusdl.fischbestand
 
 jobs:
   build-and-upload:
@@ -24,86 +24,88 @@ jobs:
         with:
           xcode-version: "15.4"
 
-      - name: Ensure AppIcon exists (placeholder, no system deps)
+      # -------- AppIcon-Placeholder (sicher, ohne Heredoc/Abhängigkeiten) --------
+      - name: Ensure AppIcon exists (placeholder, safe)
         run: |
           set -euxo pipefail
           ICONSET="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
           mkdir -p "$ICONSET"
-          # 1x1 weißes PNG (Base64) -> 1024px
-          echo iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg== | base64 -d > "$ICONSET/_base.png"
+          # 1x1-PNG (Base64) -> 1024 Master
+          printf '%s' iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg== | base64 -d > "$ICONSET/_base.png"
           /usr/bin/sips -s format png --resampleWidth 1024 "$ICONSET/_base.png" --out "$ICONSET/Icon-1024.png"
-          # iPhone-Icons
+          # iPhone-Icons: 20/29/40/60 @2x/@3x
           for size in 20 29 40 60; do
             for scale in 2 3; do
               px=$((size*scale))
-              /usr/bin/sips -s format png --resampleWidth $px "$ICONSET/Icon-1024.png" --out "$ICONSET/Icon-iphone-${size}x${size}@${scale}x.png"
+              /usr/bin/sips -s format png --resampleWidth "$px" "$ICONSET/Icon-1024.png" --out "$ICONSET/Icon-iphone-${size}x${size}@${scale}x.png"
             done
           done
-          # Contents.json (iPhone + Marketing)
-          cat > "$ICONSET/Contents.json" << 'JSON'
-          { "images": [
-            { "idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png" },
-            { "idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png" },
-            { "idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png" },
-            { "idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png" },
-            { "idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png" },
-            { "idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png" },
-            { "idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png" },
-            { "idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png" },
-            { "idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png" }
-          ], "info": { "version":1, "author":"xcode" } }
-          JSON
+          # Contents.json via Python schreiben (keine Heredoc-Fallen)
+          /usr/bin/python3 - <<'PY'
+          import json, os
+          iconset="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
+          images=[
+            {"idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png"},
+            {"idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png"},
+            {"idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png"},
+            {"idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png"},
+            {"idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png"},
+            {"idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png"},
+            {"idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png"},
+            {"idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png"},
+            {"idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png"},
+          ]
+          data={"images":images,"info":{"version":1,"author":"xcode"}}
+          with open(os.path.join(iconset,"Contents.json"),"w") as f: json.dump(data,f,indent=2)
+          PY
 
-          - name: Install certificates (extract & import separately)
-              env:
-                P12_BASE64: ${{ secrets.CERT_P12 }}
-                P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-              run: |
-                set -euxo pipefail
-                # 1) p12 aus Secret schreiben
-                printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
+      # -------- Zertifikat-Import (robust: aus p12 extrahieren & getrennt importieren) --------
+      - name: Install certificates (extract & import separately)
+        env:
+          P12_BASE64: ${{ secrets.CERT_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        run: |
+          set -euxo pipefail
+          # p12 aus Secret
+          printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
 
-                # 2) Keychain vorbereiten
-                KEYCHAIN=$RUNNER_TEMP/app.keychain-db
-                security create-keychain -p "" "$KEYCHAIN"
-                security default-keychain -s "$KEYCHAIN"
-                security unlock-keychain -p "" "$KEYCHAIN"
+          # Keychain vorbereiten
+          KEYCHAIN=$RUNNER_TEMP/app.keychain-db
+          security create-keychain -p "" "$KEYCHAIN"
+          security default-keychain -s "$KEYCHAIN"
+          security unlock-keychain -p "" "$KEYCHAIN"
 
-                # 3) Mit OpenSSL prüfen (modern; bei Fehler Legacy versuchen)
-                if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
-                  openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null
-                  LEGACY=1
-                else
-                  LEGACY=0
-                fi
+          # p12 vorab prüfen (modern -> legacy Fallback)
+          if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
+            LEGACY=1
+          else
+            LEGACY=0
+          fi
 
-                # 4) Private Key & Zertifikat extrahieren (PEM)
-                if [ "$LEGACY" = "1" ]; then
-                  openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
-                  openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
-                else
-                  openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
-                  openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
-                fi
+          # Key & Cert extrahieren (umgeht MAC-Fehler bei security import)
+          if [ "$LEGACY" = "1" ]; then
+            openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
+            openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
+          else
+            openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
+            openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
+          fi
 
-                # 5) Import getrennt in den Keychain (umgeht MAC-Fehler)
-                security import cert.pem -A -t cert -k "$KEYCHAIN"
-                # Für Private Keys Format explizit angeben (-f pem) und leeres PW (-P "")
-                security import key.pem  -A -t priv -f pem -P "" -k "$KEYCHAIN"
+          # Separat importieren
+          security import cert.pem -A -t cert -k "$KEYCHAIN"
+          security import key.pem  -A -t priv -f pem -P "" -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
 
-                # 6) xcodebuild-Zugriff erlauben
-                security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
-
-
-
+      # -------- Provisioning Profile installieren --------
       - name: Install provisioning profile
         env:
           MOBILEPROVISION_BASE64: ${{ secrets.MOBILEPROVISION }}
         run: |
           set -euxo pipefail
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          printf '%s' "$MOBILEPROVISION_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
+      # -------- Archive (Release, iphoneos) – iPhone-only & AppIcon erzwingen --------
       - name: Archive (device, Release)
         run: |
           set -euxo pipefail
@@ -112,10 +114,10 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -sdk iphoneos \
-            -archivePath $PWD/build/$SCHEME.xcarchive \
+            -archivePath "$PWD/build/$SCHEME.xcarchive" \
             archive \
-            DEVELOPMENT_TEAM=${TEAM_ID} \
-            PRODUCT_BUNDLE_IDENTIFIER=${BUNDLE_ID} \
+            DEVELOPMENT_TEAM="${TEAM_ID}" \
+            PRODUCT_BUNDLE_IDENTIFIER="${BUNDLE_ID}" \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
             TARGETED_DEVICE_FAMILY=1 \
             -allowProvisioningUpdates
@@ -133,11 +135,12 @@ jobs:
           </dict></plist>
           PLIST
           xcodebuild -exportArchive \
-            -archivePath $PWD/build/$SCHEME.xcarchive \
-            -exportPath  $PWD/build \
+            -archivePath "$PWD/build/$SCHEME.xcarchive" \
+            -exportPath  "$PWD/build" \
             -exportOptionsPlist ExportOptions.plist
           ls -la build
 
+      # -------- Upload nach TestFlight (Fastlane) --------
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
