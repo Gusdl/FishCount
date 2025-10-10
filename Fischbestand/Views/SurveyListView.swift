@@ -43,7 +43,7 @@ struct SurveyListView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
-                .listSectionSpacing(.fixed(24))
+                .listSectionSpacing(24)
                 .scrollContentBackground(.hidden)
                 .scrollIndicators(.hidden)
                 .overlay {
