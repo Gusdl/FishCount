@@ -12,24 +12,29 @@ env:
 
 jobs:
   build-and-upload:
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 15.4
+      - name: Select Xcode 16.1
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "15.4"
+          xcode-version: "16.1"
 
       - name: Ensure AppIcon exists (placeholder, safe)
         run: |
           set -euxo pipefail
           ICONSET="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
           mkdir -p "$ICONSET"
-          printf '%s' iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg== | base64 -d > "$ICONSET/_base.png"
-          /usr/bin/sips -s format png --resampleWidth 1024 "$ICONSET/_base.png" --out "$ICONSET/Icon-1024.png"
+          cat > "$ICONSET/_base.ppm" <<'PPM'
+          P3
+          1 1
+          255
+          0 109 204
+          PPM
+          /usr/bin/sips -s format png --resampleWidth 1024 "$ICONSET/_base.ppm" --out "$ICONSET/Icon-1024.png"
           for size in 20 29 40 60; do
             for scale in 2 3; do
               px=$((size*scale))
@@ -200,6 +205,7 @@ jobs:
           FASTLANE_DISABLE_COLORS: 1
           FASTLANE_SKIP_UPDATE_CHECK: 1
           FASTLANE_OPT_OUT_USAGE: 1
+          FASTLANE_SKIP_CONFIRMATIONS: 1
         run: |
           set -euxo pipefail
 
@@ -229,4 +235,4 @@ jobs:
           RUBY
 
           # Non-interactive aufrufen
-          fastlane ios beta --non-interactive
+          fastlane ios beta
