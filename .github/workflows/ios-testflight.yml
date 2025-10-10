@@ -167,6 +167,13 @@ jobs:
             <key>teamID</key><string>${TEAM_ID}</string>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
+            <key>destination</key><string>export</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
+            </dict>
           </dict></plist>
           PLIST
           xcodebuild -exportArchive \
