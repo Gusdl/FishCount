@@ -1,8 +1,10 @@
+---
 name: iOS TestFlight CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -105,8 +107,8 @@ jobs:
       # --- Zertifikat importieren (neu packen -> stabiler Import) ---
       - name: Import signing identity (manual keychain)
         env:
-          CERT_P12: ${{ secrets.CERT_P12 }}           # base64 der .p12
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}   # Passwort der .p12
+          CERT_P12: ${{ secrets.CERT_P12 }} # base64 der .p12
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }} # Passwort der .p12
         run: |
           set -euxo pipefail
           printf '%s' "$CERT_P12" | base64 --decode > /tmp/orig.p12
