@@ -47,6 +47,7 @@ objects = {
 5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyListView.swift; sourceTree = "<group>"; };
 A450CABBD3904B308779322B /* FuzzyMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcher.swift; sourceTree = "<group>"; };
 7222E99FAC51455284376B4F /* Charts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Charts.framework; path = System/Library/Frameworks/Charts.framework; sourceTree = SDKROOT; };
+B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = generate_app_icons.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,8 +67,17 @@ isa = PBXGroup;
 children = (
 5F15C8E82B1EFD1C009A2F11 /* Fischbestand */,
 5F15C8E72B1EFD1C009A2F11 /* Products */,
-3362A9CA409D4B3AAE9C7E86 /* Frameworks */
+3362A9CA409D4B3AAE9C7E86 /* Frameworks */,
+B4C7B0602C53A60D00AA1D57 /* Scripts */
 );
+sourceTree = "<group>";
+};
+B4C7B0602C53A60D00AA1D57 /* Scripts */ = {
+isa = PBXGroup;
+children = (
+B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */
+);
+path = Scripts;
 sourceTree = "<group>";
 };
 5F15C8E72B1EFD1C009A2F11 /* Products */ = {
@@ -183,6 +193,7 @@ buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list fo
 buildPhases = (
 5F15C8FB2B1EFD1C009A2F11 /* Sources */,
 5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
+B4C7B0622C53A60D00AA1D57 /* Generate App Icons */,
 5F15C8FD2B1EFD1C009A2F11 /* Resources */
 );
 buildRules = (
@@ -236,6 +247,26 @@ files = (
 runOnlyForDeploymentPostprocessing = 0;
 };
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+B4C7B0622C53A60D00AA1D57 /* Generate App Icons */ = {
+isa = PBXShellScriptBuildPhase;
+alwaysOutOfDate = 1;
+buildActionMask = 2147483647;
+files = (
+);
+inputPaths = (
+"${SRCROOT}/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
+);
+name = "Generate App Icons";
+outputPaths = (
+"${SRCROOT}/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+);
+runOnlyForDeploymentPostprocessing = 0;
+shellPath = /bin/sh;
+shellScript = "set -euo pipefail\n\"${SRCROOT}/Scripts/generate_app_icons.py\" \"${SRCROOT}/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset\"\n";
+};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 5F15C8FB2B1EFD1C009A2F11 /* Sources */ = {
