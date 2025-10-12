@@ -62,13 +62,13 @@ runOnlyForDeploymentPostprocessing = 0;
 
 /* Begin PBXGroup section */
 5F15C8E62B1EFD1C009A2F11 = {
-isa = PBXGroup;
-children = (
-5F15C8E82B1EFD1C009A2F11 /* Fischbestand */,
-5F15C8E72B1EFD1C009A2F11 /* Products */,
-3362A9CA409D4B3AAE9C7E86 /* Frameworks */
-);
-sourceTree = "<group>";
+    isa = PBXGroup;
+    children = (
+        5F15C8E82B1EFD1C009A2F11 /* Fischbestand */,
+        5F15C8E72B1EFD1C009A2F11 /* Products */,
+        3362A9CA409D4B3AAE9C7E86 /* Frameworks */
+    );
+    sourceTree = "<group>";
 };
 5F15C8E72B1EFD1C009A2F11 /* Products */ = {
 isa = PBXGroup;
@@ -182,8 +182,8 @@ isa = PBXNativeTarget;
 buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "Fischbestand" */;
 buildPhases = (
 5F15C8FB2B1EFD1C009A2F11 /* Sources */,
-5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
-5F15C8FD2B1EFD1C009A2F11 /* Resources */
+        5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
+        5F15C8FD2B1EFD1C009A2F11 /* Resources */
 );
 buildRules = (
 );
@@ -236,6 +236,9 @@ files = (
 runOnlyForDeploymentPostprocessing = 0;
 };
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 5F15C8FB2B1EFD1C009A2F11 /* Sources */ = {
