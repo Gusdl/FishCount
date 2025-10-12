@@ -29,7 +29,7 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
           set -euxo pipefail
-          printf '%s' "$P12_BASE64" | base64 --decode > cert.p12
+          printf '%s' "$P12_BASE64" | base64 -d > cert.p12
 
           KEYCHAIN=$RUNNER_TEMP/app.keychain-db
           security create-keychain -p "" "$KEYCHAIN"
@@ -78,7 +78,7 @@ jobs:
           set -euxo pipefail
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          printf '%s' "$MOBILEPROVISION_BASE64" | base64 --decode > "$PP_DIR/profile.mobileprovision"
+          printf '%s' "$MOBILEPROVISION_BASE64" | base64 -d > "$PP_DIR/profile.mobileprovision"
 
           /usr/bin/security cms -D -i "$PP_DIR/profile.mobileprovision" > profile.plist
           PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' profile.plist)
