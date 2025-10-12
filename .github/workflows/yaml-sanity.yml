@@ -7,4 +7,12 @@ jobs:
   ok:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "YAML is valid ✅"
+      - uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install --user yamllint
+
+      - name: Run yamllint on workflow files
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          yamllint .github/workflows
