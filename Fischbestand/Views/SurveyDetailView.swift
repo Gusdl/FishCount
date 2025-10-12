@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Observation
 import Charts
 
 struct SurveyDetailView: View {
