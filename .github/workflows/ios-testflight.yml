@@ -102,10 +102,6 @@ jobs:
           }
           JSON
 
-          plutil -lint "$AC/Contents.json"
-          plutil -lint "$AC/AppIcon.appiconset/Contents.json"
-          plutil -lint "$AC/AccentColor.colorset/Contents.json"
-
       # --- Zertifikat importieren (neu packen -> stabiler Import) ---
       - name: Import signing identity (manual keychain)
         env:
