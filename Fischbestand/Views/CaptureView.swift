@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Observation
 
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
