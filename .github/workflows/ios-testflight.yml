@@ -2,8 +2,8 @@ name: iOS TestFlight
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -14,16 +14,16 @@ env:
 
 jobs:
   build-and-upload:
-    runs-on: macos-15
+    runs-on: macos-14
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode
+      - name: Select Xcode 15.4
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.1'
+          xcode-version: '15.4'
 
       - name: Import signing certificate
         uses: apple-actions/import-codesign-certs@v2
@@ -37,23 +37,19 @@ jobs:
         run: |
           set -euo pipefail
           PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          PROFILE_PATH="$PROFILE_DIR/profile.mobileprovision"
           mkdir -p "$PROFILE_DIR"
-          export PROFILE_PATH
+          PROFILE_PATH="$PROFILE_DIR/profile.mobileprovision"
           python3 - <<'PY'
-import base64
-import os
-import pathlib
-
-data = os.environ["MOBILEPROVISION_BASE64"]
+import base64, os, pathlib
 path = pathlib.Path(os.environ["PROFILE_PATH"])
-path.write_bytes(base64.b64decode(data))
+path.write_bytes(base64.b64decode(os.environ["MOBILEPROVISION_BASE64"]))
 PY
           /usr/bin/security cms -D -i "$PROFILE_PATH" > profile.plist
           PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' profile.plist)
-          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' profile.plist)
           echo "PP_NAME=$PP_NAME" >> "$GITHUB_ENV"
-          echo "PP_UUID=$PP_UUID" >> "$GITHUB_ENV"
+
+      - name: Resolve SPM (optional)
+        run: xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
 
       - name: Build archive
         run: |
@@ -74,15 +70,14 @@ PY
       - name: Export IPA
         run: |
           set -euo pipefail
-          cat > ExportOptions.plist <<PLIST
+          cat > ExportOptions.plist <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>${TEAM_ID}</string>
             <key>signingStyle</key><string>manual</string>
-            <key>provisioningProfiles</key>
-            <dict>
+            <key>provisioningProfiles</key><dict>
               <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
             </dict>
           </dict></plist>
@@ -93,6 +88,7 @@ PY
             -exportPath "$PWD/build"
 
       - name: Prepare App Store Connect key
+        if: github.event_name != 'pull_request'
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_API_KEY_CONTENTS: ${{ secrets.ASC_API_KEY_CONTENTS }}
@@ -100,24 +96,17 @@ PY
           set -euo pipefail
           KEY_DIR="$HOME/.appstoreconnect/private_keys"
           mkdir -p "$KEY_DIR"
-          KEY_PATH="$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
-          python3 - <<'PY'
-import os
-import pathlib
+          echo "$ASC_API_KEY_CONTENTS" > "$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
 
-path = pathlib.Path(os.environ["KEY_PATH"])
-path.write_text(os.environ["ASC_API_KEY_CONTENTS"], encoding="utf-8")
-PY
-
-      - name: Upload to TestFlight
+      - name: Upload to TestFlight (Transporter)
+        if: github.event_name != 'pull_request'
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           set -euo pipefail
           test -f "build/${SCHEME}.ipa"
-          xcrun altool --upload-app \
-            --type ios \
-            --file "build/${SCHEME}.ipa" \
-            --apiKey "$ASC_KEY_ID" \
-            --apiIssuer "$ASC_ISSUER_ID"
+          xcrun iTMSTransporter -m upload \
+            -apiKey "$ASC_KEY_ID" \
+            -apiIssuer "$ASC_ISSUER_ID" \
+            -assetFile "build/${SCHEME}.ipa" -verbose
