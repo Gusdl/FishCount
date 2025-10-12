@@ -32,11 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           P12=/tmp/cert.p12
-          python3 - <<'PY'
-import base64, os, pathlib
-path = pathlib.Path("/tmp/cert.p12")
-path.write_bytes(base64.b64decode(os.environ["CERT_P12"]))
-PY
+          python3 -c "import base64, os, pathlib; pathlib.Path(\"$P12\").write_bytes(base64.b64decode(os.environ['CERT_P12']))"
           if ! /usr/bin/openssl pkcs12 -in "$P12" -info -nokeys -passin pass:"$P12_PASSWORD" >/dev/null 2>&1; then
             echo "::error::P12 Passwort falsch ODER CERT_P12 Base64 defekt (abgeschnitten/Zeilenumbrüche/falsche Datei)."
             exit 1
