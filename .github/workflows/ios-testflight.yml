@@ -34,34 +34,30 @@ jobs:
           set -euo pipefail
           KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
           KEYCHAIN_PWD="$(uuidgen)"
-
-          # Keychain anlegen + öffnen
           security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
 
-          # P12 decodieren
+          # P12 schreiben
           echo "$CERT_P12" | base64 -d > /tmp/cert.p12
 
-          # Vorab: Passwort + Private Key prüfen
-          /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -noout -passin env:P12_PASSWORD
-          /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -nocerts -nodes -passin env:P12_PASSWORD >/dev/null
+          # Passwort robust trimmen (entfernt \n und \r)
+          P12_PASS_TRIMMED="$(printf '%s' "$P12_PASSWORD" | tr -d '\r\n')"
 
-          # *** WICHTIG: Korrektes security import – KEIN '-t identities'! ***
+          # Sanity-Check (scheitert, wenn Passwort wirklich falsch wäre)
+          /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -noout -passin pass:"$P12_PASS_TRIMMED" >/dev/null
+          /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -nocerts -nodes -passin pass:"$P12_PASS_TRIMMED" >/dev/null
+
+          # Import (ohne -t identities)
           security import /tmp/cert.p12 \
             -k "$KEYCHAIN" \
             -f pkcs12 \
-            -P "$P12_PASSWORD" \
+            -P "$P12_PASS_TRIMMED" \
             -A
 
-          # Keychain zur Liste hinzufügen & als Default setzen
           security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/.*=//' | tr -d '"')
           security default-keychain -s "$KEYCHAIN"
-
-          # Zugriff für xcodebuild/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN"
-
-          # Sichtprüfung
           security find-identity -v -p codesigning "$KEYCHAIN" || true
       # ---------------------------------------
 
