@@ -23,42 +23,6 @@ jobs:
         with:
           xcode-version: "16.1"
 
-      - name: Ensure AppIcon exists (placeholder, safe)
-        run: |
-          set -euxo pipefail
-          ICONSET="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
-          mkdir -p "$ICONSET"
-          cat > "$ICONSET/_base.ppm" <<'PPM'
-          P3
-          1 1
-          255
-          0 109 204
-          PPM
-          /usr/bin/sips -s format png --resampleWidth 1024 "$ICONSET/_base.ppm" --out "$ICONSET/Icon-1024.png"
-          for size in 20 29 40 60; do
-            for scale in 2 3; do
-              px=$((size*scale))
-              /usr/bin/sips -s format png --resampleWidth "$px" "$ICONSET/Icon-1024.png" --out "$ICONSET/Icon-iphone-${size}x${size}@${scale}x.png"
-            done
-          done
-          /usr/bin/python3 - <<'PY'
-          import json, os
-          iconset="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
-          images=[
-            {"idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png"},
-            {"idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png"},
-            {"idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png"},
-            {"idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png"},
-            {"idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png"},
-            {"idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png"},
-            {"idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png"},
-            {"idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png"},
-            {"idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png"},
-          ]
-          data={"images":images,"info":{"version":1,"author":"xcode"}}
-          with open(os.path.join(iconset,"Contents.json"),"w") as f: json.dump(data,f,indent=2)
-          PY
-
       - name: Install certificates (triple fallback, rock solid)
         env:
           P12_BASE64: ${{ secrets.CERT_P12 }}
@@ -142,6 +106,104 @@ jobs:
             echo "::error ::TeamID im Profil ($PP_TEAMID) passt nicht zu TEAM_ID (${TEAM_ID})."
             exit 1
           fi
+
+      - name: Reset asset catalog to universal placeholder (AppIcon + AccentColor)
+        run: |
+          set -euxo pipefail
+          AC="Fischbestand/Resources/Assets.xcassets"
+          rm -rf "$AC"
+          mkdir -p "$AC/AppIcon.appiconset" "$AC/AccentColor.colorset"
+
+          # Root Contents.json
+          /usr/bin/python3 - <<'PY'
+import json, os
+root="Fischbestand/Resources/Assets.xcassets"
+with open(os.path.join(root,"Contents.json"),"w") as f:
+    json.dump({"info":{"version":1,"author":"xcode"}}, f)
+PY
+
+          # 1x1 PNG -> Master 1024
+          printf '%s' iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg== | base64 -d > "$AC/AppIcon.appiconset/_base.png"
+          /usr/bin/sips -s format png --resampleWidth 1024 "$AC/AppIcon.appiconset/_base.png" --out "$AC/AppIcon.appiconset/Icon-1024.png"
+
+          # iPhone Sizes
+          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 60  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@3x.png"
+          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 87  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@3x.png"
+          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@3x.png"
+          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 180 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@3x.png"
+
+          # iPad Sizes
+          /usr/bin/sips -s format png --resampleWidth 20  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@1x.png"
+          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 29  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@1x.png"
+          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@1x.png"
+          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 76  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@1x.png"
+          /usr/bin/sips -s format png --resampleWidth 152 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@2x.png"
+          /usr/bin/sips -s format png --resampleWidth 167 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-83.5x83.5@2x.png"
+
+          # AppIcon Contents.json (iPhone + iPad + Marketing)
+          /usr/bin/python3 - <<'PY'
+import json, os
+p="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
+imgs=[
+  # iPhone
+  {"idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png"},
+  {"idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png"},
+  {"idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png"},
+  {"idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png"},
+  {"idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png"},
+  {"idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png"},
+  {"idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png"},
+  {"idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png"},
+  # iPad
+  {"idiom":"ipad","size":"20x20","scale":"1x","filename":"Icon-ipad-20x20@1x.png"},
+  {"idiom":"ipad","size":"20x20","scale":"2x","filename":"Icon-ipad-20x20@2x.png"},
+  {"idiom":"ipad","size":"29x29","scale":"1x","filename":"Icon-ipad-29x29@1x.png"},
+  {"idiom":"ipad","size":"29x29","scale":"2x","filename":"Icon-ipad-29x29@2x.png"},
+  {"idiom":"ipad","size":"40x40","scale":"1x","filename":"Icon-ipad-40x40@1x.png"},
+  {"idiom":"ipad","size":"40x40","scale":"2x","filename":"Icon-ipad-40x40@2x.png"},
+  {"idiom":"ipad","size":"76x76","scale":"1x","filename":"Icon-ipad-76x76@1x.png"},
+  {"idiom":"ipad","size":"76x76","scale":"2x","filename":"Icon-ipad-76x76@2x.png"},
+  {"idiom":"ipad","size":"83.5x83.5","scale":"2x","filename":"Icon-ipad-83.5x83.5@2x.png"},
+  # Marketing
+  {"idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png"}
+]
+with open(os.path.join(p,"Contents.json"),"w") as f:
+  json.dump({"images":imgs,"info":{"version":1,"author":"xcode"}}, f, indent=2)
+PY
+
+          # AccentColor (blau)
+          cat > "$AC/AccentColor.colorset/Contents.json" <<'JSON'
+          {
+            "colors" : [
+              {
+                "idiom" : "universal",
+                "color" : {
+                  "color-space" : "srgb",
+                  "components" : { "red":"0.00", "green":"0.48", "blue":"1.00", "alpha":"1.0" }
+                }
+              }
+            ],
+            "info" : { "version" : 1, "author" : "xcode" }
+          }
+          JSON
+
+          # Lint + Sichtprüfung
+          plutil -lint "$AC/Contents.json"
+          plutil -lint "$AC/AppIcon.appiconset/Contents.json"
+          plutil -lint "$AC/AccentColor.colorset/Contents.json"
+          ls -la "$AC/AppIcon.appiconset"
+
+      - name: Inspect asset build settings
+        run: |
+          xcodebuild -showBuildSettings -scheme "$SCHEME" -configuration Release | \
+            egrep 'ASSETCATALOG|INFOPLIST_FILE|TARGETED_DEVICE_FAMILY|PRODUCT_BUNDLE_IDENTIFIER'
 
       - name: Archive (device, Release, manual signing)
         run: |
