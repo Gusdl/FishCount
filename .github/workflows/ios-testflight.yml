@@ -39,11 +39,7 @@ jobs:
           PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILE_DIR"
           PROFILE_PATH="$PROFILE_DIR/profile.mobileprovision"
-          python3 - <<'PY'
-import base64, os, pathlib
-path = pathlib.Path(os.environ["PROFILE_PATH"])
-path.write_bytes(base64.b64decode(os.environ["MOBILEPROVISION_BASE64"]))
-PY
+          python3 -c "import base64, os, pathlib; pathlib.Path(os.environ['PROFILE_PATH']).write_bytes(base64.b64decode(os.environ['MOBILEPROVISION_BASE64']))"
           /usr/bin/security cms -D -i "$PROFILE_PATH" > profile.plist
           PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' profile.plist)
           echo "PP_NAME=$PP_NAME" >> "$GITHUB_ENV"
