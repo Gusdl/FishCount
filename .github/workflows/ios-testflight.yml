@@ -25,6 +25,23 @@ jobs:
         with:
           xcode-version: '15.4'
 
+      - name: Validate P12 secret
+        env:
+          CERT_P12: ${{ secrets.CERT_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          P12=/tmp/cert.p12
+          python3 - <<'PY'
+import base64, os, pathlib
+path = pathlib.Path("/tmp/cert.p12")
+path.write_bytes(base64.b64decode(os.environ["CERT_P12"]))
+PY
+          if ! /usr/bin/openssl pkcs12 -in "$P12" -info -nokeys -passin pass:"$P12_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::P12 Passwort falsch ODER CERT_P12 Base64 defekt (abgeschnitten/Zeilenumbrüche/falsche Datei)."
+            exit 1
+          fi
+
       - name: Import signing certificate
         env:
           CERT_P12: ${{ secrets.CERT_P12 }}
