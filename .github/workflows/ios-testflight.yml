@@ -32,9 +32,10 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
           set -euo pipefail
-          # Keychain anlegen + öffnen
           KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
           KEYCHAIN_PWD="$(uuidgen)"
+
+          # Keychain anlegen + öffnen
           security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
@@ -42,22 +43,25 @@ jobs:
           # P12 decodieren
           echo "$CERT_P12" | base64 -d > /tmp/cert.p12
 
-          # Vorab prüfen: Passwort + privater Schlüssel vorhanden
+          # Vorab: Passwort + Private Key prüfen
           /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -noout -passin env:P12_PASSWORD
-          if ! /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -nocerts -nodes -passin env:P12_PASSWORD >/dev/null 2>&1; then
-            echo "::error::Das .p12 enthält keinen privaten Schlüssel."
-            exit 1
-          fi
+          /usr/bin/openssl pkcs12 -in /tmp/cert.p12 -nocerts -nodes -passin env:P12_PASSWORD >/dev/null
 
-          # Import in die temp Keychain
-          security import /tmp/cert.p12 -k "$KEYCHAIN" -P "$P12_PASSWORD" -A -t identities -f pkcs12
+          # *** WICHTIG: Korrektes security import – KEIN '-t identities'! ***
+          security import /tmp/cert.p12 \
+            -k "$KEYCHAIN" \
+            -f pkcs12 \
+            -P "$P12_PASSWORD" \
+            -A
 
-          # Keychain als default setzen + Zugriff für Build-Tools erlauben
+          # Keychain zur Liste hinzufügen & als Default setzen
           security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/.*=//' | tr -d '"')
           security default-keychain -s "$KEYCHAIN"
+
+          # Zugriff für xcodebuild/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN"
 
-          # Sichtprüfung: Codesigning-Identitäten auflisten
+          # Sichtprüfung
           security find-identity -v -p codesigning "$KEYCHAIN" || true
       # ---------------------------------------
 
