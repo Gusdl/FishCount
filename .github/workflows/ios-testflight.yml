@@ -1,12 +1,14 @@
-name: iOS TestFlight CI
+name: iOS TestFlight
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
   SCHEME: Fischbestand
+  PROJECT: Fischbestand.xcodeproj
   TEAM_ID: XDLCKT3P87
   BUNDLE_ID: com.simonmaiwald.fischbestand
 
@@ -15,274 +17,70 @@ jobs:
     runs-on: macos-15
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.1
+      - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.1"
+          xcode-version: '16.1'
 
-      - name: Install certificates (triple fallback, rock solid)
-        env:
-          P12_BASE64: ${{ secrets.CERT_P12 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-        run: |
-          set -euxo pipefail
-          if [ -z "${P12_BASE64}" ]; then
-            echo "::error::CERT_P12 Secret (CERT_P12) ist leer oder nicht gesetzt."
-            exit 1
-          fi
+      - name: Import signing certificate
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.CERT_P12 }}
+          p12-password: ${{ secrets.P12_PASSWORD }}
 
-          python3 - <<'PY'
-import base64
-import os
-import sys
-
-data = os.environ["P12_BASE64"]
-try:
-    decoded = base64.b64decode(data, validate=True)
-except Exception as exc:  # pragma: no cover - executed in CI shell
-    print(f"::error::Zertifikat konnte nicht dekodiert werden: {exc}", file=sys.stderr)
-    sys.exit(1)
-
-with open("cert.p12", "wb") as fh:
-    fh.write(decoded)
-PY
-
-          KEYCHAIN=$RUNNER_TEMP/app.keychain-db
-          security create-keychain -p "" "$KEYCHAIN"
-          security default-keychain -s "$KEYCHAIN"
-          security unlock-keychain -p "" "$KEYCHAIN"
-
-          if ! openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -clcerts -info >/dev/null 2>&1; then
-            LEGACY=1
-          else
-            LEGACY=0
-          fi
-
-          if [ "$LEGACY" = "1" ]; then
-            openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
-            openssl pkcs12 -legacy -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
-          else
-            openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nodes -nocerts -out key.pem
-            openssl pkcs12 -in cert.p12 -passin pass:"$P12_PASSWORD" -nokeys -out cert.pem
-          fi
-
-          security import cert.pem -A -t cert -k "$KEYCHAIN"
-
-          if security import key.pem -k "$KEYCHAIN" -t priv -f openssl -A \
-               -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild ; then
-            echo "Imported private key as OpenSSL PEM."
-          else
-            echo "OpenSSL PEM import failed, trying PKCS#8 DER…"
-            openssl pkcs8 -topk8 -nocrypt -in key.pem -outform DER -out key-pkcs8.der
-            if security import key-pkcs8.der -k "$KEYCHAIN" -t priv -f pkcs8 -A \
-                 -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild ; then
-              echo "Imported private key as PKCS#8 DER."
-            else
-              echo "PKCS#8 DER import failed, repack to fresh PKCS#12…"
-              openssl pkcs12 -export -inkey key.pem -in cert.pem -out fresh.p12 -passout pass:temp123
-              security import fresh.p12 -P temp123 -k "$KEYCHAIN" -A -t agg
-              echo "Imported key via fresh PKCS#12."
-            fi
-          fi
-
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
-
-      - name: Install provisioning profile + extract metadata
+      - name: Install provisioning profile
         env:
           MOBILEPROVISION_BASE64: ${{ secrets.MOBILEPROVISION }}
         run: |
-          set -euxo pipefail
-          PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PP_DIR"
-          if [ -z "${MOBILEPROVISION_BASE64}" ]; then
-            echo "::error::Provisioning-Profile Secret (MOBILEPROVISION) ist leer oder nicht gesetzt."
-            exit 1
-          fi
-
+          set -euo pipefail
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE_PATH="$PROFILE_DIR/profile.mobileprovision"
+          mkdir -p "$PROFILE_DIR"
+          export PROFILE_PATH
           python3 - <<'PY'
 import base64
 import os
 import pathlib
-import sys
 
 data = os.environ["MOBILEPROVISION_BASE64"]
-try:
-    decoded = base64.b64decode(data, validate=True)
-except Exception as exc:  # pragma: no cover - executed in CI shell
-    print(f"::error::Provisioning Profile konnte nicht dekodiert werden: {exc}", file=sys.stderr)
-    sys.exit(1)
-
-path = pathlib.Path.home() / "Library" / "MobileDevice" / "Provisioning Profiles" / "profile.mobileprovision"
-path.write_bytes(decoded)
-PY
-
-          /usr/bin/security cms -D -i "$PP_DIR/profile.mobileprovision" > profile.plist
-          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' profile.plist)
-          PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' profile.plist)
-          APP_ID=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' profile.plist)
-          PP_TEAMID="${APP_ID%%.*}"
-          PP_BUNDLEID="${APP_ID#*.}"
-          GET_TASK_ALLOW=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' profile.plist || echo false)
-
-          echo "PP_UUID=$PP_UUID" | tee -a $GITHUB_ENV
-          echo "PP_NAME=$PP_NAME" | tee -a $GITHUB_ENV
-          echo "PP_TEAMID=$PP_TEAMID" | tee -a $GITHUB_ENV
-          echo "PP_BUNDLEID=$PP_BUNDLEID" | tee -a $GITHUB_ENV
-          echo "GET_TASK_ALLOW=$GET_TASK_ALLOW" | tee -a $GITHUB_ENV
-
-          if [ "$GET_TASK_ALLOW" != "false" ]; then
-            echo "::error::Du nutzt ein Development/AdHoc Profil. Für App-Store-Archive brauchst du ein DISTRIBUTION (App Store) Profil."
-            exit 1
-          fi
-          if [ "$PP_BUNDLEID" != "${BUNDLE_ID}" ]; then
-            echo "::error::Bundle ID im Profil ($PP_BUNDLEID) passt nicht zu BUNDLE_ID (${BUNDLE_ID})."
-            exit 1
-          fi
-          if [ "$PP_TEAMID" != "${TEAM_ID}" ]; then
-            echo "::error::TeamID im Profil ($PP_TEAMID) passt nicht zu TEAM_ID (${TEAM_ID})."
-            exit 1
-          fi
-
-      - name: Reset asset catalog to universal placeholder (AppIcon + AccentColor)
-        run: |
-          set -euxo pipefail
-          AC="Fischbestand/Resources/Assets.xcassets"
-          rm -rf "$AC"
-          mkdir -p "$AC/AppIcon.appiconset" "$AC/AccentColor.colorset"
-
-          # Root Contents.json
-          /usr/bin/python3 - <<'PY'
-import json, os
-root="Fischbestand/Resources/Assets.xcassets"
-with open(os.path.join(root,"Contents.json"),"w") as f:
-    json.dump({"info":{"version":1,"author":"xcode"}}, f)
-PY
-
-          # 1x1 PNG -> Master 1024
-          python3 - <<'PY'
-import base64
-import pathlib
-
-data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/UZz3QAAAABJRU5ErkJggg=="
-path = pathlib.Path("Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/_base.png")
+path = pathlib.Path(os.environ["PROFILE_PATH"])
 path.write_bytes(base64.b64decode(data))
 PY
-          /usr/bin/sips -s format png --resampleWidth 1024 "$AC/AppIcon.appiconset/_base.png" --out "$AC/AppIcon.appiconset/Icon-1024.png"
+          /usr/bin/security cms -D -i "$PROFILE_PATH" > profile.plist
+          PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' profile.plist)
+          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' profile.plist)
+          echo "PP_NAME=$PP_NAME" >> "$GITHUB_ENV"
+          echo "PP_UUID=$PP_UUID" >> "$GITHUB_ENV"
 
-          # iPhone Sizes
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 60  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 87  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 180 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@3x.png"
-
-          # iPad Sizes
-          /usr/bin/sips -s format png --resampleWidth 20  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 29  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 76  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 152 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 167 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-83.5x83.5@2x.png"
-
-          # AppIcon Contents.json (iPhone + iPad + Marketing)
-          /usr/bin/python3 - <<'PY'
-import json, os
-p="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
-imgs=[
-  # iPhone
-  {"idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png"},
-  {"idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png"},
-  {"idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png"},
-  {"idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png"},
-  {"idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png"},
-  {"idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png"},
-  {"idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png"},
-  {"idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png"},
-  # iPad
-  {"idiom":"ipad","size":"20x20","scale":"1x","filename":"Icon-ipad-20x20@1x.png"},
-  {"idiom":"ipad","size":"20x20","scale":"2x","filename":"Icon-ipad-20x20@2x.png"},
-  {"idiom":"ipad","size":"29x29","scale":"1x","filename":"Icon-ipad-29x29@1x.png"},
-  {"idiom":"ipad","size":"29x29","scale":"2x","filename":"Icon-ipad-29x29@2x.png"},
-  {"idiom":"ipad","size":"40x40","scale":"1x","filename":"Icon-ipad-40x40@1x.png"},
-  {"idiom":"ipad","size":"40x40","scale":"2x","filename":"Icon-ipad-40x40@2x.png"},
-  {"idiom":"ipad","size":"76x76","scale":"1x","filename":"Icon-ipad-76x76@1x.png"},
-  {"idiom":"ipad","size":"76x76","scale":"2x","filename":"Icon-ipad-76x76@2x.png"},
-  {"idiom":"ipad","size":"83.5x83.5","scale":"2x","filename":"Icon-ipad-83.5x83.5@2x.png"},
-  # Marketing
-  {"idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png"}
-]
-with open(os.path.join(p,"Contents.json"),"w") as f:
-  json.dump({"images":imgs,"info":{"version":1,"author":"xcode"}}, f, indent=2)
-PY
-
-          # AccentColor (blau)
-          cat > "$AC/AccentColor.colorset/Contents.json" <<'JSON'
-          {
-            "colors" : [
-              {
-                "idiom" : "universal",
-                "color" : {
-                  "color-space" : "srgb",
-                  "components" : { "red":"0.00", "green":"0.48", "blue":"1.00", "alpha":"1.0" }
-                }
-              }
-            ],
-            "info" : { "version" : 1, "author" : "xcode" }
-          }
-          JSON
-
-          # Lint + Sichtprüfung
-          plutil -lint "$AC/Contents.json"
-          plutil -lint "$AC/AppIcon.appiconset/Contents.json"
-          plutil -lint "$AC/AccentColor.colorset/Contents.json"
-          ls -la "$AC/AppIcon.appiconset"
-
-      - name: Inspect asset build settings
+      - name: Build archive
         run: |
-          xcodebuild -showBuildSettings -scheme "$SCHEME" -configuration Release | \
-            egrep 'ASSETCATALOG|INFOPLIST_FILE|TARGETED_DEVICE_FAMILY|PRODUCT_BUNDLE_IDENTIFIER'
-
-      - name: Archive (device, Release, manual signing)
-        run: |
-          set -euxo pipefail
+          set -euo pipefail
           xcodebuild \
+            -project "$PROJECT" \
             -scheme "$SCHEME" \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -sdk iphoneos \
             -archivePath "$PWD/build/$SCHEME.xcarchive" \
             archive \
             CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="${TEAM_ID}" \
-            PRODUCT_BUNDLE_IDENTIFIER="${BUNDLE_ID}" \
-            PROVISIONING_PROFILE_SPECIFIER="${PP_NAME}" \
-            PROVISIONING_PROFILE="${PP_UUID}" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
-            TARGETED_DEVICE_FAMILY=1
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
+            CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export IPA
         run: |
+          set -euo pipefail
           cat > ExportOptions.plist <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>${TEAM_ID}</string>
-            <key>uploadSymbols</key><true/>
-            <key>stripSwiftSymbols</key><true/>
-            <key>destination</key><string>export</string>
             <key>signingStyle</key><string>manual</string>
-            <key>signingCertificate</key><string>Apple Distribution</string>
             <key>provisioningProfiles</key>
             <dict>
               <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
@@ -291,56 +89,35 @@ PY
           PLIST
           xcodebuild -exportArchive \
             -archivePath "$PWD/build/$SCHEME.xcarchive" \
-            -exportPath  "$PWD/build" \
-            -exportOptionsPlist ExportOptions.plist
-          ls -la build
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath "$PWD/build"
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Install fastlane
-        run: gem install fastlane
-
-      - name: Upload to TestFlight (non-interactive)
+      - name: Prepare App Store Connect key
         env:
-          APP_STORE_CONNECT_KEY_ID:     ${{ secrets.ASC_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID:  ${{ secrets.ASC_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY:    ${{ secrets.ASC_API_KEY_CONTENTS }}
-          CI: true
-          FASTLANE_DISABLE_COLORS: 1
-          FASTLANE_SKIP_UPDATE_CHECK: 1
-          FASTLANE_OPT_OUT_USAGE: 1
-          FASTLANE_SKIP_CONFIRMATIONS: 1
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_API_KEY_CONTENTS: ${{ secrets.ASC_API_KEY_CONTENTS }}
         run: |
-          set -euxo pipefail
+          set -euo pipefail
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
+          python3 - <<'PY'
+import os
+import pathlib
 
-          # Sicherstellen, dass die IPA da ist
-          ls -la build || true
-          test -f "build/${SCHEME}.ipa" || { echo "::error::IPA fehlt unter build/${SCHEME}.ipa"; exit 1; }
+path = pathlib.Path(os.environ["KEY_PATH"])
+path.write_text(os.environ["ASC_API_KEY_CONTENTS"], encoding="utf-8")
+PY
 
-          # Fastfile im standard Pfad anlegen (fastlane/Fastfile)
-          mkdir -p fastlane
-          cat > fastlane/Fastfile <<'RUBY'
-          opt_out_usage
-          default_platform(:ios)
-          platform :ios do
-            lane :beta do
-              api_key = app_store_connect_api_key(
-                key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
-                issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
-                key_content: ENV["APP_STORE_CONNECT_API_KEY"]
-              )
-              pilot(
-                api_key: api_key,
-                ipa: "build/#{ENV['SCHEME']}.ipa",
-                skip_waiting_for_build_processing: true
-              )
-            end
-          end
-          RUBY
-
-          # Non-interactive aufrufen
-          fastlane ios beta
+      - name: Upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          test -f "build/${SCHEME}.ipa"
+          xcrun altool --upload-app \
+            --type ios \
+            --file "build/${SCHEME}.ipa" \
+            --apiKey "$ASC_KEY_ID" \
+            --apiIssuer "$ASC_ISSUER_ID"
