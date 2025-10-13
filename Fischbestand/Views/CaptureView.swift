@@ -22,6 +22,12 @@ struct CaptureView: View {
     @State private var manualCount: Int = 1
     @State private var manualComment: String = ""
     @State private var locationError: String?
+    @State private var isEditingWeather = false
+    @State private var draftWeatherNote: String = ""
+    @State private var lastLocationUpdate: Date?
+    @State private var isShowingVoiceHelp = false
+
+    @FocusState private var isWeatherFieldFocused: Bool
 
     private let numberWordHints: [String] = [
         "null", "eins", "eine", "einen", "zwei", "drei", "vier", "fünf", "sechs",
@@ -63,6 +69,9 @@ struct CaptureView: View {
                 selectedSizeClassID = sizeClassPresets.first?.persistentModelID
             }
             locationManager.requestLocation()
+            if survey.latitude != nil || survey.longitude != nil {
+                lastLocationUpdate = Date()
+            }
         }
         .sheet(isPresented: $showManualInput) {
             ManualEntrySheet(manualSpecies: $manualSpecies,
@@ -74,6 +83,58 @@ struct CaptureView: View {
                 resetManualFields()
             }
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $isEditingWeather) {
+            NavigationStack {
+                Form {
+                    Section("Wetter & Bedingungen") {
+                        TextField("z. B. Bewölkt, 12°C, leichter Wind",
+                                  text: $draftWeatherNote,
+                                  axis: .vertical)
+                            .focused($isWeatherFieldFocused)
+                            .submitLabel(.done)
+                    }
+
+                    if survey.weatherNote != nil {
+                        Section {
+                            Button("Notiz entfernen", role: .destructive) {
+                                survey.weatherNote = nil
+                                try? context.save()
+                                isEditingWeather = false
+                            }
+                        }
+                    }
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .navigationTitle("Wetter notieren")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Abbrechen") {
+                            isEditingWeather = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Speichern") {
+                            let trimmed = draftWeatherNote.trimmingCharacters(in: .whitespacesAndNewlines)
+                            survey.weatherNote = trimmed.isEmpty ? nil : trimmed
+                            try? context.save()
+                            isEditingWeather = false
+                        }
+                        .disabled(draftWeatherNote.trimmingCharacters(in: .whitespacesAndNewlines) == (survey.weatherNote?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""))
+                    }
+                }
+                .task {
+                    await MainActor.run {
+                        draftWeatherNote = survey.weatherNote ?? ""
+                        isWeatherFieldFocused = true
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $isShowingVoiceHelp) {
+            VoiceCommandHelpSheet(featuredSpecies: SpeciesCatalog.featuredSpecies,
+                                  sizeClassExample: currentSizeClassLabel)
         }
         .alert("Standort konnte nicht ermittelt werden", isPresented: Binding(get: {
             locationError != nil
@@ -94,11 +155,17 @@ struct CaptureView: View {
                 survey.latitude = newValue
                 try? context.save()
             }
+            if newValue != nil {
+                lastLocationUpdate = Date()
+            }
         }
         .onChange(of: locationManager.longitude) { newValue in
             if survey.longitude != newValue {
                 survey.longitude = newValue
                 try? context.save()
+            }
+            if newValue != nil {
+                lastLocationUpdate = Date()
             }
         }
         .onChange(of: locationManager.authorizationStatus) { status in
@@ -138,20 +205,93 @@ struct CaptureView: View {
                 }
                 .buttonStyle(.borderless)
             }
-            if let weather = survey.weatherNote, !weather.isEmpty {
-                Label(weather, systemImage: "cloud.sun")
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.subtleText)
+            Button {
+                draftWeatherNote = survey.weatherNote ?? ""
+                isEditingWeather = true
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Label(weatherSummaryText, systemImage: weatherSummaryIcon)
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.subtleText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    Spacer(minLength: 12)
+                    Image(systemName: "square.and.pencil")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.primaryAccent)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
+            .buttonStyle(.plain)
+
+            locationStatusBadge
         }
         .glassCard()
     }
 
+    private var weatherSummaryText: String {
+        if let weather = survey.weatherNote, !weather.isEmpty {
+            return weather
+        }
+        return "Wetter & Bedingungen hinzufügen"
+    }
+
+    private var weatherSummaryIcon: String {
+        if let weather = survey.weatherNote, !weather.isEmpty {
+            return "cloud.sun"
+        }
+        return "cloud.badge.plus"
+    }
+
+    private var locationStatusBadge: some View {
+        let descriptor = makeLocationStatusDescriptor()
+
+        return HStack(alignment: .center, spacing: 12) {
+            Image(systemName: descriptor.icon)
+                .font(.headline)
+                .foregroundStyle(descriptor.tint)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(descriptor.title)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(AppTheme.mutedText)
+                if let subtitle = descriptor.subtitle {
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.subtleText)
+                        .lineLimit(2)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
     private var transcriptCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
-                .font(.headline)
-                .foregroundStyle(AppTheme.mutedText)
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.mutedText)
+
+                Spacer(minLength: 12)
+
+                Button {
+                    isShowingVoiceHelp = true
+                } label: {
+                    Label("Sprachbefehle", systemImage: "questionmark.circle")
+                        .font(.footnote.weight(.semibold))
+                        .labelStyle(.titleAndIcon)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                        .background(Color.white.opacity(0.12), in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
             Text(liveTranscript.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : liveTranscript)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -395,6 +535,151 @@ struct CaptureView: View {
         hints.formUnion(numberWordHints)
         hints.formUnion((0...50).map { String($0) })
         return Array(hints)
+    }
+
+    private struct LocationStatusDescriptor {
+        let title: String
+        let subtitle: String?
+        let icon: String
+        let tint: Color
+    }
+
+    private func makeLocationStatusDescriptor() -> LocationStatusDescriptor {
+        if let error = locationManager.errorMessage {
+            return LocationStatusDescriptor(title: "Standortfehler",
+                                            subtitle: error,
+                                            icon: "exclamationmark.triangle.fill",
+                                            tint: .orange)
+        }
+
+        switch locationManager.authorizationStatus {
+        case .restricted, .denied:
+            return LocationStatusDescriptor(title: "Standortzugriff deaktiviert",
+                                            subtitle: "Aktiviere den Zugriff in den Einstellungen.",
+                                            icon: "lock.slash",
+                                            tint: .orange)
+        case .notDetermined:
+            return LocationStatusDescriptor(title: "Standortfreigabe erforderlich",
+                                            subtitle: "Tippe auf \"Standort abrufen\" oben.",
+                                            icon: "questionmark.circle",
+                                            tint: AppTheme.primaryAccent)
+        default:
+            break
+        }
+
+        if locationManager.isUpdating {
+            return LocationStatusDescriptor(title: "Standort wird gesucht …",
+                                            subtitle: "Bitte bleib kurz an Ort und Stelle.",
+                                            icon: "location.circle",
+                                            tint: AppTheme.primaryAccent)
+        }
+
+        if let lastLocationUpdate {
+            return LocationStatusDescriptor(title: "Standort aktualisiert",
+                                            subtitle: locationStatusSubtitle(lastUpdate: lastLocationUpdate),
+                                            icon: "checkmark.circle.fill",
+                                            tint: .green)
+        }
+
+        if survey.latitude != nil && survey.longitude != nil {
+            return LocationStatusDescriptor(title: "Standort gespeichert",
+                                            subtitle: locationStatusSubtitle(lastUpdate: nil),
+                                            icon: "checkmark.circle",
+                                            tint: .green)
+        }
+
+        return LocationStatusDescriptor(title: "Kein Standort erfasst",
+                                        subtitle: "Der letzte Standort konnte nicht bestimmt werden.",
+                                        icon: "location.slash",
+                                        tint: .yellow)
+    }
+
+    private func locationStatusSubtitle(lastUpdate: Date?) -> String? {
+        var components: [String] = []
+
+        if let lastUpdate {
+            let relative = lastUpdate.formatted(.relative(presentation: .numeric, unitsStyle: .narrow))
+            components.append("vor \(relative)")
+        }
+
+        if let accuracyDescription = formattedLocationAccuracy() {
+            components.append(accuracyDescription)
+        }
+
+        return components.isEmpty ? nil : components.joined(separator: " • ")
+    }
+
+    private func formattedLocationAccuracy() -> String? {
+        guard let accuracy = locationManager.horizontalAccuracy, accuracy > 0 else { return nil }
+        let measurement = Measurement(value: accuracy, unit: UnitLength.meters)
+        let formatted = measurement.formatted(.measurement(width: .abbreviated,
+                                                           usage: .asProvided,
+                                                           numberFormatStyle: .number.precision(.fractionLength(0))))
+        return "Genauigkeit ±\(formatted)"
+    }
+}
+
+private struct VoiceCommandHelpSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let featuredSpecies: [String]
+    let sizeClassExample: String
+
+    private var primarySpecies: String { featuredSpecies.first ?? "Barsch" }
+    private var secondarySpecies: String { featuredSpecies.dropFirst().first ?? primarySpecies }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Grundsyntax") {
+                    VoiceCommandExampleRow(phrase: "\(primarySpecies) bis \(sizeClassExample), drei Stück, Kommentar: Jungfische",
+                                           detail: "Art + Größenklasse + Anzahl + optionaler Kommentar in einem Satz.")
+                    VoiceCommandExampleRow(phrase: "\(secondarySpecies) bis \(sizeClassExample), 2 Stück",
+                                           detail: "Zahlen funktionieren als Worte oder Ziffern – beide Varianten werden verstanden.")
+                    VoiceCommandExampleRow(phrase: "Rückgängig",
+                                           detail: "Entfernt den zuletzt erfassten Eintrag, falls du dich versprochen hast.")
+                }
+
+                Section("Tipps für bessere Erkennung") {
+                    Label("Mach nach der Art eine kurze Pause, damit die App Größenklasse und Menge sauber trennt.", systemImage: "waveform.badge.mic")
+                        .labelStyle(.titleAndIcon)
+                    Label("Sprich die Größenklasse so aus, wie sie oben angezeigt wird (z. B. „\(sizeClassExample)“).", systemImage: "ruler")
+                        .labelStyle(.titleAndIcon)
+                    Label("Falls es windig ist, halte das Mikrofon näher und wiederhole die Anzahl deutlich.", systemImage: "wind")
+                        .labelStyle(.titleAndIcon)
+                }
+
+                Section("Wenn Spracheingabe nicht möglich ist") {
+                    Label("Nutze die Schaltfläche „Manuell“, um Einträge per Tastatur zu erfassen.", systemImage: "square.and.pencil")
+                        .labelStyle(.titleAndIcon)
+                    Label("Greife bei häufigen Arten auf den Schnellzugriff oberhalb der Größenklasse zurück.", systemImage: "bolt.fill")
+                        .labelStyle(.titleAndIcon)
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Sprachbefehle")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fertig") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+private struct VoiceCommandExampleRow: View {
+    let phrase: String
+    let detail: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("„\(phrase)“")
+                .font(.body.weight(.semibold))
+            Text(detail)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
     }
 }
 

@@ -8,6 +8,7 @@ final class LocationManager: NSObject, ObservableObject {
     @Published private(set) var longitude: Double?
     @Published private(set) var locationName: String?
     @Published private(set) var isUpdating = false
+    @Published private(set) var horizontalAccuracy: CLLocationAccuracy?
     @Published var errorMessage: String?
 
     private let manager: CLLocationManager
@@ -23,6 +24,7 @@ final class LocationManager: NSObject, ObservableObject {
     }
 
     func requestLocation() {
+        errorMessage = nil
         switch authorizationStatus {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
@@ -38,6 +40,7 @@ final class LocationManager: NSObject, ObservableObject {
     private func startRequest() {
         guard !isUpdating else { return }
         isUpdating = true
+        horizontalAccuracy = nil
         manager.requestLocation()
     }
 
@@ -52,6 +55,9 @@ final class LocationManager: NSObject, ObservableObject {
                 }
                 if let placemark = placemarks?.first {
                     self.locationName = Self.makeDescription(from: placemark)
+                }
+                if error == nil {
+                    self.errorMessage = nil
                 }
                 self.isUpdating = false
             }
@@ -98,6 +104,8 @@ extension LocationManager: CLLocationManagerDelegate {
         Task { @MainActor in
             latitude = location.coordinate.latitude
             longitude = location.coordinate.longitude
+            horizontalAccuracy = location.horizontalAccuracy
+            errorMessage = nil
             resolvePlacemark(for: location)
         }
     }
@@ -105,6 +113,7 @@ extension LocationManager: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         Task { @MainActor in
             errorMessage = "Standortfehler: \(error.localizedDescription)"
+            horizontalAccuracy = nil
             isUpdating = false
         }
     }
