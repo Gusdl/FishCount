@@ -178,9 +178,11 @@ jobs:
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
       #       IPHONEOS_DEPLOYMENT_TARGET=16.0 build
 
-      - name: Archive (device, Release, manual signing)
+      - name: Archive (device, Release, manual signing, with log)
         run: |
           set -euxo pipefail
+          # schneller & stabiler
+          export COMPILER_INDEX_STORE_ENABLE=NO
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
             -destination 'generic/platform=iOS' -sdk iphoneos \
             -archivePath "$PWD/build/$SCHEME.xcarchive" archive \
@@ -191,7 +193,19 @@ jobs:
             PROVISIONING_PROFILE="$PP_UUID" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
-            IPHONEOS_DEPLOYMENT_TARGET=16.0
+            IPHONEOS_DEPLOYMENT_TARGET=16.0 \
+            SWIFT_VERSION=5.10 \
+            | tee xcodebuild.log
+
+          echo "------ FIRST 200 ERROR LINES ------"
+          grep -n " error:" -n xcodebuild.log | head -n 200 || true
+
+          # Falls der Build fehlgeschlagen ist, die letzten 200 Zeilen zeigen
+          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+            echo "------ LAST 200 LINES ------"
+            tail -n 200 xcodebuild.log || true
+            exit 65
+          fi
 
       - name: Export IPA
         run: |
