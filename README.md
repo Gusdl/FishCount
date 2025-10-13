@@ -6,6 +6,7 @@ Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am 
 
 - **Sprachaufnahme & Parser**: Deutscher Sprachsupport mit Voice-Kommandos ("Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische") inklusive `rückgängig` und Live-Feedback.
 - **Manuelle Eingabe**: Schnellzugriff über glassmorphe Cards, Picker für Größenklassen sowie optionaler Kommentar.
+- **Standorterfassung**: Automatische Zuordnung von Koordinaten & Ortsnamen zum Survey inkl. manuellem Refresh.
 - **Analyse**: Übersichten nach Art & Größenklasse, Balkendiagramm mit Swift Charts in einem aufgeräumten Dashboard.
 - **Export**: CSV-/JSON-Export via Share-Sheet, temporäre Dateien werden automatisch entfernt.
 - **Anpassung & Style**: Größenklassen-Verwaltung, kleiner Artkatalog mit Synonymen sowie ein maritim abgestimmtes UI mit hellem Dark-Mode-Look.
@@ -16,6 +17,7 @@ Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am 
 Fischbestand/
 ├── FischbestandApp.swift       // App-Einstieg & SwiftData-Konfiguration
 ├── Managers/
+│   ├── LocationManager.swift   // CLLocationManager + Reverse Geocoding
 │   └── SpeechManager.swift     // Steuerung der Spracherkennung (de-DE)
 ├── Models/
 │   └── Survey.swift            // SwiftData-Modelle (Survey, CountEntry, SizeClassPreset)

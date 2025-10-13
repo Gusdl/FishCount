@@ -120,6 +120,11 @@ private struct SurveyRow: View {
                     Label(survey.date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
                         .font(.caption)
                         .foregroundStyle(AppTheme.subtleText)
+                    if let locationName = survey.locationName, !locationName.isEmpty {
+                        Label(locationName, systemImage: "mappin.and.ellipse")
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.subtleText)
+                    }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Observation
+import CoreLocation
 
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
@@ -10,6 +11,7 @@ struct CaptureView: View {
     @Bindable var survey: Survey
 
     @StateObject private var speechManager = SpeechManager()
+    @StateObject private var locationManager = LocationManager()
     @State private var parser = VoiceParser(speciesList: SpeciesCatalog.allSpecies,
                                            speciesAliases: SpeciesCatalog.aliases)
     @State private var liveTranscript: String = ""
@@ -49,6 +51,7 @@ struct CaptureView: View {
             if selectedSizeClassID == nil {
                 selectedSizeClassID = sizeClassPresets.first?.persistentModelID
             }
+            locationManager.requestLocation()
         }
         .sheet(isPresented: $showManualInput) {
             ManualEntrySheet(manualSpecies: $manualSpecies,
@@ -70,6 +73,31 @@ struct CaptureView: View {
         } message: {
             Text(locationError ?? "")
         }
+        .onChange(of: locationManager.locationName) { newValue in
+            guard let newValue, newValue != survey.locationName else { return }
+            survey.locationName = newValue
+            try? context.save()
+        }
+        .onChange(of: locationManager.latitude) { newValue in
+            if survey.latitude != newValue {
+                survey.latitude = newValue
+                try? context.save()
+            }
+        }
+        .onChange(of: locationManager.longitude) { newValue in
+            if survey.longitude != newValue {
+                survey.longitude = newValue
+                try? context.save()
+            }
+        }
+        .onChange(of: locationManager.authorizationStatus) { status in
+            if status == .denied || status == .restricted {
+                locationError = "Bitte erlaube den Standortzugriff in den Systemeinstellungen."
+            }
+        }
+        .onChange(of: locationManager.errorMessage) { message in
+            if let message { locationError = message }
+        }
     }
 
     private var header: some View {
@@ -84,6 +112,20 @@ struct CaptureView: View {
                 Label(locationName, systemImage: "mappin.and.ellipse")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.subtleText)
+            } else if locationManager.isUpdating {
+                Label("Standort wird gesucht …", systemImage: "location.circle")
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.subtleText)
+            } else {
+                Button {
+                    locationManager.requestLocation()
+                } label: {
+                    Label("Standort abrufen", systemImage: "location")
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.subtleText)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.borderless)
             }
             if let weather = survey.weatherNote, !weather.isEmpty {
                 Label(weather, systemImage: "cloud.sun")
