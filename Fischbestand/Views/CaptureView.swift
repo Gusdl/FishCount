@@ -23,6 +23,17 @@ struct CaptureView: View {
     @State private var manualComment: String = ""
     @State private var locationError: String?
 
+    private let numberWordHints: [String] = [
+        "null", "eins", "eine", "einen", "zwei", "drei", "vier", "fünf", "sechs",
+        "sieben", "acht", "neun", "zehn", "elf", "zwölf", "dreizehn", "vierzehn",
+        "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig"
+    ]
+
+    private let contextVocabulary: [String] = [
+        "bis", "bis zu", "Zentimeter", "zentimeter", "Zentimetern", "cm", "Zentimeterbereich",
+        "Stück", "Stueck", "Anzahl", "Kommentar", "Kommentare"
+    ]
+
     var body: some View {
         ZStack {
             AppTheme.backgroundGradient
@@ -169,7 +180,8 @@ struct CaptureView: View {
                 } else {
                     Task {
                         do {
-                            try await speechManager.start { text in
+                            liveTranscript = ""
+                            try await speechManager.start(hints: speechHints) { text in
                                 liveTranscript = text
                                 handleVoice(text)
                             }
@@ -375,6 +387,14 @@ struct CaptureView: View {
             return selected.label
         }
         return sizeClassPresets.first?.label ?? "bis 5 cm"
+    }
+
+    private var speechHints: [String] {
+        var hints = Set(SpeciesCatalog.searchableNames)
+        hints.formUnion(contextVocabulary)
+        hints.formUnion(numberWordHints)
+        hints.formUnion((0...50).map { String($0) })
+        return Array(hints)
     }
 }
 
