@@ -23,6 +23,7 @@ final class LocationManager: NSObject, ObservableObject {
     }
 
     func requestLocation() {
+        errorMessage = nil
         switch authorizationStatus {
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
@@ -52,6 +53,9 @@ final class LocationManager: NSObject, ObservableObject {
                 }
                 if let placemark = placemarks?.first {
                     self.locationName = Self.makeDescription(from: placemark)
+                }
+                if error == nil {
+                    self.errorMessage = nil
                 }
                 self.isUpdating = false
             }
@@ -98,6 +102,7 @@ extension LocationManager: CLLocationManagerDelegate {
         Task { @MainActor in
             latitude = location.coordinate.latitude
             longitude = location.coordinate.longitude
+            errorMessage = nil
             resolvePlacemark(for: location)
         }
     }
