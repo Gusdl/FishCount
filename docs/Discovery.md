@@ -21,9 +21,9 @@
 ## 3. Gaps & Opportunities
 ### Product & UX
 - **Weather capture loop was missing**: Users can now open a quick-edit sheet from the capture header to add or update contextual notes; consider structured fields (temperature, flow) next.【F:Fischbestand/Views/CaptureView.swift†L44-L154】
-- **Location feedback lacks clarity**: Errors surface via alerts, but there is no persistent status indicator or map snippet to reassure users when GPS is unavailable. Status badges were added to the capture header; consider a mini-map or accuracy readout next.【F:Fischbestand/Views/CaptureView.swift†L98-L152】【F:Fischbestand/Managers/LocationManager.swift†L5-L93】
+- **Location feedback**: Die Kopfzeile zeigt nun Status-Badges mit letzter Aktualisierung und ±-Genauigkeit; als nächstes wären eine Mini-Karte oder Genauigkeitsverlauf hilfreich.【F:Fischbestand/Views/CaptureView.swift†L100-L260】【F:Fischbestand/Managers/LocationManager.swift†L5-L101】
 - **Limited taxonomy depth**: Species catalog features 14 species plus aliases; clubs may need regional variants, invasive species, or saltwater data, requiring extensibility tools (import, tagging).【F:Fischbestand/Utilities/SpeciesCatalog.swift†L3-L29】
-- **No onboarding or tutorial**: Voice syntax is implied by placeholder text; a first-run walkthrough or command cheat-sheet would reduce the learning curve.【F:Fischbestand/Views/CaptureView.swift†L150-L169】
+- **Voice onboarding**: Ein neues Sprachbefehl-Hilfeblatt deckt Syntax, Tipps und Fallbacks ab; ergänzend wären First-Run-Hinweise oder Tooltips sinnvoll.【F:Fischbestand/Views/CaptureView.swift†L150-L262】
 - **Collaboration gaps**: Surveys are single-user and device-local; teams cannot merge logs or share sessions without manual exports.【F:Fischbestand/Views/ExportView.swift†L21-L85】
 
 ### Technical & Data
@@ -40,8 +40,8 @@
 ### Short-term (MVP polish)
 1. ✅ Add editable weather & water conditions fields in capture settings or a quick note prompt to unlock context already modeled (implemented via capture header quick-edit).【F:Fischbestand/Views/CaptureView.swift†L44-L154】
 2. Expand species management with CSV import, tagging, and user-defined shortcuts to cover diverse fisheries.【F:Fischbestand/Utilities/SpeciesCatalog.swift†L3-L29】
-3. Implement lightweight onboarding: first-run checklist, sample voice command list, and fallback instructions in case of speech failure.【F:Fischbestand/Views/CaptureView.swift†L150-L198】
-4. Instrument crash/log capture around speech permissions and location errors for faster support triage.【F:Fischbestand/Views/CaptureView.swift†L175-L233】【F:Fischbestand/Managers/LocationManager.swift†L60-L95】
+3. Implement lightweight onboarding: first-run checklist, sample voice command list, and fallback instructions in case of speech failure. ✅ Sprachbefehle lassen sich jetzt direkt im Capture-Screen abrufen; ein dedizierter Erststart-Flow steht noch aus.【F:Fischbestand/Views/CaptureView.swift†L150-L262】
+4. Instrument crash/log capture around speech permissions and location errors for faster support triage.【F:Fischbestand/Views/CaptureView.swift†L175-L233】【F:Fischbestand/Managers/LocationManager.swift†L62-L101】
 
 ### Mid-term (v1 release)
 - Build aggregated dashboards (per species trends, heatmaps) leveraging stored timestamps and coordinates once location reliability improves.【F:Fischbestand/Models/Survey.swift†L8-L28】【F:Fischbestand/Views/SurveyDetailView.swift†L59-L117】

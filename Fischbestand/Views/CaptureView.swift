@@ -25,6 +25,7 @@ struct CaptureView: View {
     @State private var isEditingWeather = false
     @State private var draftWeatherNote: String = ""
     @State private var lastLocationUpdate: Date?
+    @State private var isShowingVoiceHelp = false
 
     @FocusState private var isWeatherFieldFocused: Bool
 
@@ -130,6 +131,10 @@ struct CaptureView: View {
                 }
             }
             .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $isShowingVoiceHelp) {
+            VoiceCommandHelpSheet(featuredSpecies: SpeciesCatalog.featuredSpecies,
+                                  sizeClassExample: currentSizeClassLabel)
         }
         .alert("Standort konnte nicht ermittelt werden", isPresented: Binding(get: {
             locationError != nil
@@ -268,9 +273,25 @@ struct CaptureView: View {
 
     private var transcriptCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
-                .font(.headline)
-                .foregroundStyle(AppTheme.mutedText)
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.mutedText)
+
+                Spacer(minLength: 12)
+
+                Button {
+                    isShowingVoiceHelp = true
+                } label: {
+                    Label("Sprachbefehle", systemImage: "questionmark.circle")
+                        .font(.footnote.weight(.semibold))
+                        .labelStyle(.titleAndIcon)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                        .background(Color.white.opacity(0.12), in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
             Text(liveTranscript.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : liveTranscript)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -554,16 +575,15 @@ struct CaptureView: View {
         }
 
         if let lastLocationUpdate {
-            let relative = lastLocationUpdate.formatted(.relative(presentation: .numeric, unitsStyle: .narrow))
             return LocationStatusDescriptor(title: "Standort aktualisiert",
-                                            subtitle: "vor \(relative)",
+                                            subtitle: locationStatusSubtitle(lastUpdate: lastLocationUpdate),
                                             icon: "checkmark.circle.fill",
                                             tint: .green)
         }
 
         if survey.latitude != nil && survey.longitude != nil {
             return LocationStatusDescriptor(title: "Standort gespeichert",
-                                            subtitle: nil,
+                                            subtitle: locationStatusSubtitle(lastUpdate: nil),
                                             icon: "checkmark.circle",
                                             tint: .green)
         }
@@ -572,6 +592,94 @@ struct CaptureView: View {
                                         subtitle: "Der letzte Standort konnte nicht bestimmt werden.",
                                         icon: "location.slash",
                                         tint: .yellow)
+    }
+
+    private func locationStatusSubtitle(lastUpdate: Date?) -> String? {
+        var components: [String] = []
+
+        if let lastUpdate {
+            let relative = lastUpdate.formatted(.relative(presentation: .numeric, unitsStyle: .narrow))
+            components.append("vor \(relative)")
+        }
+
+        if let accuracyDescription = formattedLocationAccuracy() {
+            components.append(accuracyDescription)
+        }
+
+        return components.isEmpty ? nil : components.joined(separator: " • ")
+    }
+
+    private func formattedLocationAccuracy() -> String? {
+        guard let accuracy = locationManager.horizontalAccuracy, accuracy > 0 else { return nil }
+        let measurement = Measurement(value: accuracy, unit: UnitLength.meters)
+        let formatted = measurement.formatted(.measurement(width: .abbreviated,
+                                                           usage: .asProvided,
+                                                           numberFormatStyle: .number.precision(.fractionLength(0))))
+        return "Genauigkeit ±\(formatted)"
+    }
+}
+
+private struct VoiceCommandHelpSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let featuredSpecies: [String]
+    let sizeClassExample: String
+
+    private var primarySpecies: String { featuredSpecies.first ?? "Barsch" }
+    private var secondarySpecies: String { featuredSpecies.dropFirst().first ?? primarySpecies }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Grundsyntax") {
+                    VoiceCommandExampleRow(phrase: "\(primarySpecies) bis \(sizeClassExample), drei Stück, Kommentar: Jungfische",
+                                           detail: "Art + Größenklasse + Anzahl + optionaler Kommentar in einem Satz.")
+                    VoiceCommandExampleRow(phrase: "\(secondarySpecies) bis \(sizeClassExample), 2 Stück",
+                                           detail: "Zahlen funktionieren als Worte oder Ziffern – beide Varianten werden verstanden.")
+                    VoiceCommandExampleRow(phrase: "Rückgängig",
+                                           detail: "Entfernt den zuletzt erfassten Eintrag, falls du dich versprochen hast.")
+                }
+
+                Section("Tipps für bessere Erkennung") {
+                    Label("Mach nach der Art eine kurze Pause, damit die App Größenklasse und Menge sauber trennt.", systemImage: "waveform.badge.mic")
+                        .labelStyle(.titleAndIcon)
+                    Label("Sprich die Größenklasse so aus, wie sie oben angezeigt wird (z. B. „\(sizeClassExample)“).", systemImage: "ruler")
+                        .labelStyle(.titleAndIcon)
+                    Label("Falls es windig ist, halte das Mikrofon näher und wiederhole die Anzahl deutlich.", systemImage: "wind")
+                        .labelStyle(.titleAndIcon)
+                }
+
+                Section("Wenn Spracheingabe nicht möglich ist") {
+                    Label("Nutze die Schaltfläche „Manuell“, um Einträge per Tastatur zu erfassen.", systemImage: "square.and.pencil")
+                        .labelStyle(.titleAndIcon)
+                    Label("Greife bei häufigen Arten auf den Schnellzugriff oberhalb der Größenklasse zurück.", systemImage: "bolt.fill")
+                        .labelStyle(.titleAndIcon)
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Sprachbefehle")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fertig") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+private struct VoiceCommandExampleRow: View {
+    let phrase: String
+    let detail: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("„\(phrase)“")
+                .font(.body.weight(.semibold))
+            Text(detail)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
     }
 }
 
