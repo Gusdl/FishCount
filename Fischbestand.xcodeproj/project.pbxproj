@@ -22,6 +22,7 @@ objects = {
 5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */; };
 5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */; };
 95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A450CABBD3904B308779322B /* FuzzyMatcher.swift */; };
+B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */; };
 97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7222E99FAC51455284376B4F /* Charts.framework */; };
 5F15C92F2B1EFD1C009A2F11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@ objects = {
 5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fischbestand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FischbestandApp.swift; sourceTree = "<group>"; };
 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
+B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 5F15C9032B1EFD1C009A2F11 /* Survey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Survey.swift; sourceTree = "<group>"; };
 5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
 5F15C9052B1EFD1C009A2F11 /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@ sourceTree = "<group>";
 5F15C8E92B1EFD1C009A2F11 /* Managers */ = {
 isa = PBXGroup;
 children = (
+B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */,
 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */
 );
 name = Managers;
@@ -274,6 +277,7 @@ isa = PBXSourcesBuildPhase;
 buildActionMask = 2147483647;
 files = (
 5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */,
+B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
 5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */,
