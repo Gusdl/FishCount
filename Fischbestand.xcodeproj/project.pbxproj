@@ -6,6 +6,7 @@ objectVersion = 56;
 objects = {
 
 /* Begin PBXBuildFile section */
+1E00E92C576A4C97B2F8C5D1 /* FuzzyMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */; };
 5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */; };
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */; };
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9032B1EFD1C009A2F11 /* Survey.swift */; };
@@ -25,6 +26,7 @@ objects = {
 B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */; };
 97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7222E99FAC51455284376B4F /* Charts.framework */; };
 5F15C92F2B1EFD1C009A2F11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */; };
+6FE59C0EB17A4663967583FF /* VoiceParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F890764E33DA46BB908CC251 /* VoiceParserTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +52,10 @@ B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */ = {isa = PBXFileReference; 
 A450CABBD3904B308779322B /* FuzzyMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcher.swift; sourceTree = "<group>"; };
 7222E99FAC51455284376B4F /* Charts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Charts.framework; path = System/Library/Frameworks/Charts.framework; sourceTree = SDKROOT; };
 B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = generate_app_icons.py; sourceTree = "<group>"; };
+5467A018521B425AAEA10C59 /* FischbestandTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FischbestandTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+F890764E33DA46BB908CC251 /* VoiceParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParserTests.swift; sourceTree = "<group>"; };
+F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcherTests.swift; sourceTree = "<group>"; };
+B3C21CF397254470ACF7CA44 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +64,13 @@ isa = PBXFrameworksBuildPhase;
 buildActionMask = 2147483647;
 files = (
 97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */
+);
+runOnlyForDeploymentPostprocessing = 0;
+};
+0DAABFFAB41E4F8CB1A33EEE /* Frameworks */ = {
+isa = PBXFrameworksBuildPhase;
+buildActionMask = 2147483647;
+files = (
 );
 runOnlyForDeploymentPostprocessing = 0;
 };
@@ -74,18 +87,11 @@ B4C7B0602C53A60D00AA1D57 /* Scripts */
 );
 sourceTree = "<group>";
 };
-B4C7B0602C53A60D00AA1D57 /* Scripts */ = {
-isa = PBXGroup;
-children = (
-B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */
-);
-path = Scripts;
-sourceTree = "<group>";
-};
 5F15C8E72B1EFD1C009A2F11 /* Products */ = {
 isa = PBXGroup;
 children = (
-5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */
+5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */,
+5467A018521B425AAEA10C59 /* FischbestandTests.xctest */
 );
 name = Products;
 sourceTree = "<group>";
@@ -99,9 +105,28 @@ children = (
 5F15C8EB2B1EFD1C009A2F11 /* Services */,
 5F15C8EC2B1EFD1C009A2F11 /* Utilities */,
 5F15C8ED2B1EFD1C009A2F11 /* Views */,
-5F15C8EF2B1EFD1C009A2F11 /* Resources */
+5F15C8EF2B1EFD1C009A2F11 /* Resources */,
+F4C8AEB72EBC4D0B9466D979 /* FischbestandTests */
 );
 path = Fischbestand;
+sourceTree = "<group>";
+};
+B4C7B0602C53A60D00AA1D57 /* Scripts */ = {
+isa = PBXGroup;
+children = (
+B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */
+);
+path = Scripts;
+sourceTree = "<group>";
+};
+F4C8AEB72EBC4D0B9466D979 /* FischbestandTests */ = {
+isa = PBXGroup;
+children = (
+F890764E33DA46BB908CC251 /* VoiceParserTests.swift */,
+F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */,
+B3C21CF397254470ACF7CA44 /* Info.plist */
+);
+path = FischbestandTests;
 sourceTree = "<group>";
 };
 5F15C8E92B1EFD1C009A2F11 /* Managers */ = {
@@ -209,7 +234,42 @@ productName = Fischbestand;
 productReference = 5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */;
 productType = "com.apple.product-type.application";
 };
+B1824B8B1E6D4896A3B8E0E6 /* FischbestandTests */ = {
+isa = PBXNativeTarget;
+buildConfigurationList = 84FF54E8447949BB8722CDF0 /* Build configuration list for PBXNativeTarget "FischbestandTests" */;
+buildPhases = (
+1183CF581405498687EC33EF /* Sources */,
+0DAABFFAB41E4F8CB1A33EEE /* Frameworks */
+);
+buildRules = (
+);
+dependencies = (
+F166336D75B24BA497B33C77 /* PBXTargetDependency */
+);
+name = FischbestandTests;
+productName = FischbestandTests;
+productReference = 5467A018521B425AAEA10C59 /* FischbestandTests.xctest */;
+productType = "com.apple.product-type.bundle.unit-test";
+};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+685489E7575F449C9DFCF1B1 /* PBXContainerItemProxy */ = {
+isa = PBXContainerItemProxy;
+containerPortal = 5F15C8E52B1EFD1C009A2F11 /* Project object */;
+proxyType = 1;
+remoteGlobalIDString = 5F15C8F92B1EFD1C009A2F11;
+remoteInfo = Fischbestand;
+};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+F166336D75B24BA497B33C77 /* PBXTargetDependency */ = {
+isa = PBXTargetDependency;
+target = 5F15C8F92B1EFD1C009A2F11 /* Fischbestand */;
+targetProxy = 685489E7575F449C9DFCF1B1 /* PBXContainerItemProxy */;
+};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 5F15C8E52B1EFD1C009A2F11 /* Project object */ = {
@@ -220,6 +280,10 @@ LastUpgradeCheck = 1540;
 TargetAttributes = {
 5F15C8F92B1EFD1C009A2F11 = {
 CreatedOnToolsVersion = 15.4;
+};
+B1824B8B1E6D4896A3B8E0E6 = {
+CreatedOnToolsVersion = 15.4;
+TestTargetID = 5F15C8F92B1EFD1C009A2F11;
 };
 };
 };
@@ -235,9 +299,10 @@ mainGroup = 5F15C8E62B1EFD1C009A2F11;
 productRefGroup = 5F15C8E72B1EFD1C009A2F11 /* Products */;
 projectDirPath = "";
 projectRoot = "";
-targets = (
-5F15C8F92B1EFD1C009A2F11 /* Fischbestand */
-);
+ targets = (
+ 5F15C8F92B1EFD1C009A2F11 /* Fischbestand */,
+ B1824B8B1E6D4896A3B8E0E6 /* FischbestandTests */
+ );
 };
 /* End PBXProject section */
 
@@ -307,9 +372,18 @@ B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
 5F15C92B2B1EFD1C009A2F11 /* ExportView.swift in Sources */,
 5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */,
 5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */,
-        5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */,
-        95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */
-    );
+5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */,
+95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */
+);
+runOnlyForDeploymentPostprocessing = 0;
+};
+1183CF581405498687EC33EF /* Sources */ = {
+isa = PBXSourcesBuildPhase;
+buildActionMask = 2147483647;
+files = (
+6FE59C0EB17A4663967583FF /* VoiceParserTests.swift in Sources */,
+1E00E92C576A4C97B2F8C5D1 /* FuzzyMatcherTests.swift in Sources */
+);
 runOnlyForDeploymentPostprocessing = 0;
 };
 /* End PBXSourcesBuildPhase section */
@@ -465,6 +539,56 @@ TARGETED_DEVICE_FAMILY = "1,2";
 };
 name = Release;
 };
+77F68ABC8849448CBE27B122 /* Debug */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+BUNDLE_LOADER = "$(TEST_HOST)";
+CODE_SIGN_STYLE = Automatic;
+CURRENT_PROJECT_VERSION = 1;
+DEVELOPMENT_TEAM = XDLCKT3P87;
+GENERATE_INFOPLIST_FILE = NO;
+INFOPLIST_FILE = FischbestandTests/Info.plist;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+LD_RUNPATH_SEARCH_PATHS = (
+"$(inherited)",
+"@executable_path/Frameworks",
+"@loader_path/Frameworks"
+);
+PRODUCT_BUNDLE_IDENTIFIER = com.simonmaiwald.fischbestandTests;
+PRODUCT_NAME = "$(TARGET_NAME)";
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+SWIFT_VERSION = 5.0;
+TARGETED_DEVICE_FAMILY = "1,2";
+TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fischbestand.app/Fischbestand";
+};
+name = Debug;
+};
+06BAB35A46F7401FBA790843 /* Release */ = {
+isa = XCBuildConfiguration;
+buildSettings = {
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+BUNDLE_LOADER = "$(TEST_HOST)";
+CODE_SIGN_STYLE = Automatic;
+CURRENT_PROJECT_VERSION = 1;
+DEVELOPMENT_TEAM = XDLCKT3P87;
+GENERATE_INFOPLIST_FILE = NO;
+INFOPLIST_FILE = FischbestandTests/Info.plist;
+IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+LD_RUNPATH_SEARCH_PATHS = (
+"$(inherited)",
+"@executable_path/Frameworks",
+"@loader_path/Frameworks"
+);
+PRODUCT_BUNDLE_IDENTIFIER = com.simonmaiwald.fischbestandTests;
+PRODUCT_NAME = "$(TARGET_NAME)";
+SWIFT_OPTIMIZATION_LEVEL = "-O";
+SWIFT_VERSION = 5.0;
+TARGETED_DEVICE_FAMILY = "1,2";
+TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fischbestand.app/Fischbestand";
+};
+name = Release;
+};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -482,6 +606,15 @@ isa = XCConfigurationList;
 buildConfigurations = (
 5F15C9152B1EFD1C009A2F11 /* Debug */,
 5F15C9162B1EFD1C009A2F11 /* Release */
+);
+defaultConfigurationIsVisible = 0;
+defaultConfigurationName = Release;
+};
+84FF54E8447949BB8722CDF0 /* Build configuration list for PBXNativeTarget "FischbestandTests" */ = {
+isa = XCConfigurationList;
+buildConfigurations = (
+77F68ABC8849448CBE27B122 /* Debug */,
+06BAB35A46F7401FBA790843 /* Release */
 );
 defaultConfigurationIsVisible = 0;
 defaultConfigurationName = Release;

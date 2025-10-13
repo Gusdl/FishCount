@@ -2,6 +2,11 @@
 
 Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am Wasser. Die App setzt auf SwiftData (iOS 17+) und bietet eine Offline-first-Erfassung, Auswertung und Export der Daten.
 
+## Dokumentation
+
+- [Discovery brief](docs/Discovery.md)
+- [Text-to-speech enhancement strategies](docs/TextToSpeechEnhancements.md)
+
 ## Highlights
 
 - **Sprachaufnahme & Parser**: Deutscher Sprachsupport mit Voice-Kommandos ("Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische") inklusive `rückgängig` und Live-Feedback.
@@ -53,6 +58,11 @@ Fischbestand/
 2. Ziel-Schema `Fischbestand` auswählen.
 3. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
 4. Auf einem iOS 17 Gerät oder Simulator ausführen.
+
+## Tests
+
+- Logik rund um Sprachbefehle, Alias-Auflösung und Fuzzy Matching wird durch das neue `FischbestandTests`-Ziel abgedeckt.【F:Fischbestand/FischbestandTests/VoiceParserTests.swift†L1-L52】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
+- In Xcode das Schema `FischbestandTests` wählen und `⌘U` drücken oder per CLI `xcodebuild test -scheme Fischbestand -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:FischbestandTests` ausführen, um die Unit-Tests zu starten.
 
 ## Continuous Integration
 
