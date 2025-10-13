@@ -54,6 +54,11 @@ Fischbestand/
 3. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
 4. Auf einem iOS 17 Gerät oder Simulator ausführen.
 
+## Tests
+
+- Logik rund um Sprachbefehle, Alias-Auflösung und Fuzzy Matching wird durch das neue `FischbestandTests`-Ziel abgedeckt.【F:Fischbestand/FischbestandTests/VoiceParserTests.swift†L1-L52】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
+- In Xcode das Schema `FischbestandTests` wählen und `⌘U` drücken oder per CLI `xcodebuild test -scheme Fischbestand -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:FischbestandTests` ausführen, um die Unit-Tests zu starten.
+
 ## Continuous Integration
 
 Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt auf `macos-14` mit Xcode 15.4. Der Job führt `xcodebuild` gegen das geteilte Schema aus und deaktiviert Codesigning, so dass ein schneller Plausibilitäts-Check für Pull Requests entsteht.

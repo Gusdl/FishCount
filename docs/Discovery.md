@@ -28,7 +28,7 @@
 
 ### Technical & Data
 - **Offline scope stops at device**: There is no sync, backup, or cross-device access despite model support for metadata; consider CloudKit or simple file export automation.【F:Fischbestand/Models/Survey.swift†L8-L18】
-- **Testing & automation**: Project lacks unit/UI tests around parsing, speech, and exports—key for reliability in noisy field conditions.
+- **Testing & automation**: Neue Unit-Tests decken Parser- und Fuzzy-Matching-Kantenfälle ab; Speech- und Exportpfade bleiben weiterhin ungetestet.【F:Fischbestand/FischbestandTests/VoiceParserTests.swift†L1-L52】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
 - **Speech robustness**: Parser relies on a static species list and regex heuristics; background noise, pluralization, and measurement variants beyond centimeters could cause misses.【F:Fischbestand/Services/VoiceParser.swift†L44-L140】
 - **Accessibility**: Voice-first approach is strong, but manual flows lack Dynamic Type scaling, VoiceOver hints, or haptic confirmations.
 
