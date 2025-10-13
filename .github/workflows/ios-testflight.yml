@@ -176,7 +176,7 @@ jobs:
       #     set -euxo pipefail
       #     xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
-      #       IPHONEOS_DEPLOYMENT_TARGET=16.0 build
+      #       IPHONEOS_DEPLOYMENT_TARGET=17.0 build
 
       - name: Archive (device, Release, manual signing, with log)
         run: |
@@ -193,7 +193,7 @@ jobs:
             PROVISIONING_PROFILE="$PP_UUID" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
-            IPHONEOS_DEPLOYMENT_TARGET=16.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
             SWIFT_VERSION=5.10 \
             | tee xcodebuild.log
 
@@ -215,6 +215,16 @@ jobs:
           <plist version="1.0"><dict>
             <key>method</key><string>app-store</string>
             <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <!-- Name ODER UUID des Profils ist erlaubt. Wir nehmen den Namen -->
+              <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
+              <!-- Falls du lieber die UUID nutzen willst:
+              <key>${BUNDLE_ID}</key><string>${PP_UUID}</string>
+              -->
+            </dict>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
           </dict></plist>
@@ -243,6 +253,7 @@ jobs:
           FASTLANE_DISABLE_COLORS: 1
           FASTLANE_SKIP_UPDATE_CHECK: 1
           FASTLANE_OPT_OUT_USAGE: 1
+          FASTLANE_DISABLE_PROMPTS: 1      # statt --non-interactive
         run: |
           set -euxo pipefail
           mkdir -p fastlane
@@ -262,4 +273,4 @@ jobs:
           end
           RUBY
           test -f "build/${SCHEME}.ipa"
-          fastlane ios beta --non-interactive
+          fastlane ios beta
