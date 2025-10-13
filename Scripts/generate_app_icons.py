@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate placeholder app icon PNGs in the asset catalog.
 
-The script reads the existing Contents.json so that it only writes the filenames
-referenced by the catalog. Each image receives a simple two-tone gradient so the
-icons are visually distinct while remaining obviously placeholder artwork.
+The script reads the existing ``Contents.json`` so that it only writes the
+filenames referenced by the catalog. Each image receives a simple two-tone
+gradient so the icons are visually distinct while remaining obviously
+placeholder artwork.
 """
 from __future__ import annotations
 
