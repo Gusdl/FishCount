@@ -193,12 +193,13 @@ sourceTree = "<group>";
 5F15C8F92B1EFD1C009A2F11 /* Fischbestand */ = {
 isa = PBXNativeTarget;
 buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list for PBXNativeTarget "Fischbestand" */;
-buildPhases = (
-5F15C8FB2B1EFD1C009A2F11 /* Sources */,
-5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
-B4C7B0622C53A60D00AA1D57 /* Generate App Icons */,
-5F15C8FD2B1EFD1C009A2F11 /* Resources */
-);
+    buildPhases = (
+        5F15C8FB2B1EFD1C009A2F11 /* Sources */,
+        5F15C8FC2B1EFD1C009A2F11 /* Frameworks */,
+        B4D5B0622C7FDB3A00AA1D57 /* Update Build Number */,
+        B4C7B0622C53A60D00AA1D57 /* Generate App Icons */,
+        5F15C8FD2B1EFD1C009A2F11 /* Resources */
+    );
 buildRules = (
 );
 dependencies = (
@@ -252,11 +253,26 @@ runOnlyForDeploymentPostprocessing = 0;
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+B4D5B0622C7FDB3A00AA1D57 /* Update Build Number */ = {
+    isa = PBXShellScriptBuildPhase;
+    alwaysOutOfDate = 1;
+    buildActionMask = 2147483647;
+    files = (
+    );
+    inputPaths = (
+    );
+    name = "Update Build Number";
+    outputPaths = (
+    );
+    runOnlyForDeploymentPostprocessing = 0;
+    shellPath = /bin/sh;
+    shellScript = "set -euo pipefail\nBUILD_NUMBER=$(date -u +%Y%m%d%H%M%S)\necho \"Updating build number to $BUILD_NUMBER\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+};
 B4C7B0622C53A60D00AA1D57 /* Generate App Icons */ = {
-isa = PBXShellScriptBuildPhase;
-alwaysOutOfDate = 1;
-buildActionMask = 2147483647;
-files = (
+    isa = PBXShellScriptBuildPhase;
+    alwaysOutOfDate = 1;
+    buildActionMask = 2147483647;
+    files = (
 );
 inputPaths = (
 "${SRCROOT}/Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
