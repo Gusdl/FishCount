@@ -2,6 +2,11 @@
 
 Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am Wasser. Die App setzt auf SwiftData (iOS 17+) und bietet eine Offline-first-Erfassung, Auswertung und Export der Daten.
 
+## Dokumentation
+
+- [Discovery brief](docs/Discovery.md)
+- [Text-to-speech enhancement strategies](docs/TextToSpeechEnhancements.md)
+
 ## Highlights
 
 - **Sprachaufnahme & Parser**: Deutscher Sprachsupport mit Voice-Kommandos ("Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische") inklusive `rückgängig` und Live-Feedback.
