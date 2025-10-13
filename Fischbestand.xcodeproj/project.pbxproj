@@ -266,7 +266,7 @@ B4D5B0622C7FDB3A00AA1D57 /* Update Build Number */ = {
     );
     runOnlyForDeploymentPostprocessing = 0;
     shellPath = /bin/sh;
-    shellScript = "set -euo pipefail\nBUILD_NUMBER=$(date +%Y%m%d%H%M)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+    shellScript = "set -euo pipefail\nBUILD_NUMBER=$(date +%Y%m%d%H%M%S)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
 };
 B4C7B0622C53A60D00AA1D57 /* Generate App Icons */ = {
     isa = PBXShellScriptBuildPhase;
