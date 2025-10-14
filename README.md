@@ -5,7 +5,7 @@ Ein schlankes SwiftUI-MVP für manuelle und sprachgesteuerte Fischzählungen am 
 ## Dokumentation
 
 - [Discovery brief](docs/Discovery.md)
-- [Text-to-speech enhancement strategies](docs/TextToSpeechEnhancements.md)
+- [Speech-to-text robustness strategies](docs/SpeechToTextEnhancements.md)
 
 ## Highlights
 
