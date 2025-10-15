@@ -4,6 +4,8 @@ import Observation
 import Charts
 
 struct SurveyDetailView: View {
+    @Environment(\.modelContext) private var context
+    @EnvironmentObject private var store: SurveyStore
     @Bindable var survey: Survey
 
     @State private var selection: DetailSection = .capture
@@ -30,7 +32,7 @@ struct SurveyDetailView: View {
                         .tag(DetailSection.capture)
                     AnalysisContainerView(survey: survey)
                         .tag(DetailSection.analysis)
-                    ExportView(survey: survey)
+                    ExportView()
                         .tag(DetailSection.export)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -39,6 +41,9 @@ struct SurveyDetailView: View {
         }
         .navigationTitle(survey.title)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            store.bind(to: survey, context: context)
+        }
     }
 
     enum DetailSection: CaseIterable {

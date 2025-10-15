@@ -3,6 +3,9 @@ import SwiftData
 
 @main
 struct FischbestandApp: App {
+    @StateObject private var book = SpeciesBook()
+    @StateObject private var store = SurveyStore()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Survey.self,
@@ -20,6 +23,8 @@ struct FischbestandApp: App {
     var body: some Scene {
         WindowGroup {
             SurveyListView()
+                .environmentObject(book)
+                .environmentObject(store)
                 .modelContainer(sharedModelContainer)
         }
     }

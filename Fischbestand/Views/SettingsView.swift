@@ -9,6 +9,9 @@ struct SettingsView: View {
                     NavigationLink("Größenklassen verwalten") {
                         SizeClassManagementView()
                     }
+                    NavigationLink("Artenbuch bearbeiten") {
+                        SpeciesBookView()
+                    }
                 }
 
                 Section(header: Text("Über")) {

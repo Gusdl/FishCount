@@ -23,11 +23,13 @@ Fischbestand/
 ├── FischbestandApp.swift       // App-Einstieg & SwiftData-Konfiguration
 ├── Managers/
 │   ├── LocationManager.swift   // CLLocationManager + Reverse Geocoding
-│   └── SpeechManager.swift     // Steuerung der Spracherkennung (de-DE)
+│   ├── SpeechManager.swift     // Steuerung der Spracherkennung (de-DE)
+│   └── SurveyStore.swift       // ObservableObject für aktive Surveys
 ├── Models/
+│   ├── SpeciesBook.swift       // Persistenter Artenkatalog mit Aliassen
 │   └── Survey.swift            // SwiftData-Modelle (Survey, CountEntry, SizeClassPreset)
 ├── Services/
-│   └── VoiceParser.swift       // Befehlserkennung & Parsing
+│   └── UtteranceParser.swift   // Parser für gesprochene Größen & Mengen
 ├── Utilities/
 │   ├── Exporters.swift         // CSV-/JSON-Erzeugung & Temp-Dateien
 │   ├── ShareSheet.swift        // Wrapper für das iOS Share-Sheet
@@ -39,6 +41,7 @@ Fischbestand/
     │   └── SurveyBreakdownChart.swift
     ├── ExportView.swift        // Share-Sheet-Export
     ├── SettingsView.swift      // Größenklassen-Verwaltung & App-Infos
+    ├── SpeciesBookView.swift   // UI zum Pflegen des Artenbuchs
     ├── SurveyDetailView.swift  // TabView aus Erfassung, Analyse, Export
     └── SurveyListView.swift    // NavigationStack + Survey-Liste
 ```
@@ -61,7 +64,7 @@ Fischbestand/
 
 ## Tests
 
-- Logik rund um Sprachbefehle, Alias-Auflösung und Fuzzy Matching wird durch das neue `FischbestandTests`-Ziel abgedeckt.【F:Fischbestand/FischbestandTests/VoiceParserTests.swift†L1-L52】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
+- Logik rund um Sprachbefehle, Alias-Auflösung und Fuzzy Matching wird durch das `FischbestandTests`-Ziel abgedeckt.【F:Fischbestand/FischbestandTests/UtteranceParserTests.swift†L1-L19】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
 - In Xcode das Schema `FischbestandTests` wählen und `⌘U` drücken oder per CLI `xcodebuild test -scheme Fischbestand -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:FischbestandTests` ausführen, um die Unit-Tests zu starten.
 
 ## Continuous Integration

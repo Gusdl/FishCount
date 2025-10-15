@@ -6,15 +6,14 @@ import CoreLocation
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var book: SpeciesBook
+    @EnvironmentObject private var store: SurveyStore
     @Query(sort: \SizeClassPreset.label) private var sizeClassPresets: [SizeClassPreset]
 
     @Bindable var survey: Survey
 
-    @StateObject private var speechManager = SpeechManager()
+    @StateObject private var speech = SpeechManager()
     @StateObject private var locationManager = LocationManager()
-    @State private var parser = VoiceParser(speciesList: SpeciesCatalog.allSpecies,
-                                           speciesAliases: SpeciesCatalog.aliases)
-    @State private var liveTranscript: String = ""
     @State private var infoBanner: String?
     @State private var showManualInput = false
     @State private var selectedSizeClassID: PersistentIdentifier?
@@ -28,17 +27,6 @@ struct CaptureView: View {
     @State private var isShowingVoiceHelp = false
 
     @FocusState private var isWeatherFieldFocused: Bool
-
-    private let numberWordHints: [String] = [
-        "null", "eins", "eine", "einen", "zwei", "drei", "vier", "fünf", "sechs",
-        "sieben", "acht", "neun", "zehn", "elf", "zwölf", "dreizehn", "vierzehn",
-        "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig"
-    ]
-
-    private let contextVocabulary: [String] = [
-        "bis", "bis zu", "Zentimeter", "zentimeter", "Zentimetern", "cm", "Zentimeterbereich",
-        "Stück", "Stueck", "Anzahl", "Kommentar", "Kommentare"
-    ]
 
     var body: some View {
         ZStack {
@@ -176,6 +164,15 @@ struct CaptureView: View {
         .onChange(of: locationManager.errorMessage) { message in
             if let message { locationError = message }
         }
+        .onAppear {
+            configureSpeechHandler()
+        }
+        .onChange(of: book.items) { _ in
+            configureSpeechHandler()
+        }
+        .onDisappear {
+            speech.stop()
+        }
     }
 
     private var header: some View {
@@ -274,7 +271,7 @@ struct CaptureView: View {
     private var transcriptCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Label("Sprachaufnahme", systemImage: speechManager.isRecording ? "waveform" : "waveform.circle")
+                Label("Sprachaufnahme", systemImage: speech.isRecording ? "waveform" : "waveform.circle")
                     .font(.headline)
                     .foregroundStyle(AppTheme.mutedText)
 
@@ -292,12 +289,12 @@ struct CaptureView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text(liveTranscript.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : liveTranscript)
+            Text(speech.liveText.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : speech.liveText)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(alignment: .topTrailing) {
-                    if speechManager.isRecording {
+                    if speech.isRecording {
                         RecordingIndicator()
                             .padding(12)
                     }
@@ -315,24 +312,19 @@ struct CaptureView: View {
     private var actionButtons: some View {
         VStack(spacing: 12) {
             Button {
-                if speechManager.isRecording {
-                    speechManager.stop()
+                if speech.isRecording {
+                    speech.stop()
                 } else {
-                    Task {
-                        do {
-                            liveTranscript = ""
-                            try await speechManager.start(hints: speechHints) { text in
-                                liveTranscript = text
-                                handleVoice(text)
-                            }
-                        } catch {
-                            infoBanner = "Spracherkennung nicht verfügbar. Prüfe Berechtigungen."
-                        }
+                    do {
+                        infoBanner = nil
+                        try speech.start(contextualStrings: speechContextStrings)
+                    } catch {
+                        infoBanner = "Spracherkennung nicht verfügbar. Prüfe Berechtigungen."
                     }
                 }
             } label: {
-                Label(speechManager.isRecording ? "Aufnahme stoppen" : "Aufnahme starten",
-                      systemImage: speechManager.isRecording ? "stop.fill" : "mic.fill")
+                Label(speech.isRecording ? "Aufnahme stoppen" : "Aufnahme starten",
+                      systemImage: speech.isRecording ? "stop.fill" : "mic.fill")
                     .font(.title3.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -373,7 +365,7 @@ struct CaptureView: View {
     }
 
     private var recordingButtonBackground: AnyShapeStyle {
-        if speechManager.isRecording {
+        if speech.isRecording {
             return AnyShapeStyle(Color.red.gradient)
         } else {
             return AnyShapeStyle(AppTheme.buttonGradient)
@@ -392,7 +384,7 @@ struct CaptureView: View {
                 HStack(spacing: 12) {
                     ForEach(SpeciesCatalog.featuredSpecies, id: \.self) { species in
                         Button {
-                            addEntry(ParsedEntry(species: species, sizeClass: currentSizeClassLabel, count: 1, comment: nil))
+                            addEntry(ParsedEntry(species: species, sizeLabel: currentSizeClassLabel, count: 1, note: nil))
                         } label: {
                             Text(species)
                                 .padding(.horizontal, 16)
@@ -461,27 +453,15 @@ struct CaptureView: View {
         .glassCard()
     }
 
-    private func handleVoice(_ text: String) {
-        let command = parser.parse(text: text)
-        switch command {
-        case .undo:
-            undoLastEntry()
-        case .add(let entry):
-            addEntry(entry)
-        case .none:
-            break
-        }
-    }
-
     private func addEntry(_ parsed: ParsedEntry) {
+        guard store.currentSurvey != nil else { return }
+        let canonical = book.canonicalName(for: parsed.species)
         withAnimation {
-            let entry = CountEntry(species: parsed.species,
-                                   sizeClass: parsed.sizeClass,
-                                   count: parsed.count,
-                                   comment: parsed.comment)
-            survey.entries.append(entry)
-            infoBanner = "Erfasst: \(parsed.species) – \(parsed.sizeClass) – \(parsed.count)x"
-            try? context.save()
+            store.addEntry(species: canonical,
+                           sizeLabel: parsed.sizeLabel,
+                           count: parsed.count,
+                           note: parsed.note)
+            infoBanner = "Erfasst: \(canonical) – \(parsed.sizeLabel) – \(parsed.count)x"
         }
     }
 
@@ -491,16 +471,36 @@ struct CaptureView: View {
             return
         }
         withAnimation {
-            context.delete(last)
+            store.remove(last)
             infoBanner = "Letzten Eintrag gelöscht."
-            try? context.save()
         }
     }
 
     private func delete(_ entry: CountEntry) {
         withAnimation {
-            context.delete(entry)
-            try? context.save()
+            store.remove(entry)
+        }
+    }
+
+    private func configureSpeechHandler() {
+        speech.onUtterance = { utterance in
+            processUtterance(utterance)
+        }
+    }
+
+    private func processUtterance(_ utterance: String) {
+        let catalog = book.namesAndAliases()
+        if let parsed = UtteranceParser.parse(utterance, speciesCatalog: catalog) {
+            addEntry(parsed)
+        } else {
+            guard store.currentSurvey != nil else { return }
+            withAnimation {
+                store.addEntry(species: "Unbestimmt",
+                               sizeLabel: "bis 5 cm",
+                               count: 1,
+                               note: utterance)
+                infoBanner = "Nicht erkannt, als Notiz gespeichert."
+            }
         }
     }
 
@@ -529,12 +529,9 @@ struct CaptureView: View {
         return sizeClassPresets.first?.label ?? "bis 5 cm"
     }
 
-    private var speechHints: [String] {
-        var hints = Set(SpeciesCatalog.searchableNames)
-        hints.formUnion(contextVocabulary)
-        hints.formUnion(numberWordHints)
-        hints.formUnion((0...50).map { String($0) })
-        return Array(hints)
+    private var speechContextStrings: [String] {
+        let extras = ["bis", "cm", "zentimeter", "stück", "jungfische"] + Array(UtteranceParser.numberWords.keys)
+        return Array(Set(book.namesAndAliases() + extras))
     }
 
     private struct LocationStatusDescriptor {

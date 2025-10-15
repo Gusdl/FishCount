@@ -42,8 +42,8 @@ compatible hardware.
 
 ## 4. Harden the Language Model Against Confusion
 
-`VoiceParser` recognises commands through regex-based slot filling and a fixed
-species catalogue.【F:Fischbestand/Services/VoiceParser.swift†L44-L140】 Improve
+`UtteranceParser` erkennt Satzfragmente über Wortlisten und Levenshtein-Abgleich
+gegen den Artenkatalog.【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】 Improve
 its resilience by:
 
 - Extending the species alias list with common mis-hearings (e.g. "Barsch" ↔
