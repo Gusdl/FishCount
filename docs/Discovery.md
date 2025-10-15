@@ -4,7 +4,7 @@
 - **Vision**: A lightweight SwiftUI MVP that enables anglers to capture fish counts hands-free or manually, store them offline with SwiftData, and export results for further processing.【F:README.md†L3-L12】
 - **Primary users**: Field biologists, angling clubs, and citizen science volunteers who need structured, fast, and reliable catch logging in environments with poor connectivity.
 - **Core value props**:
-  - Voice-driven logging with German commands, undo, and contextual hints reduces friction when handling gear by the water.【F:Fischbestand/Views/CaptureView.swift†L175-L233】【F:Fischbestand/Services/VoiceParser.swift†L44-L140】
+  - Voice-driven logging with German commands, undo, and contextual hints reduces friction when handling gear by the water.【F:Fischbestand/Views/CaptureView.swift†L175-L342】【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】
   - Manual quick-entry UI, size-class presets, and featured species speed up repeat recording tasks.【F:Fischbestand/Views/CaptureView.swift†L243-L322】【F:Fischbestand/Utilities/SpeciesCatalog.swift†L3-L29】
   - Integrated analysis, export, and location metadata keep workflows in one app and ready for sharing.【F:Fischbestand/Views/SurveyDetailView.swift†L28-L117】【F:Fischbestand/Views/ExportView.swift†L21-L85】【F:Fischbestand/Managers/LocationManager.swift†L5-L93】
 
@@ -28,8 +28,8 @@
 
 ### Technical & Data
 - **Offline scope stops at device**: There is no sync, backup, or cross-device access despite model support for metadata; consider CloudKit or simple file export automation.【F:Fischbestand/Models/Survey.swift†L8-L18】
-- **Testing & automation**: Neue Unit-Tests decken Parser- und Fuzzy-Matching-Kantenfälle ab; Speech- und Exportpfade bleiben weiterhin ungetestet.【F:Fischbestand/FischbestandTests/VoiceParserTests.swift†L1-L52】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
-- **Speech robustness**: Parser relies on a static species list and regex heuristics; background noise, pluralization, and measurement variants beyond centimeters could cause misses.【F:Fischbestand/Services/VoiceParser.swift†L44-L140】
+- **Testing & automation**: Neue Unit-Tests decken Parser- und Fuzzy-Matching-Kantenfälle ab; Speech- und Exportpfade bleiben weiterhin ungetestet.【F:Fischbestand/FischbestandTests/UtteranceParserTests.swift†L1-L19】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
+- **Speech robustness**: Parser relies on heuristic extraction and limited measurement vocab; broader units or noisy variants may still slip through.【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】
 - **Accessibility**: Voice-first approach is strong, but manual flows lack Dynamic Type scaling, VoiceOver hints, or haptic confirmations.
 
 ### Business & Monetization

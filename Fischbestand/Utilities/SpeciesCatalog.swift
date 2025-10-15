@@ -1,14 +1,16 @@
 import Foundation
 
 enum SpeciesCatalog {
+    static let defaultSpecies: [String] = [
+        "Aal", "Äsche", "Bachforelle", "Barsch", "Döbel", "Forelle", "Hecht", "Karpfen",
+        "Rotauge", "Rotfeder", "Saibling", "Schleie", "Wels", "Zander"
+    ].sorted()
+
     static let featuredSpecies: [String] = [
         "Barsch", "Hecht", "Karpfen", "Zander", "Rotfeder"
     ]
 
-    static let allSpecies: [String] = [
-        "Aal", "Äsche", "Bachforelle", "Barsch", "Döbel", "Forelle", "Hecht", "Karpfen",
-        "Rotauge", "Rotfeder", "Saibling", "Schleie", "Wels", "Zander"
-    ].sorted()
+    static var allSpecies: [String] { defaultSpecies }
 
     static let aliases: [String: [String]] = [
         "Barsch": ["Flussbarsch"],

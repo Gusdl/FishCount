@@ -10,7 +10,12 @@ objects = {
 5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9012B1EFD1C009A2F11 /* FischbestandApp.swift */; };
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */; };
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9032B1EFD1C009A2F11 /* Survey.swift */; };
-5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */; };
+/* Added new build files */
+B4D9F0012C6B2E7A00AA1234 /* UtteranceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */; };
+B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */; };
+B4D9F0032C6B2E7A00AA1234 /* SpeciesBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */; };
+B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */; };
+B4D9F0062C6B2E7A00AA1234 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */; };
 5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9052B1EFD1C009A2F11 /* Exporters.swift */; };
 5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */; };
 5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */; };
@@ -26,7 +31,7 @@ objects = {
 B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */; };
 97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7222E99FAC51455284376B4F /* Charts.framework */; };
 5F15C92F2B1EFD1C009A2F11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F15C8F02B1EFD1C009A2F11 /* Assets.xcassets */; };
-6FE59C0EB17A4663967583FF /* VoiceParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F890764E33DA46BB908CC251 /* VoiceParserTests.swift */; };
+B4D9F0052C6B2E7A00AA1234 /* UtteranceParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF62C6B2E2E00AA1234 /* UtteranceParserTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,7 +42,10 @@ B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */ = {isa = PBXBuil
 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
 B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 5F15C9032B1EFD1C009A2F11 /* Survey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Survey.swift; sourceTree = "<group>"; };
-5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
+B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtteranceParser.swift; sourceTree = "<group>"; };
+B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBook.swift; sourceTree = "<group>"; };
+B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBookView.swift; sourceTree = "<group>"; };
+B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyStore.swift; sourceTree = "<group>"; };
 5F15C9052B1EFD1C009A2F11 /* Exporters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exporters.swift; sourceTree = "<group>"; };
 5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesCatalog.swift; sourceTree = "<group>"; };
@@ -53,19 +61,20 @@ A450CABBD3904B308779322B /* FuzzyMatcher.swift */ = {isa = PBXFileReference; las
 7222E99FAC51455284376B4F /* Charts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Charts.framework; path = System/Library/Frameworks/Charts.framework; sourceTree = SDKROOT; };
 B4C7B0612C53A60D00AA1D57 /* generate_app_icons.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = generate_app_icons.py; sourceTree = "<group>"; };
 5467A018521B425AAEA10C59 /* FischbestandTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FischbestandTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-F890764E33DA46BB908CC251 /* VoiceParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParserTests.swift; sourceTree = "<group>"; };
+B4D9EFF62C6B2E2E00AA1234 /* UtteranceParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtteranceParserTests.swift; sourceTree = "<group>"; };
 F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcherTests.swift; sourceTree = "<group>"; };
 B3C21CF397254470ACF7CA44 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 5F15C8FC2B1EFD1C009A2F11 /* Frameworks */ = {
-isa = PBXFrameworksBuildPhase;
-buildActionMask = 2147483647;
-files = (
-97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */
-);
-runOnlyForDeploymentPostprocessing = 0;
+    isa = PBXFrameworksBuildPhase;
+    buildActionMask = 2147483647;
+    files = (
+        97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */,
+        B4D9F0062C6B2E7A00AA1234 /* ZIPFoundation in Frameworks */
+    );
+    runOnlyForDeploymentPostprocessing = 0;
 };
 0DAABFFAB41E4F8CB1A33EEE /* Frameworks */ = {
 isa = PBXFrameworksBuildPhase;
@@ -120,42 +129,44 @@ path = Scripts;
 sourceTree = "<group>";
 };
 F4C8AEB72EBC4D0B9466D979 /* FischbestandTests */ = {
-isa = PBXGroup;
-children = (
-F890764E33DA46BB908CC251 /* VoiceParserTests.swift */,
-F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */,
-B3C21CF397254470ACF7CA44 /* Info.plist */
-);
-path = FischbestandTests;
+    isa = PBXGroup;
+    children = (
+        B4D9EFF62C6B2E2E00AA1234 /* UtteranceParserTests.swift */,
+        F74B8A98FB3E469A982D42DB /* FuzzyMatcherTests.swift */,
+        B3C21CF397254470ACF7CA44 /* Info.plist */
+    );
+    path = FischbestandTests;
 sourceTree = "<group>";
 };
 5F15C8E92B1EFD1C009A2F11 /* Managers */ = {
-isa = PBXGroup;
-children = (
-B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */,
-5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */
-);
-name = Managers;
-path = Managers;
-sourceTree = "<group>";
+    isa = PBXGroup;
+    children = (
+        B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */,
+        5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */,
+        B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */
+    );
+    name = Managers;
+    path = Managers;
+    sourceTree = "<group>";
 };
 5F15C8EA2B1EFD1C009A2F11 /* Models */ = {
-isa = PBXGroup;
-children = (
-5F15C9032B1EFD1C009A2F11 /* Survey.swift */
-);
-name = Models;
-path = Models;
-sourceTree = "<group>";
+    isa = PBXGroup;
+    children = (
+        5F15C9032B1EFD1C009A2F11 /* Survey.swift */,
+        B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */
+    );
+    name = Models;
+    path = Models;
+    sourceTree = "<group>";
 };
 5F15C8EB2B1EFD1C009A2F11 /* Services */ = {
-isa = PBXGroup;
-children = (
-5F15C9042B1EFD1C009A2F11 /* VoiceParser.swift */
-);
-name = Services;
-path = Services;
-sourceTree = "<group>";
+    isa = PBXGroup;
+    children = (
+        B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */
+    );
+    name = Services;
+    path = Services;
+    sourceTree = "<group>";
 };
 5F15C8EC2B1EFD1C009A2F11 /* Utilities */ = {
 isa = PBXGroup;
@@ -179,16 +190,17 @@ name = Frameworks;
 sourceTree = "<group>";
 };
 5F15C8ED2B1EFD1C009A2F11 /* Views */ = {
-isa = PBXGroup;
-children = (
-5F15C9092B1EFD1C009A2F11 /* CaptureView.swift */,
-5F15C90C2B1EFD1C009A2F11 /* ExportView.swift */,
-5F15C90D2B1EFD1C009A2F11 /* SettingsView.swift */,
-5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */,
-5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */,
-5F15C8EE2B1EFD1C009A2F11 /* Components */
-);
-name = Views;
+    isa = PBXGroup;
+    children = (
+        5F15C9092B1EFD1C009A2F11 /* CaptureView.swift */,
+        5F15C90C2B1EFD1C009A2F11 /* ExportView.swift */,
+        5F15C90D2B1EFD1C009A2F11 /* SettingsView.swift */,
+        B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */,
+        5F15C90E2B1EFD1C009A2F11 /* SurveyDetailView.swift */,
+        5F15C90F2B1EFD1C009A2F11 /* SurveyListView.swift */,
+        5F15C8EE2B1EFD1C009A2F11 /* Components */
+    );
+    name = Views;
 path = Views;
 sourceTree = "<group>";
 };
@@ -225,12 +237,15 @@ buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list fo
         B4C7B0622C53A60D00AA1D57 /* Generate App Icons */,
         5F15C8FD2B1EFD1C009A2F11 /* Resources */
     );
-buildRules = (
-);
-dependencies = (
-);
-name = Fischbestand;
-productName = Fischbestand;
+    buildRules = (
+    );
+    dependencies = (
+    );
+    packageProductDependencies = (
+        B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */
+    );
+    name = Fischbestand;
+    productName = Fischbestand;
 productReference = 5F15C8F32B1EFD1C009A2F11 /* Fischbestand.app */;
 productType = "com.apple.product-type.application";
 };
@@ -295,14 +310,17 @@ knownRegions = (
 en,
 Base
 );
-mainGroup = 5F15C8E62B1EFD1C009A2F11;
-productRefGroup = 5F15C8E72B1EFD1C009A2F11 /* Products */;
-projectDirPath = "";
-projectRoot = "";
- targets = (
- 5F15C8F92B1EFD1C009A2F11 /* Fischbestand */,
- B1824B8B1E6D4896A3B8E0E6 /* FischbestandTests */
- );
+    mainGroup = 5F15C8E62B1EFD1C009A2F11;
+    productRefGroup = 5F15C8E72B1EFD1C009A2F11 /* Products */;
+    projectDirPath = "";
+    projectRoot = "";
+    packageReferences = (
+        B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */
+    );
+    targets = (
+        5F15C8F92B1EFD1C009A2F11 /* Fischbestand */,
+        B1824B8B1E6D4896A3B8E0E6 /* FischbestandTests */
+    );
 };
 /* End PBXProject section */
 
@@ -361,32 +379,54 @@ files = (
 B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
-5F15C9232B1EFD1C009A2F11 /* VoiceParser.swift in Sources */,
-5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */,
-5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */,
-5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */,
-5F15C9272B1EFD1C009A2F11 /* AppTheme.swift in Sources */,
-5F15C9282B1EFD1C009A2F11 /* CaptureView.swift in Sources */,
-5F15C9292B1EFD1C009A2F11 /* ManualEntrySheet.swift in Sources */,
-5F15C92A2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift in Sources */,
-5F15C92B2B1EFD1C009A2F11 /* ExportView.swift in Sources */,
-5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */,
-5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */,
+        B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */,
+        B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */,
+        B4D9F0012C6B2E7A00AA1234 /* UtteranceParser.swift in Sources */,
+        5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */,
+        5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */,
+        5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */,
+        5F15C9272B1EFD1C009A2F11 /* AppTheme.swift in Sources */,
+        5F15C9282B1EFD1C009A2F11 /* CaptureView.swift in Sources */,
+        5F15C9292B1EFD1C009A2F11 /* ManualEntrySheet.swift in Sources */,
+        5F15C92A2B1EFD1C009A2F11 /* SurveyBreakdownChart.swift in Sources */,
+        5F15C92B2B1EFD1C009A2F11 /* ExportView.swift in Sources */,
+        5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */,
+        B4D9F0032C6B2E7A00AA1234 /* SpeciesBookView.swift in Sources */,
+        5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */,
 5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */,
 95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */
 );
 runOnlyForDeploymentPostprocessing = 0;
 };
 1183CF581405498687EC33EF /* Sources */ = {
-isa = PBXSourcesBuildPhase;
-buildActionMask = 2147483647;
-files = (
-6FE59C0EB17A4663967583FF /* VoiceParserTests.swift in Sources */,
-1E00E92C576A4C97B2F8C5D1 /* FuzzyMatcherTests.swift in Sources */
-);
-runOnlyForDeploymentPostprocessing = 0;
+    isa = PBXSourcesBuildPhase;
+    buildActionMask = 2147483647;
+    files = (
+        B4D9F0052C6B2E7A00AA1234 /* UtteranceParserTests.swift in Sources */,
+        1E00E92C576A4C97B2F8C5D1 /* FuzzyMatcherTests.swift in Sources */
+    );
+    runOnlyForDeploymentPostprocessing = 0;
 };
 /* End PBXSourcesBuildPhase section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+    isa = XCRemoteSwiftPackageReference;
+    repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+    requirement = {
+        kind = upToNextMajorVersion;
+        minimumVersion = 0.9.0;
+    };
+};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */ = {
+    isa = XCSwiftPackageProductDependency;
+    package = B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+    productName = ZIPFoundation;
+};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 5F15C9122B1EFD1C009A2F11 /* Debug */ = {

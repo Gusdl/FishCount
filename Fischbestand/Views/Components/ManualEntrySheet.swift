@@ -2,15 +2,13 @@ import SwiftUI
 import SwiftData
 
 struct ManualEntrySheet: View {
+    @EnvironmentObject private var book: SpeciesBook
     @Binding var manualSpecies: String
     @Binding var manualCount: Int
     @Binding var manualComment: String
     let sizeClasses: [SizeClassPreset]
     @Binding var selectedSizeClassID: PersistentIdentifier?
     var onSave: (ParsedEntry) -> Void
-
-    private let parser = VoiceParser(speciesList: SpeciesCatalog.allSpecies,
-                                     speciesAliases: SpeciesCatalog.aliases)
 
     var body: some View {
         NavigationStack {
@@ -58,12 +56,14 @@ struct ManualEntrySheet: View {
                             return preset.persistentModelID == selectedSizeClassID
                         }?.label ?? "bis 5 cm"
                         let trimmedSpecies = manualSpecies.trimmingCharacters(in: .whitespacesAndNewlines)
-                        let canonicalSpecies = parser.canonicalSpecies(from: trimmedSpecies)
+                        let canonicalSpecies = book.canonicalName(for: trimmedSpecies)
+                        let note = manualComment.trimmingCharacters(in: .whitespaces)
+                        let comment = note.isEmpty ? nil : note
                         let entry = ParsedEntry(
                             species: canonicalSpecies,
-                            sizeClass: selectedLabel,
+                            sizeLabel: selectedLabel,
                             count: manualCount,
-                            comment: manualComment.trimmingCharacters(in: .whitespaces)
+                            note: comment
                         )
                         onSave(entry)
                         dismiss()
@@ -78,6 +78,7 @@ struct ManualEntrySheet: View {
 
 private struct SpeciesSuggestionList: View {
     @Binding var species: String
+    @EnvironmentObject private var book: SpeciesBook
 
     var body: some View {
         let trimmed = species.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -86,18 +87,22 @@ private struct SpeciesSuggestionList: View {
         let suggestions: [String] = {
             guard trimmed.count >= 1 else { return [] }
 
-            let prefixMatches = SpeciesCatalog.allSpecies.filter { suggestion in
+            let canonicalNames = book.items.map(\.name)
+            let searchPool = book.namesAndAliases()
+
+            let prefixMatches = canonicalNames.filter { suggestion in
                 suggestion.lowercased().hasPrefix(lowercased) && suggestion.lowercased() != lowercased
             }
             let fuzzyMatches = FuzzyMatcher.rankedMatches(for: trimmed,
-                                                          in: SpeciesCatalog.searchableNames,
+                                                          in: searchPool,
                                                           limit: 6,
                                                           threshold: 0.55)
-            return (prefixMatches + fuzzyMatches).reduce(into: [String]()) { result, name in
-                let normalized = name.lowercased()
+            return (prefixMatches + fuzzyMatches.map { book.canonicalName(for: $0) }).reduce(into: [String]()) { result, name in
+                let canonical = book.canonicalName(for: name)
+                let normalized = canonical.lowercased()
                 guard normalized != lowercased else { return }
                 if !result.contains(where: { $0.lowercased() == normalized }) {
-                    result.append(name)
+                    result.append(canonical)
                 }
             }
         }()
