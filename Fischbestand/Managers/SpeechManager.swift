@@ -14,14 +14,11 @@ final class SpeechManager: NSObject, ObservableObject {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
 
-    // Stille-Handling für Satzgrenzen
-    private var lastSpeechAt = Date()
-    private let silenceTimeout: TimeInterval = 1.0
-    private var timer: Timer?
-
-    // Segmentierung
-    private var lastCommittedSegmentIndex = 0
-    private var latestSegments: [SFTranscriptionSegment] = []
+    // Puffert laufend erkannte Tokens, bis eine Pause erkannt wird
+    private var bufferedTokens: [String] = []
+    private var lastProcessedCharCount: Int = 0
+    private var lastSegmentTimestamp: TimeInterval = 0
+    private let pauseCommitWindow: TimeInterval = 0.7
 
     // Kontext
     private var contextual: [String] = []
@@ -36,14 +33,15 @@ final class SpeechManager: NSObject, ObservableObject {
 
     func stop() {
         guard isRecording else { return }
-        commitPendingUtteranceIfAny()
-        timer?.invalidate(); timer = nil
+        flushBufferedTokens()
         audioEngine.stop()
         request?.endAudio()
         task?.cancel()
         request = nil
         task = nil
         isRecording = false
+        lastProcessedCharCount = 0
+        lastSegmentTimestamp = 0
     }
 
     private func configureSession() throws {
@@ -72,39 +70,81 @@ final class SpeechManager: NSObject, ObservableObject {
         audioEngine.prepare()
         try audioEngine.start()
 
-        lastSpeechAt = Date()
-        lastCommittedSegmentIndex = 0
-        latestSegments.removeAll()
         liveText = ""
+        bufferedTokens.removeAll()
+        lastProcessedCharCount = 0
+        lastSegmentTimestamp = 0
 
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            guard let self else { return }
-            if let r = result {
-                self.liveText = r.bestTranscription.formattedString
-                let segs = r.bestTranscription.segments
-                if segs.count != self.latestSegments.count {
-                    self.lastSpeechAt = Date()
-                    self.latestSegments = segs
-                }
-            }
-            if error != nil { self.commitPendingUtteranceIfAny() }
+            self?.handleRecognition(result: result, error: error)
         }
-
-        timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            if Date().timeIntervalSince(self.lastSpeechAt) >= self.silenceTimeout {
-                self.commitPendingUtteranceIfAny()
-            }
-        }
-        RunLoop.main.add(timer!, forMode: .common)
     }
 
-    private func commitPendingUtteranceIfAny() {
-        guard latestSegments.count > lastCommittedSegmentIndex else { return }
-        let slice = latestSegments[lastCommittedSegmentIndex..<latestSegments.count]
-        let text = slice.map { $0.substring }.joined(separator: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        lastCommittedSegmentIndex = latestSegments.count
-        if !text.isEmpty { onUtterance?(text) }
+    private func handleRecognition(result: SFSpeechRecognitionResult?, error: Error?) {
+        if let result {
+            liveText = result.bestTranscription.formattedString
+
+            let transcription = result.bestTranscription
+            let segments = transcription.segments
+            let newCharCount = transcription.formattedString.count
+
+            if newCharCount > lastProcessedCharCount {
+                let newSegments = segments.filter { segment in
+                    let segmentEnd = segment.substringRange.location + segment.substringRange.length
+                    return segmentEnd > lastProcessedCharCount
+                }
+
+                for segment in newSegments {
+                    bufferedTokens.append(segment.substring.lowercased())
+                    lastSegmentTimestamp = CFAbsoluteTimeGetCurrent()
+                }
+
+                lastProcessedCharCount = newCharCount
+            }
+
+            var shouldCommit = false
+            if !bufferedTokens.isEmpty, lastSegmentTimestamp > 0 {
+                let gap = CFAbsoluteTimeGetCurrent() - lastSegmentTimestamp
+                if gap >= pauseCommitWindow { shouldCommit = true }
+            }
+
+            if result.isFinal { shouldCommit = true }
+
+            if shouldCommit, !bufferedTokens.isEmpty {
+                let utterance = bufferedTokens.joined(separator: " ")
+                commitUtterance(utterance)
+                bufferedTokens.removeAll()
+                lastSegmentTimestamp = 0
+            }
+
+            if result.isFinal {
+                finalizeRecognition()
+            }
+        }
+
+        if let error {
+            print("Speech error:", error)
+            finalizeRecognition()
+        }
+    }
+
+    private func finalizeRecognition() {
+        flushBufferedTokens()
+        lastProcessedCharCount = 0
+        lastSegmentTimestamp = 0
+    }
+
+    private func flushBufferedTokens() {
+        guard !bufferedTokens.isEmpty else { return }
+        let utterance = bufferedTokens.joined(separator: " ")
+        Task { @MainActor in
+            commitUtterance(utterance)
+        }
+        bufferedTokens.removeAll()
+    }
+
+    @MainActor
+    private func commitUtterance(_ text: String) {
+        onUtterance?(text)
     }
 }
