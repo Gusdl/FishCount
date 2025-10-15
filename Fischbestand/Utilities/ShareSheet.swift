@@ -11,3 +11,14 @@ struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) { }
 }
+
+@MainActor
+func exportAndShareProtocol(for survey: Survey, meta: FieldMeta? = nil, presenter: UIViewController) {
+    do {
+        let url = try survey.exportProtocolCSV(meta: meta)
+        let controller = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        presenter.present(controller, animated: true)
+    } catch {
+        print("Export fehlgeschlagen: \(error)")
+    }
+}

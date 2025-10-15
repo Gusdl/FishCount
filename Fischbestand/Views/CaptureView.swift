@@ -162,9 +162,13 @@ struct CaptureView: View {
         }
         .onAppear {
             configureSpeechHandler()
+            speech.activeDefaultSize = activeSizeBin.sizeRange
         }
         .onChange(of: book.items) { _ in
             configureSpeechHandler()
+        }
+        .onChange(of: activeSizeBin) { newValue in
+            speech.activeDefaultSize = newValue.sizeRange
         }
         .onDisappear {
             speech.stop()
@@ -285,7 +289,7 @@ struct CaptureView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text(speech.liveText.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : speech.liveText)
+            Text(speech.latestText.isEmpty ? "Sag z. B.: Barsch bis 5 Zentimeter, drei Stück, Kommentar: Jungfische" : speech.latestText)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -313,7 +317,9 @@ struct CaptureView: View {
                 } else {
                     do {
                         infoBanner = nil
-                        try speech.start(contextualStrings: speechContextStrings)
+                        speech.speciesCatalog = book.namesAndAliases()
+                        speech.activeDefaultSize = activeSizeBin.sizeRange
+                        try speech.start()
                     } catch {
                         infoBanner = "Spracherkennung nicht verfügbar. Prüfe Berechtigungen."
                     }
@@ -439,32 +445,50 @@ struct CaptureView: View {
                                        description: Text("Starte die Aufnahme oder füge manuell Einträge hinzu."))
                 .foregroundStyle(.white)
             } else {
-                LazyVStack(alignment: .leading, spacing: 12) {
-                    ForEach(store.entries) { entry in
-                        EntryCard(entry: entry)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    withAnimation { store.delete(entry) }
-                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                } label: {
-                                    Label("Löschen", systemImage: "trash")
+                List {
+                    Section {
+                        ForEach(store.entries) { entry in
+                            EntryCard(entry: entry)
+                                .listRowBackground(Color.clear)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        withAnimation { store.delete(entry) }
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    } label: {
+                                        Label("Löschen", systemImage: "trash")
+                                    }
                                 }
+                        }
+                        .onDelete { offsets in
+                            withAnimation {
+                                store.deleteEntries(at: offsets)
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             }
+                        }
                     }
                 }
+                .listStyle(.plain)
+                .listRowSeparator(.hidden)
+                .scrollContentBackground(.hidden)
+                .frame(height: entryListHeight)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
         }
         .glassCard()
     }
 
-    private func addEntry(_ entry: SurveyEntry) {
-        guard store.currentSurvey != nil else { return }
+    @discardableResult
+    private func addEntry(_ entry: SurveyEntry, showBanner: Bool = true) -> SurveyEntry? {
+        guard store.currentSurvey != nil else { return nil }
         var normalized = entry
         normalized.species = book.canonicalName(for: entry.species)
         withAnimation {
             store.add(normalized)
-            infoBanner = "Erfasst: \(normalized.species) – \(normalized.sizeBin.title) – \(normalized.count)x"
+            if showBanner {
+                infoBanner = "Erfasst: \(normalized.species) – \(normalized.sizeBin.title) – \(normalized.count)x"
+            }
         }
+        return normalized
     }
 
     private func undoLastEntry() {
@@ -479,26 +503,47 @@ struct CaptureView: View {
     }
 
     private func configureSpeechHandler() {
-        speech.onUtterance = { utterance in
-            processUtterance(utterance)
+        speech.speciesCatalog = book.namesAndAliases()
+        speech.activeDefaultSize = activeSizeBin.sizeRange
+        speech.onCommands = { [weak self] commands in
+            self?.handleCommands(commands)
+        }
+        speech.onUnrecognized = { [weak self] text in
+            self?.handleUnrecognized(text: text)
         }
     }
 
-    private func processUtterance(_ utterance: String) {
-        if let parsed = entry(from: utterance, fallbackBin: activeSizeBin) {
-            addEntry(parsed)
-        } else {
-            guard store.currentSurvey != nil else { return }
-            withAnimation {
-                let noteEntry = SurveyEntry(species: "Unbestimmt",
-                                            sizeBin: activeSizeBin,
-                                            count: 1,
-                                            isYOY: detectYOY(utterance),
-                                            note: utterance)
-                store.add(noteEntry)
-                infoBanner = "Nicht erkannt, als Notiz gespeichert."
+    private func handleCommands(_ commands: [ParsedCommand]) {
+        guard store.currentSurvey != nil else { return }
+        var captured: [SurveyEntry] = []
+        for command in commands {
+            let entry = SurveyEntry(species: command.species,
+                                    sizeBin: SizeBin(range: command.sizeRange),
+                                    count: command.count,
+                                    isYOY: command.isYOY,
+                                    note: nil)
+            if let normalized = addEntry(entry, showBanner: false) {
+                captured.append(normalized)
             }
         }
+        if !captured.isEmpty {
+            let message = captured.map { "\($0.species) – \($0.sizeBin.title) – \($0.count)x" }.joined(separator: ", ")
+            infoBanner = "Erfasst: \(message)"
+        }
+    }
+
+    private func handleUnrecognized(text: String) {
+        guard store.currentSurvey != nil else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let fallbackBin = speech.activeDefaultSize?.sizeBin ?? activeSizeBin
+        let noteEntry = SurveyEntry(species: "Unbestimmt",
+                                    sizeBin: fallbackBin,
+                                    count: 1,
+                                    isYOY: detectYOY(trimmed),
+                                    note: trimmed)
+        _ = addEntry(noteEntry, showBanner: false)
+        infoBanner = "Nicht erkannt, als Notiz gespeichert."
     }
 
     private func resetManualFields() {
@@ -510,9 +555,12 @@ struct CaptureView: View {
 
     private var currentSizeClassLabel: String { activeSizeBin.title }
 
-    private var speechContextStrings: [String] {
-        let extras = ["bis", "cm", "zentimeter", "stück", "jungfische"] + Array(voiceNumberWords.keys)
-        return Array(Set(book.namesAndAliases() + extras))
+    private var entryListHeight: CGFloat {
+        let base: CGFloat = 80
+        let rowHeight: CGFloat = 92
+        let count = CGFloat(store.entries.count)
+        let calculated = base + rowHeight * count
+        return min(max(calculated, 200), 440)
     }
 
     private struct LocationStatusDescriptor {
