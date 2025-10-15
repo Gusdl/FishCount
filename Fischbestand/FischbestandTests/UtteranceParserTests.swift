@@ -26,3 +26,23 @@ final class UtteranceParserTests: XCTestCase {
         XCTAssertTrue(result?.isYOY ?? false)
     }
 }
+
+private func entry(from text: String, fallbackBin: SizeBin) -> SurveyEntry? {
+    let parseResult = VoiceParser.extractCommands(
+        from: text,
+        speciesCatalog: SpeciesCatalog.all,
+        defaultSize: fallbackBin.sizeRange
+    )
+
+    guard let command = parseResult.commands.first else {
+        return nil
+    }
+
+    return SurveyEntry(
+        species: command.species,
+        sizeBin: SizeBin(range: command.sizeRange),
+        count: command.count,
+        isYOY: command.isYOY,
+        note: nil
+    )
+}
