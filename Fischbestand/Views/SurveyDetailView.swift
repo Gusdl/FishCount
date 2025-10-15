@@ -104,9 +104,9 @@ private struct GroupedList: View {
                     Text(species)
                         .font(.headline)
                         .foregroundStyle(.white)
-                    ForEach(speciesEntries.sorted(by: { $0.sizeClass < $1.sizeClass })) { entry in
+                    ForEach(speciesEntries.sorted(by: { $0.sizeBin.title < $1.sizeBin.title })) { entry in
                         HStack {
-                            Text(entry.sizeClass)
+                            Text(entry.sizeBin.title)
                             Spacer()
                             Text("\(entry.count)")
                         }

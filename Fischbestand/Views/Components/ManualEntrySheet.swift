@@ -1,14 +1,13 @@
 import SwiftUI
-import SwiftData
 
 struct ManualEntrySheet: View {
     @EnvironmentObject private var book: SpeciesBook
     @Binding var manualSpecies: String
     @Binding var manualCount: Int
     @Binding var manualComment: String
-    let sizeClasses: [SizeClassPreset]
-    @Binding var selectedSizeClassID: PersistentIdentifier?
-    var onSave: (ParsedEntry) -> Void
+    @Binding var selectedSizeBin: SizeBin
+    @Binding var manualYOY: Bool
+    var onSave: (SurveyEntry) -> Void
 
     var body: some View {
         NavigationStack {
@@ -19,10 +18,9 @@ struct ManualEntrySheet: View {
                 }
 
                 Section(header: Text("Größenklasse")) {
-                    Picker("Größe", selection: $selectedSizeClassID) {
-                        ForEach(sizeClasses) { preset in
-                            Text(preset.label)
-                                .tag(PersistentIdentifier?.some(preset.persistentModelID))
+                    Picker("Größe", selection: $selectedSizeBin) {
+                        ForEach(SizeBin.ordered, id: \.self) { bin in
+                            Text(bin.title).tag(bin)
                         }
                     }
                     .pickerStyle(.inline)
@@ -32,6 +30,10 @@ struct ManualEntrySheet: View {
                     Stepper(value: $manualCount, in: 1...999) {
                         Text("\(manualCount) Stück")
                     }
+                }
+
+                Section(header: Text("Jungfische")) {
+                    Toggle("0+ / Jungfische", isOn: $manualYOY)
                 }
 
                 Section(header: Text("Kommentar")) {
@@ -51,20 +53,15 @@ struct ManualEntrySheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Übernehmen") {
                         guard !manualSpecies.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                        let selectedLabel = sizeClasses.first { preset in
-                            guard let selectedSizeClassID else { return false }
-                            return preset.persistentModelID == selectedSizeClassID
-                        }?.label ?? "bis 5 cm"
                         let trimmedSpecies = manualSpecies.trimmingCharacters(in: .whitespacesAndNewlines)
                         let canonicalSpecies = book.canonicalName(for: trimmedSpecies)
                         let note = manualComment.trimmingCharacters(in: .whitespaces)
                         let comment = note.isEmpty ? nil : note
-                        let entry = ParsedEntry(
-                            species: canonicalSpecies,
-                            sizeLabel: selectedLabel,
-                            count: manualCount,
-                            note: comment
-                        )
+                        let entry = SurveyEntry(species: canonicalSpecies,
+                                                sizeBin: selectedSizeBin,
+                                                count: manualCount,
+                                                isYOY: manualYOY,
+                                                note: comment)
                         onSave(entry)
                         dismiss()
                     }

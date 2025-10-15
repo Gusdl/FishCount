@@ -26,10 +26,12 @@ Fischbestand/
 │   ├── SpeechManager.swift     // Steuerung der Spracherkennung (de-DE)
 │   └── SurveyStore.swift       // ObservableObject für aktive Surveys
 ├── Models/
+│   ├── SizeBin.swift           // Standardisierte Größenklassen
+│   ├── SurveyEntry.swift       // Value-Typ für Einträge & Brücke zu SwiftData
 │   ├── SpeciesBook.swift       // Persistenter Artenkatalog mit Aliassen
-│   └── Survey.swift            // SwiftData-Modelle (Survey, CountEntry, SizeClassPreset)
+│   └── Survey.swift            // SwiftData-Modelle (Survey, CountEntry)
 ├── Services/
-│   └── UtteranceParser.swift   // Parser für gesprochene Größen & Mengen
+│   └── VoiceParser.swift       // Parser für gesprochene Größen & Mengen
 ├── Utilities/
 │   ├── Exporters.swift         // CSV-/JSON-Erzeugung & Temp-Dateien
 │   ├── ShareSheet.swift        // Wrapper für das iOS Share-Sheet
@@ -39,8 +41,8 @@ Fischbestand/
     ├── Components/
     │   ├── ManualEntrySheet.swift
     │   └── SurveyBreakdownChart.swift
-    ├── ExportView.swift        // Share-Sheet-Export
-    ├── SettingsView.swift      // Größenklassen-Verwaltung & App-Infos
+    ├── ExportView.swift        // CSV-Export im Feldvorlagen-Layout
+    ├── SettingsView.swift      // Artenbuch inline bearbeiten
     ├── SpeciesBookView.swift   // UI zum Pflegen des Artenbuchs
     ├── SurveyDetailView.swift  // TabView aus Erfassung, Analyse, Export
     └── SurveyListView.swift    // NavigationStack + Survey-Liste

@@ -4,8 +4,8 @@
 - **Vision**: A lightweight SwiftUI MVP that enables anglers to capture fish counts hands-free or manually, store them offline with SwiftData, and export results for further processing.【F:README.md†L3-L12】
 - **Primary users**: Field biologists, angling clubs, and citizen science volunteers who need structured, fast, and reliable catch logging in environments with poor connectivity.
 - **Core value props**:
-  - Voice-driven logging with German commands, undo, and contextual hints reduces friction when handling gear by the water.【F:Fischbestand/Views/CaptureView.swift†L175-L342】【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】
-  - Manual quick-entry UI, size-class presets, and featured species speed up repeat recording tasks.【F:Fischbestand/Views/CaptureView.swift†L243-L322】【F:Fischbestand/Utilities/SpeciesCatalog.swift†L3-L29】
+  - Voice-driven logging with German commands, undo, and contextual hints reduces friction when handling gear by the water.【F:Fischbestand/Views/CaptureView.swift†L168-L346】【F:Fischbestand/Services/VoiceParser.swift†L1-L69】
+  - Manual quick-entry UI, standardisierte Größenklassen und Highlight-Spezies beschleunigen wiederkehrende Erfassungen.【F:Fischbestand/Views/CaptureView.swift†L318-L402】【F:Fischbestand/Utilities/SpeciesCatalog.swift†L1-L58】
   - Integrated analysis, export, and location metadata keep workflows in one app and ready for sharing.【F:Fischbestand/Views/SurveyDetailView.swift†L28-L117】【F:Fischbestand/Views/ExportView.swift†L21-L85】【F:Fischbestand/Managers/LocationManager.swift†L5-L93】
 
 ## 2. Current Experience Audit
@@ -14,8 +14,8 @@
 | Landing & sessions | Home list highlights cumulative metrics, sessions, and empty states; users can add surveys and access settings from the navigation bar.【F:Fischbestand/Views/SurveyListView.swift†L12-L108】 |
 | Capture | Capture tab combines header metadata, voice recording controls, manual undo, quick species shortcuts, and entry history with context-aware hints for speech recognition.【F:Fischbestand/Views/CaptureView.swift†L37-L398】 |
 | Analysis | Tabbed detail view shows charts and grouped breakdowns once entries exist, keeping the capture-analysis-export flow tightly integrated.【F:Fischbestand/Views/SurveyDetailView.swift†L11-L117】 |
-| Export | CSV/JSON share-sheet export and auto-cleanup support downstream reporting without leaving the app.【F:Fischbestand/Views/ExportView.swift†L21-L85】 |
-| Configuration | Settings exposes size-class management with default seeding, but little else about survey metadata or personalization.【F:Fischbestand/Views/SettingsView.swift†L4-L127】 |
+| Export | CSV-Export im Feldvorlagen-Layout ermöglicht strukturierten Berichtsexport direkt aus der App.【F:Fischbestand/Views/ExportView.swift†L1-L66】 |
+| Configuration | Einstellungen bieten nun ein editierbares Artenbuch; weiterführende Personalisierungen fehlen noch.【F:Fischbestand/Views/SettingsView.swift†L1-L34】 |
 | Data foundations | Survey model already stores geolocation, weather notes, and entries with comments/timestamps, although some fields are unused in the UI.【F:Fischbestand/Models/Survey.swift†L4-L52】 |
 
 ## 3. Gaps & Opportunities
@@ -29,7 +29,7 @@
 ### Technical & Data
 - **Offline scope stops at device**: There is no sync, backup, or cross-device access despite model support for metadata; consider CloudKit or simple file export automation.【F:Fischbestand/Models/Survey.swift†L8-L18】
 - **Testing & automation**: Neue Unit-Tests decken Parser- und Fuzzy-Matching-Kantenfälle ab; Speech- und Exportpfade bleiben weiterhin ungetestet.【F:Fischbestand/FischbestandTests/UtteranceParserTests.swift†L1-L19】【F:Fischbestand/FischbestandTests/FuzzyMatcherTests.swift†L1-L35】
-- **Speech robustness**: Parser relies on heuristic extraction and limited measurement vocab; broader units or noisy variants may still slip through.【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】
+- **Speech robustness**: Parser relies on heuristic extraction and limited measurement vocab; broader units or noisy variants may still slip through.【F:Fischbestand/Services/VoiceParser.swift†L1-L69】
 - **Accessibility**: Voice-first approach is strong, but manual flows lack Dynamic Type scaling, VoiceOver hints, or haptic confirmations.
 
 ### Business & Monetization
@@ -45,11 +45,11 @@
 
 ### Mid-term (v1 release)
 - Build aggregated dashboards (per species trends, heatmaps) leveraging stored timestamps and coordinates once location reliability improves.【F:Fischbestand/Models/Survey.swift†L8-L28】【F:Fischbestand/Views/SurveyDetailView.swift†L59-L117】
-- Offer survey templates (preset species lists, count defaults) for recurring monitoring programs.【F:Fischbestand/Views/SettingsView.swift†L26-L127】
+- Offer survey templates (preset species lists, count defaults) for recurring monitoring programs.【F:Fischbestand/Views/SettingsView.swift†L1-L34】
 - Explore optional CloudKit sync or collaborative exports for clubs needing centralized archives.
 
 ### Long-term (growth bets)
-- Integrate regulatory exports (e.g., fisheries authorities formats) and automation APIs for research partners.【F:Fischbestand/Views/ExportView.swift†L21-L85】
+- Integrate regulatory exports (e.g., fisheries authorities formats) and automation APIs for research partners.【F:Fischbestand/Views/ExportView.swift†L1-L66】
 - Investigate passive data capture (BLE scales, camera recognition) once core workflows are stable.
 - Consider marketplace positioning as a toolkit for conservation NGOs, bundling analytics subscriptions and training resources.
 

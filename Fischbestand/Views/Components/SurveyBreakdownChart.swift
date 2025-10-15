@@ -6,7 +6,7 @@ struct SurveyBreakdownChart: View {
 
     private var totals: [ChartEntry] {
         let grouped = Dictionary(grouping: entries) { entry in
-            ChartKey(sizeClass: entry.sizeClass, species: entry.species)
+            ChartKey(sizeClass: entry.sizeBin.title, species: entry.species)
         }
         return grouped.map { key, values in
             ChartEntry(sizeClass: key.sizeClass, species: key.species, total: values.reduce(0) { $0 + $1.count })

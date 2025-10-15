@@ -9,8 +9,7 @@ struct FischbestandApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Survey.self,
-            CountEntry.self,
-            SizeClassPreset.self
+            CountEntry.self
         ])
 
         do {
