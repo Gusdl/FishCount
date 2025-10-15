@@ -49,15 +49,15 @@ struct ExportView: View {
     }
 
     private func export() {
+        guard let survey = store.currentSurvey else { return }
         do {
             let meta = FieldMeta(gewaesser: gewaesser,
                                  ort: ort,
                                  datum: datum,
                                  leitfaehigkeit: leitfaehigkeit,
                                  temperatur: temperatur)
-            let url = try exportFieldTemplateCSV(surveyEntries: store.entries,
-                                                 meta: meta,
-                                                 speciesOrder: SpeciesCatalog.allNames)
+            let url = try survey.exportProtocolCSV(meta: meta,
+                                                   speciesOrder: SpeciesCatalog.all)
             shareItems = [url]
             showShare = true
         } catch {

@@ -73,4 +73,8 @@ enum SpeciesCatalog {
         }
         return Array(set)
     }
+
+    static var all: [String] {
+        searchableNames
+    }
 }

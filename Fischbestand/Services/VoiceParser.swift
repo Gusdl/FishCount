@@ -1,10 +1,18 @@
 import Foundation
 
-let voiceNumberWords: [String: Double] = [
-    "null": 0,
+struct ParsedCommand {
+    let species: String
+    let sizeRange: SizeRange
+    let count: Int
+    let isYOY: Bool
+    let rawText: String
+}
+
+private let wordNumbers: [String: Int] = [
     "eins": 1,
-    "eine": 1,
     "ein": 1,
+    "eine": 1,
+    "einen": 1,
     "zwei": 2,
     "drei": 3,
     "vier": 4,
@@ -29,26 +37,22 @@ let voiceNumberWords: [String: Double] = [
     "zwanzig": 20
 ]
 
-func parseSizeCM(from text: String) -> Double? {
-    let t = text.lowercased().replacingOccurrences(of: ",", with: ".")
-    if let r = t.range(of: #"(\d+(?:\.\d+)?)\s*(cm|zentimeter)"#, options: .regularExpression) {
-        let n = String(t[r]).components(separatedBy: CharacterSet(charactersIn: "0123456789.").inverted).joined()
-        return Double(n)
-    }
-    for (w, v) in voiceNumberWords {
-        if t.contains("\(w) cm") || t.contains("\(w) zentimeter") { return v }
-    }
+private func normalize(_ s: String) -> String {
+    s
+        .lowercased()
+        .replacingOccurrences(of: ",", with: ".")
+        .replacingOccurrences(of: "  ", with: " ")
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+}
+
+private func numberFromToken(_ t: String) -> Double? {
+    if let n = Double(t.replacingOccurrences(of: ",", with: ".")) { return n }
+    if let n = wordNumbers[t] { return Double(n) }
     return nil
 }
 
-func normalizeSpecies(from text: String) -> String? {
-    let t = text.lowercased()
-    for species in SpeciesCatalog.load() {
-        if t.contains(species.name.lowercased()) { return species.name }
-        for alias in species.aliases where t.contains(alias.lowercased()) {
-            return species.name
-        }
-    }
+private func intFromToken(_ t: String) -> Int? {
+    if let d = numberFromToken(t) { return Int(d.rounded()) }
     return nil
 }
 
@@ -57,32 +61,100 @@ func detectYOY(_ text: String) -> Bool {
     return t.contains("0+") || t.contains("0 plus") || t.contains("jungfisch") || t.contains("jungfische")
 }
 
-func detectCount(from text: String, defaultCount: Int) -> Int {
-    let nsText = text as NSString
-    let number = nsText.integerValue
-    if number > 0 { return number }
-    let lower = text.lowercased()
-    for (word, value) in voiceNumberWords {
-        if lower.contains("\(word) st") || lower.hasSuffix(" \(word)") { return Int(value) }
-    }
-    return defaultCount
-}
+struct VoiceParser {
+    static func extractCommands(from buffer: String,
+                                speciesCatalog: [String],
+                                defaultSize: SizeRange?) -> (commands: [ParsedCommand], remainder: String) {
 
-func entry(from text: String, fallbackBin: SizeBin, defaultCount: Int = 1) -> SurveyEntry? {
-    guard let species = normalizeSpecies(from: text) else { return nil }
-    let cm = parseSizeCM(from: text)
-    let lower = text.lowercased()
-    let adjustedBin: SizeBin
-    if let cm {
-        var effective = cm
-        if lower.contains("bis") || lower.contains("≤") || lower.contains("unter") {
-            effective = max(cm - 0.1, 0)
+        var text = normalize(buffer)
+            .replacingOccurrences(of: " stück", with: " stueck")
+            .replacingOccurrences(of: " jungfisch", with: " jungfische")
+
+        var commands: [ParsedCommand] = []
+
+        let tokens = text.split(whereSeparator: { !$0.isLetter && !$0.isNumber && $0 != "." }).map { String($0) }
+
+        var catalog: [(key: String, value: String)] = []
+        var seenKeys = Set<String>()
+        for name in speciesCatalog {
+            let key = name.lowercased()
+            if seenKeys.insert(key).inserted {
+                catalog.append((key: key, value: name))
+            }
         }
-        adjustedBin = SizeBin.bin(forCM: effective)
-    } else {
-        adjustedBin = fallbackBin
+        catalog.sort { $0.key.count > $1.key.count }
+
+        var i = 0
+        while i < tokens.count {
+            let token = tokens[i]
+            guard let speciesMatch = catalog.first(where: { token.hasPrefix($0.key) || $0.key.hasPrefix(token) }) else {
+                i += 1
+                continue
+            }
+            let species = speciesMatch.value
+
+            var cmValue: Double?
+            var isUpperBound = false
+            let window = max(0, i - 3)...min(tokens.count - 1, i + 4)
+
+            for j in window {
+                let t = tokens[j]
+                if t == "bis" { isUpperBound = true; continue }
+                if t == "cm" || t == "zentimeter" { continue }
+                if t.hasSuffix("cm"), let n = numberFromToken(String(t.dropLast(2))) { cmValue = n; break }
+                if let n = numberFromToken(t) {
+                    if j + 1 <= window.upperBound, tokens[j + 1] == "cm" || tokens[j + 1] == "zentimeter" {
+                        cmValue = n
+                        break
+                    }
+                    if isUpperBound {
+                        cmValue = n
+                        break
+                    }
+                }
+            }
+
+            var count = 1
+            for j in i...min(tokens.count - 1, i + 5) {
+                let t = tokens[j]
+                if t == "stueck" { continue }
+                if let c = intFromToken(t) {
+                    count = max(1, c)
+                    break
+                }
+            }
+
+            let sizeRange: SizeRange = {
+                guard let cm = cmValue else {
+                    if let fallback = defaultSize { return fallback }
+                    return SizeBuckets.default.first!
+                }
+
+                if isUpperBound {
+                    if let match = SizeBuckets.default.first(where: { range in
+                        if let upper = range.upper { return cm <= upper }
+                        return false
+                    }) {
+                        return match
+                    }
+                    return SizeBuckets.default.first!
+                }
+
+                return SizeBuckets.bucket(for: cm)
+            }()
+
+            let rawTokens = tokens[max(0, i - 2)...min(tokens.count - 1, i + 5)]
+            let raw = rawTokens.joined(separator: " ")
+            let command = ParsedCommand(species: species,
+                                        sizeRange: sizeRange,
+                                        count: count,
+                                        isYOY: detectYOY(raw),
+                                        rawText: raw)
+            commands.append(command)
+
+            i += 6
+        }
+
+        return (commands, "")
     }
-    let count = detectCount(from: text, defaultCount: defaultCount)
-    let isYOY = detectYOY(text)
-    return SurveyEntry(species: species, sizeBin: adjustedBin, count: count, isYOY: isYOY, timestamp: Date())
 }
