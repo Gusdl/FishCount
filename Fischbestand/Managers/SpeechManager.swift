@@ -1,6 +1,7 @@
 import AVFoundation
 import Speech
 
+@MainActor
 final class SpeechManager: ObservableObject {
     @Published var isRecording = false
     @Published var latestText: String = ""
@@ -63,25 +64,27 @@ final class SpeechManager: ObservableObject {
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
         inputNode.removeTap(onBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
-            self?.request?.append(buffer)
+        inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak request] buffer, _ in
+            request?.append(buffer)
         }
 
         audioEngine.prepare()
         try audioEngine.start()
 
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            guard let self else { return }
-            if let result {
-                let transcript = result.bestTranscription.formattedString
-                self.onPartial(transcript: transcript)
-                if result.isFinal {
-                    self.flush()
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if let result {
+                    let transcript = result.bestTranscription.formattedString
+                    self.onPartial(transcript: transcript)
+                    if result.isFinal {
+                        self.flush()
+                    }
                 }
-            }
-            if let error {
-                self.lastInfo = "Spracherkennung beendet (\(error.localizedDescription))"
-                self.stop()
+                if let error {
+                    self.lastInfo = "Spracherkennung beendet (\(error.localizedDescription))"
+                    self.stop()
+                }
             }
         }
     }

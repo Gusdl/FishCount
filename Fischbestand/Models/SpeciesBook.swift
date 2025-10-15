@@ -6,6 +6,7 @@ struct SpeciesEntry: Identifiable, Codable, Equatable {
     var aliases: [String] = []
 }
 
+@MainActor
 final class SpeciesBook: ObservableObject {
     @Published var items: [SpeciesEntry] = [] { didSet { save() } }
 

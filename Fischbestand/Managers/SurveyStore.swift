@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 final class SurveyStore: ObservableObject {
     @Published var currentSurvey: Survey? {
         didSet { reloadEntries() }
