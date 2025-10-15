@@ -137,14 +137,17 @@ final class SpeechManager: NSObject, ObservableObject {
     private func flushBufferedTokens() {
         guard !bufferedTokens.isEmpty else { return }
         let utterance = bufferedTokens.joined(separator: " ")
-        Task { @MainActor in
-            commitUtterance(utterance)
-        }
+        commitUtterance(utterance)
         bufferedTokens.removeAll()
     }
 
-    @MainActor
     private func commitUtterance(_ text: String) {
-        onUtterance?(text)
+        if Thread.isMainThread {
+            onUtterance?(text)
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.onUtterance?(text)
+            }
+        }
     }
 }
