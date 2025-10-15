@@ -35,6 +35,10 @@ final class SurveyStore: ObservableObject {
         reloadEntries()
     }
 
+    func deleteEntries(at offsets: IndexSet) {
+        delete(at: offsets)
+    }
+
     func delete(_ entry: SurveyEntry) {
         guard let survey = currentSurvey,
               let index = survey.entries.firstIndex(where: { $0.id == entry.id }) else { return }

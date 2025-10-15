@@ -8,43 +8,80 @@ struct FieldMeta {
     var temperatur: String
 }
 
-func exportFieldTemplateCSV(surveyEntries: [SurveyEntry], meta: FieldMeta, speciesOrder: [String]) throws -> URL {
-    var table: [String: [SizeBin: Int]] = [:]
-    var yoy: [String: Int] = [:]
-
-    for entry in surveyEntries {
-        table[entry.species, default: [:]][entry.sizeBin, default: 0] += entry.count
-        if entry.isYOY { yoy[entry.species, default: 0] += entry.count }
+extension Survey {
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 
-    let separator = ";"
-    var csv = ""
-    csv += "Nachgewiesene Arten und Größenklassen [cm]\n"
-    csv += "Gewässer:\(separator)\(meta.gewaesser)\n"
-    csv += "Ortsangabe:\(separator)\(meta.ort)\n"
-    csv += "Datum:\(separator)\(meta.datum)\n"
-    csv += "Leitfähigkeit:\(separator)\(meta.leitfaehigkeit) µS/cm\n"
-    csv += "Temperatur:\(separator)\(meta.temperatur) °C\n\n"
+    func exportProtocolCSV(meta: FieldMeta? = nil,
+                           speciesOrder: [String] = SpeciesCatalog.all) throws -> URL {
+        let bins = SizeBuckets.default
 
-    csv += (["Art"] + SizeBin.ordered.map(\.title) + ["davon 0+"]).joined(separator: separator) + "\n"
+        var lines: [String] = []
+        func appendLine(_ value: String) { lines.append(value) }
 
-    let allSpecies = Array(Set(table.keys).union(speciesOrder)).sorted {
-        let ia = speciesOrder.firstIndex(of: $0) ?? .max
-        let ib = speciesOrder.firstIndex(of: $1) ?? .max
-        return (ia, $0) < (ib, $1)
+        let meta = meta ?? FieldMeta(gewaesser: title,
+                                     ort: locationName ?? "",
+                                     datum: formattedDate,
+                                     leitfaehigkeit: "",
+                                     temperatur: "")
+
+        let water = meta.gewaesser.isEmpty ? title : meta.gewaesser
+        let place = meta.ort.isEmpty ? (locationName ?? "") : meta.ort
+        let dateString = meta.datum.isEmpty ? formattedDate : meta.datum
+        let conductivity = meta.leitfaehigkeit
+        let temperature = meta.temperatur
+
+        appendLine("Nachgewiesene Arten und Größenklassen [cm]")
+        appendLine("Gewässer:;\(water)")
+        appendLine("Ortsangabe:;\(place)")
+        appendLine("Datum:;\(dateString)")
+        appendLine("Leitfähigkeit:; \(conductivity) µS/cm")
+        appendLine("Temperatur:; \(temperature) °C")
+
+        let header = "Art;" + bins.map(\.label).joined(separator: ";") + ";davon 0+"
+        appendLine(header)
+
+        let surveyEntries = entries.map(SurveyEntry.init(from:))
+
+        var matrix: [String: [SizeRange: Int]] = [:]
+        var zeroPlus: [String: Int] = [:]
+
+        for entry in surveyEntries {
+            let key = entry.species
+            var sizeCounts = matrix[key, default: [:]]
+            sizeCounts[entry.sizeBin.sizeRange, default: 0] += entry.count
+            matrix[key] = sizeCounts
+            if entry.isYOY { zeroPlus[key, default: 0] += entry.count }
+        }
+
+        let orderedSpecies = speciesOrder + matrix.keys.filter { !speciesOrder.contains($0) }
+        var rendered = Set<String>()
+        for species in orderedSpecies {
+            guard !rendered.contains(species) else { continue }
+            rendered.insert(species)
+            let counts = matrix[species] ?? [:]
+            let rowCounts = bins.map { String(counts[$0, default: 0]) }
+            let yoy = zeroPlus[species, default: 0]
+            appendLine(([species] + rowCounts + [String(yoy)]).joined(separator: ";"))
+        }
+
+        if !rendered.contains("Unbestimmt") {
+            rendered.insert("Unbestimmt")
+            let counts = matrix["Unbestimmt"] ?? [:]
+            let rowCounts = bins.map { String(counts[$0, default: 0]) }
+            let yoy = zeroPlus["Unbestimmt", default: 0]
+            appendLine((["Unbestimmt"] + rowCounts + [String(yoy)]).joined(separator: ";"))
+        }
+
+        appendLine("Besatz:")
+
+        let csv = lines.joined(separator: "\n")
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("Fischbestand_\(Int(Date().timeIntervalSince1970)).csv")
+        try csv.write(to: url, atomically: true, encoding: .utf8)
+        return url
     }
-
-    for species in allSpecies {
-        var row = [species]
-        let counts = table[species] ?? [:]
-        for bin in SizeBin.ordered { row.append(String(counts[bin] ?? 0)) }
-        row.append(String(yoy[species] ?? 0))
-        csv += row.joined(separator: separator) + "\n"
-    }
-    csv += "\nBesatz:\n"
-
-    let url = FileManager.default.temporaryDirectory
-        .appendingPathComponent("Fischbestand_\(Int(Date().timeIntervalSince1970)).csv")
-    try csv.data(using: .utf8)?.write(to: url, options: .atomic)
-    return url
 }
