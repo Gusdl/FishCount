@@ -8,7 +8,6 @@ struct CaptureView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var book: SpeciesBook
     @EnvironmentObject private var store: SurveyStore
-    @Query(sort: \SizeClassPreset.label) private var sizeClassPresets: [SizeClassPreset]
 
     @Bindable var survey: Survey
 
@@ -16,10 +15,11 @@ struct CaptureView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var infoBanner: String?
     @State private var showManualInput = false
-    @State private var selectedSizeClassID: PersistentIdentifier?
     @State private var manualSpecies: String = ""
     @State private var manualCount: Int = 1
     @State private var manualComment: String = ""
+    @State private var manualYOY: Bool = false
+    @State private var activeSizeBin: SizeBin = .le5
     @State private var locationError: String?
     @State private var isEditingWeather = false
     @State private var draftWeatherNote: String = ""
@@ -52,10 +52,6 @@ struct CaptureView: View {
             }
         }
         .task {
-            await ensureDefaultSizeClasses()
-            if selectedSizeClassID == nil {
-                selectedSizeClassID = sizeClassPresets.first?.persistentModelID
-            }
             locationManager.requestLocation()
             if survey.latitude != nil || survey.longitude != nil {
                 lastLocationUpdate = Date()
@@ -65,8 +61,8 @@ struct CaptureView: View {
             ManualEntrySheet(manualSpecies: $manualSpecies,
                              manualCount: $manualCount,
                              manualComment: $manualComment,
-                             sizeClasses: sizeClassPresets,
-                             selectedSizeClassID: $selectedSizeClassID) { entry in
+                             selectedSizeBin: $activeSizeBin,
+                             manualYOY: $manualYOY) { entry in
                 addEntry(entry)
                 resetManualFields()
             }
@@ -384,7 +380,12 @@ struct CaptureView: View {
                 HStack(spacing: 12) {
                     ForEach(SpeciesCatalog.featuredSpecies, id: \.self) { species in
                         Button {
-                            addEntry(ParsedEntry(species: species, sizeLabel: currentSizeClassLabel, count: 1, note: nil))
+                            let entry = SurveyEntry(species: species,
+                                                    sizeBin: activeSizeBin,
+                                                    count: 1,
+                                                    isYOY: false,
+                                                    note: nil)
+                            addEntry(entry)
                         } label: {
                             Text(species)
                                 .padding(.horizontal, 16)
@@ -409,9 +410,9 @@ struct CaptureView: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.mutedText)
             Menu {
-                ForEach(sizeClassPresets) { preset in
-                    Button(action: { selectedSizeClassID = preset.persistentModelID }) {
-                        Label(preset.label, systemImage: preset.persistentModelID == selectedSizeClassID ? "checkmark" : "")
+                ForEach(SizeBin.ordered, id: \.self) { bin in
+                    Button(action: { activeSizeBin = bin }) {
+                        Label(bin.title, systemImage: bin == activeSizeBin ? "checkmark" : "")
                     }
                 }
             } label: {
@@ -432,18 +433,21 @@ struct CaptureView: View {
             Label("Erfasste Einträge", systemImage: "fish.fill")
                 .font(.headline)
                 .foregroundStyle(AppTheme.mutedText)
-            if survey.entries.isEmpty {
+            if store.entries.isEmpty {
                 ContentUnavailableView("Noch keine Fische erfasst",
                                        systemImage: "fish",
                                        description: Text("Starte die Aufnahme oder füge manuell Einträge hinzu."))
                 .foregroundStyle(.white)
             } else {
                 LazyVStack(alignment: .leading, spacing: 12) {
-                    ForEach(survey.entries.sorted(by: { $0.createdAt > $1.createdAt })) { entry in
+                    ForEach(store.entries) { entry in
                         EntryCard(entry: entry)
-                            .contextMenu {
-                                Button("Löschen", role: .destructive) {
-                                    delete(entry)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    withAnimation { store.delete(entry) }
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                } label: {
+                                    Label("Löschen", systemImage: "trash")
                                 }
                             }
                     }
@@ -453,32 +457,24 @@ struct CaptureView: View {
         .glassCard()
     }
 
-    private func addEntry(_ parsed: ParsedEntry) {
+    private func addEntry(_ entry: SurveyEntry) {
         guard store.currentSurvey != nil else { return }
-        let canonical = book.canonicalName(for: parsed.species)
+        var normalized = entry
+        normalized.species = book.canonicalName(for: entry.species)
         withAnimation {
-            store.addEntry(species: canonical,
-                           sizeLabel: parsed.sizeLabel,
-                           count: parsed.count,
-                           note: parsed.note)
-            infoBanner = "Erfasst: \(canonical) – \(parsed.sizeLabel) – \(parsed.count)x"
+            store.add(normalized)
+            infoBanner = "Erfasst: \(normalized.species) – \(normalized.sizeBin.title) – \(normalized.count)x"
         }
     }
 
     private func undoLastEntry() {
-        guard let last = survey.entries.sorted(by: { $0.createdAt < $1.createdAt }).last else {
+        guard let last = store.entries.first else {
             infoBanner = "Kein Eintrag zum Löschen."
             return
         }
         withAnimation {
-            store.remove(last)
+            store.delete(last)
             infoBanner = "Letzten Eintrag gelöscht."
-        }
-    }
-
-    private func delete(_ entry: CountEntry) {
-        withAnimation {
-            store.remove(entry)
         }
     }
 
@@ -489,48 +485,33 @@ struct CaptureView: View {
     }
 
     private func processUtterance(_ utterance: String) {
-        let catalog = book.namesAndAliases()
-        if let parsed = UtteranceParser.parse(utterance, speciesCatalog: catalog) {
+        if let parsed = entry(from: utterance, fallbackBin: activeSizeBin) {
             addEntry(parsed)
         } else {
             guard store.currentSurvey != nil else { return }
             withAnimation {
-                store.addEntry(species: "Unbestimmt",
-                               sizeLabel: "bis 5 cm",
-                               count: 1,
-                               note: utterance)
+                let noteEntry = SurveyEntry(species: "Unbestimmt",
+                                            sizeBin: activeSizeBin,
+                                            count: 1,
+                                            isYOY: detectYOY(utterance),
+                                            note: utterance)
+                store.add(noteEntry)
                 infoBanner = "Nicht erkannt, als Notiz gespeichert."
             }
         }
-    }
-
-    private func ensureDefaultSizeClasses() async {
-        if !sizeClassPresets.isEmpty { return }
-        let defaults: [SizeClassPreset] = [
-            SizeClassPreset(label: "0–5 cm", lowerBound: 0, upperBound: 5, isDefault: true),
-            SizeClassPreset(label: "6–10 cm", lowerBound: 6, upperBound: 10, isDefault: true),
-            SizeClassPreset(label: "11–15 cm", lowerBound: 11, upperBound: 15, isDefault: true),
-            SizeClassPreset(label: "16–20 cm", lowerBound: 16, upperBound: 20, isDefault: true)
-        ]
-        defaults.forEach(context.insert)
-        try? context.save()
     }
 
     private func resetManualFields() {
         manualSpecies = ""
         manualCount = 1
         manualComment = ""
+        manualYOY = false
     }
 
-    private var currentSizeClassLabel: String {
-        if let selected = sizeClassPresets.first(where: { $0.persistentModelID == selectedSizeClassID }) {
-            return selected.label
-        }
-        return sizeClassPresets.first?.label ?? "bis 5 cm"
-    }
+    private var currentSizeClassLabel: String { activeSizeBin.title }
 
     private var speechContextStrings: [String] {
-        let extras = ["bis", "cm", "zentimeter", "stück", "jungfische"] + Array(UtteranceParser.numberWords.keys)
+        let extras = ["bis", "cm", "zentimeter", "stück", "jungfische"] + Array(voiceNumberWords.keys)
         return Array(Set(book.namesAndAliases() + extras))
     }
 
@@ -681,7 +662,7 @@ private struct VoiceCommandExampleRow: View {
 }
 
 private struct EntryCard: View {
-    let entry: CountEntry
+    let entry: SurveyEntry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -689,16 +670,21 @@ private struct EntryCard: View {
                 Text(entry.species)
                     .font(.headline)
                 Spacer()
-                Text(entry.createdAt, style: .time)
+                Text(entry.timestamp, style: .time)
                     .font(.caption)
                     .foregroundStyle(AppTheme.subtleText)
             }
-            Text(entry.sizeClass)
+            Text(entry.sizeBin.title)
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.subtleText)
             HStack(spacing: 8) {
                 Label("\(entry.count) Stück", systemImage: "number")
-                if let comment = entry.comment, !comment.isEmpty {
+                if entry.isYOY {
+                    Divider().frame(height: 12)
+                    Label("0+", systemImage: "leaf")
+                        .labelStyle(.titleAndIcon)
+                }
+                if let comment = entry.note, !comment.isEmpty {
                     Divider().frame(height: 12)
                     Label(comment, systemImage: "text.bubble")
                         .labelStyle(.titleAndIcon)

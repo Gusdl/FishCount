@@ -2,18 +2,27 @@ import XCTest
 @testable import Fischbestand
 
 final class UtteranceParserTests: XCTestCase {
-    let species = ["Barsch", "Hecht", "Karpfen", "Zander", "Forelle"]
+    override func setUp() {
+        super.setUp()
+        SpeciesCatalog.save(SpeciesCatalog.defaults)
+    }
 
-    func testBis5() {
-        let p = UtteranceParser.parse("Barsch bis 5 cm fünf Stück", speciesCatalog: species)!
-        XCTAssertEqual(p.species, "Barsch"); XCTAssertEqual(p.sizeLabel, "bis 5 cm"); XCTAssertEqual(p.count, 5)
+    func testUpperBoundBinning() {
+        let result = entry(from: "Barsch bis 5 cm fünf Stück", fallbackBin: .gt10to15)
+        XCTAssertEqual(result?.species, "Barsch")
+        XCTAssertEqual(result?.sizeBin, .le5)
+        XCTAssertEqual(result?.count, 5)
     }
-    func testRange() {
-        let p = UtteranceParser.parse("Forelle 10 bis 15 Zentimeter 3 Stück", speciesCatalog: species)!
-        XCTAssertEqual(p.sizeLabel, "10–15 cm"); XCTAssertEqual(p.count, 3)
+
+    func testRangeBinning() {
+        let result = entry(from: "Forelle 10 bis 15 Zentimeter 3 Stück", fallbackBin: .le5)
+        XCTAssertEqual(result?.sizeBin, .gt10to15)
+        XCTAssertEqual(result?.count, 3)
     }
-    func testWords() {
-        let p = UtteranceParser.parse("Zander bis 8 cm zehn Stück Jungfische", speciesCatalog: species)!
-        XCTAssertEqual(p.count, 10); XCTAssertEqual(p.note, "Jungfische")
+
+    func testWordNumbersAndYOY() {
+        let result = entry(from: "Zander bis 8 cm zehn Stück Jungfische", fallbackBin: .le5)
+        XCTAssertEqual(result?.count, 10)
+        XCTAssertTrue(result?.isYOY ?? false)
     }
 }

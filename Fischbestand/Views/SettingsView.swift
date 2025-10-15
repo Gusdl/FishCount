@@ -1,130 +1,40 @@
 import SwiftUI
-import SwiftData
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var book: SpeciesBook
+    @State private var speciesList: [Species] = SpeciesCatalog.load()
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("Voreinstellungen")) {
-                    NavigationLink("Größenklassen verwalten") {
-                        SizeClassManagementView()
-                    }
-                    NavigationLink("Artenbuch bearbeiten") {
-                        SpeciesBookView()
-                    }
+            List {
+                ForEach(Array($speciesList.enumerated()), id: \.offset) { _, $species in
+                    TextField("Art", text: $species.name)
+                        .textInputAutocapitalization(.words)
                 }
+                .onDelete { speciesList.remove(atOffsets: $0) }
 
-                Section(header: Text("Über")) {
-                    Label("Offline-first Sprachzählung", systemImage: "waveform")
-                    Label("Version 0.1", systemImage: "info.circle")
+                Button {
+                    speciesList.append(Species(name: ""))
+                } label: {
+                    Label("Art hinzufügen", systemImage: "plus")
                 }
             }
-            .navigationTitle("Einstellungen")
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.backgroundGradient.ignoresSafeArea())
-        }
-    }
-}
-
-private struct SizeClassManagementView: View {
-    @Environment(\.modelContext) private var context
-    @Query(sort: \SizeClassPreset.label) private var sizeClasses: [SizeClassPreset]
-    @State private var label: String = ""
-    @State private var lowerBound: String = ""
-    @State private var upperBound: String = ""
-    @State private var didLoadDefaults = false
-
-    var body: some View {
-        List {
-            Section(header: Text("Bestehende Klassen")) {
-                if sizeClasses.isEmpty {
-                    ContentUnavailableView("Keine Klassen", systemImage: "ruler",
-                                           description: Text("Füge deine ersten Größenklassen hinzu."))
-                    .foregroundStyle(.white)
-                } else {
-                    ForEach(sizeClasses) { preset in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(preset.label)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                            Text(boundsText(for: preset))
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.subtleText)
-                        }
+            .navigationTitle("Artenbuch")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Schließen") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Speichern") {
+                        let cleaned = speciesList.filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+                        SpeciesCatalog.save(cleaned)
+                        book.items = cleaned.map { SpeciesEntry(name: $0.name, aliases: $0.aliases) }
+                        dismiss()
                     }
-                    .onDelete { indexSet in
-                        indexSet.map { sizeClasses[$0] }.forEach(context.delete)
-                        try? context.save()
-                    }
+                    .disabled(speciesList.allSatisfy { $0.name.trimmingCharacters(in: .whitespaces).isEmpty })
                 }
             }
-
-            Section(header: Text("Neue Klasse")) {
-                TextField("Bezeichnung", text: $label)
-                    .foregroundStyle(.white)
-                HStack {
-                    TextField("ab", text: $lowerBound)
-                        .keyboardType(.numberPad)
-                        .foregroundStyle(.white)
-                    Text("bis")
-                        .foregroundStyle(AppTheme.subtleText)
-                    TextField("bis", text: $upperBound)
-                        .keyboardType(.numberPad)
-                        .foregroundStyle(.white)
-                }
-                Button("Hinzufügen") {
-                    addPreset()
-                }
-                .disabled(label.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
-        .navigationTitle("Größenklassen")
-        .toolbar { EditButton().tint(.white) }
-        .task {
-            await ensureDefaultSizeClasses()
-        }
-        .background(AppTheme.backgroundGradient.ignoresSafeArea())
-    }
-
-    private func addPreset() {
-        let lower = Int(lowerBound)
-        let upper = Int(upperBound)
-        let preset = SizeClassPreset(label: label, lowerBound: lower, upperBound: upper, isDefault: false)
-        context.insert(preset)
-        try? context.save()
-        label = ""
-        lowerBound = ""
-        upperBound = ""
-    }
-
-    private func ensureDefaultSizeClasses() async {
-        guard !didLoadDefaults else { return }
-        if sizeClasses.isEmpty {
-            let defaults: [SizeClassPreset] = [
-                SizeClassPreset(label: "0–5 cm", lowerBound: 0, upperBound: 5, isDefault: true),
-                SizeClassPreset(label: "6–10 cm", lowerBound: 6, upperBound: 10, isDefault: true),
-                SizeClassPreset(label: "11–15 cm", lowerBound: 11, upperBound: 15, isDefault: true),
-                SizeClassPreset(label: "16–20 cm", lowerBound: 16, upperBound: 20, isDefault: true)
-            ]
-            defaults.forEach(context.insert)
-            try? context.save()
-        }
-        didLoadDefaults = true
-    }
-
-    private func boundsText(for preset: SizeClassPreset) -> String {
-        switch (preset.lowerBound, preset.upperBound) {
-        case let (low?, high?):
-            return "\(low) – \(high) cm"
-        case let (low?, nil):
-            return "ab \(low) cm"
-        case let (nil, high?):
-            return "bis \(high) cm"
-        default:
-            return "Freier Text"
         }
     }
 }

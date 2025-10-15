@@ -11,11 +11,12 @@ objects = {
 5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */; };
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9032B1EFD1C009A2F11 /* Survey.swift */; };
 /* Added new build files */
-B4D9F0012C6B2E7A00AA1234 /* UtteranceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */; };
+B4D9F0012C6B2E7A00AA1234 /* VoiceParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF22C6B2E2E00AA1234 /* VoiceParser.swift */; };
 B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */; };
 B4D9F0032C6B2E7A00AA1234 /* SpeciesBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */; };
 B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */; };
-B4D9F0062C6B2E7A00AA1234 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */; };
+B4E0AAA32C8B12340000AAAA /* SizeBin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E0AAA12C8B12340000AAAA /* SizeBin.swift */; };
+B4E0AAA42C8B12340000AAAA /* SurveyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E0AAA22C8B12340000AAAA /* SurveyEntry.swift */; };
 5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9052B1EFD1C009A2F11 /* Exporters.swift */; };
 5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9062B1EFD1C009A2F11 /* ShareSheet.swift */; };
 5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F15C9072B1EFD1C009A2F11 /* SpeciesCatalog.swift */; };
@@ -42,7 +43,9 @@ B4D9F0052C6B2E7A00AA1234 /* UtteranceParserTests.swift in Sources */ = {isa = PB
 5F15C9022B1EFD1C009A2F11 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
 B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 5F15C9032B1EFD1C009A2F11 /* Survey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Survey.swift; sourceTree = "<group>"; };
-B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtteranceParser.swift; sourceTree = "<group>"; };
+B4E0AAA12C8B12340000AAAA /* SizeBin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeBin.swift; sourceTree = "<group>"; };
+B4E0AAA22C8B12340000AAAA /* SurveyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyEntry.swift; sourceTree = "<group>"; };
+B4D9EFF22C6B2E2E00AA1234 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
 B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBook.swift; sourceTree = "<group>"; };
 B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBookView.swift; sourceTree = "<group>"; };
 B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyStore.swift; sourceTree = "<group>"; };
@@ -71,8 +74,7 @@ B3C21CF397254470ACF7CA44 /* Info.plist */ = {isa = PBXFileReference; lastKnownFi
     isa = PBXFrameworksBuildPhase;
     buildActionMask = 2147483647;
     files = (
-        97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */,
-        B4D9F0062C6B2E7A00AA1234 /* ZIPFoundation in Frameworks */
+        97945E49A1AB40C0BBF1D84E /* Charts.framework in Frameworks */
     );
     runOnlyForDeploymentPostprocessing = 0;
 };
@@ -153,6 +155,8 @@ sourceTree = "<group>";
     isa = PBXGroup;
     children = (
         5F15C9032B1EFD1C009A2F11 /* Survey.swift */,
+        B4E0AAA12C8B12340000AAAA /* SizeBin.swift */,
+        B4E0AAA22C8B12340000AAAA /* SurveyEntry.swift */,
         B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */
     );
     name = Models;
@@ -162,7 +166,7 @@ sourceTree = "<group>";
 5F15C8EB2B1EFD1C009A2F11 /* Services */ = {
     isa = PBXGroup;
     children = (
-        B4D9EFF22C6B2E2E00AA1234 /* UtteranceParser.swift */
+        B4D9EFF22C6B2E2E00AA1234 /* VoiceParser.swift */
     );
     name = Services;
     path = Services;
@@ -242,7 +246,6 @@ buildConfigurationList = 5F15C9142B1EFD1C009A2F11 /* Build configuration list fo
     dependencies = (
     );
     packageProductDependencies = (
-        B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */
     );
     name = Fischbestand;
     productName = Fischbestand;
@@ -315,7 +318,6 @@ Base
     projectDirPath = "";
     projectRoot = "";
     packageReferences = (
-        B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */
     );
     targets = (
         5F15C8F92B1EFD1C009A2F11 /* Fischbestand */,
@@ -381,7 +383,7 @@ B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
 5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
         B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */,
         B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */,
-        B4D9F0012C6B2E7A00AA1234 /* UtteranceParser.swift in Sources */,
+        B4D9F0012C6B2E7A00AA1234 /* VoiceParser.swift in Sources */,
         5F15C9242B1EFD1C009A2F11 /* Exporters.swift in Sources */,
         5F15C9252B1EFD1C009A2F11 /* ShareSheet.swift in Sources */,
         5F15C9262B1EFD1C009A2F11 /* SpeciesCatalog.swift in Sources */,
@@ -393,8 +395,10 @@ B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
         5F15C92C2B1EFD1C009A2F11 /* SettingsView.swift in Sources */,
         B4D9F0032C6B2E7A00AA1234 /* SpeciesBookView.swift in Sources */,
         5F15C92D2B1EFD1C009A2F11 /* SurveyDetailView.swift in Sources */,
-5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */,
-95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */
+        5F15C92E2B1EFD1C009A2F11 /* SurveyListView.swift in Sources */,
+        95231342EE0C483E95F94599 /* FuzzyMatcher.swift in Sources */,
+        B4E0AAA32C8B12340000AAAA /* SizeBin.swift in Sources */,
+        B4E0AAA42C8B12340000AAAA /* SurveyEntry.swift in Sources */
 );
 runOnlyForDeploymentPostprocessing = 0;
 };
@@ -410,22 +414,9 @@ runOnlyForDeploymentPostprocessing = 0;
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-    isa = XCRemoteSwiftPackageReference;
-    repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
-    requirement = {
-        kind = upToNextMajorVersion;
-        minimumVersion = 0.9.0;
-    };
-};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-B4D9F0072C6B2E7A00AA1234 /* ZIPFoundation */ = {
-    isa = XCSwiftPackageProductDependency;
-    package = B4D9F0082C6B2E7A00AA1234 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-    productName = ZIPFoundation;
-};
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */

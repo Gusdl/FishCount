@@ -42,8 +42,8 @@ compatible hardware.
 
 ## 4. Harden the Language Model Against Confusion
 
-`UtteranceParser` erkennt Satzfragmente über Wortlisten und Levenshtein-Abgleich
-gegen den Artenkatalog.【F:Fischbestand/Services/UtteranceParser.swift†L1-L74】 Improve
+`VoiceParser` erkennt Satzfragmente über Wortlisten und Größenklassen-Binning
+gegen den Artenkatalog.【F:Fischbestand/Services/VoiceParser.swift†L1-L69】 Improve
 its resilience by:
 
 - Extending the species alias list with common mis-hearings (e.g. "Barsch" ↔

@@ -9,18 +9,13 @@ struct SpeciesEntry: Identifiable, Codable, Equatable {
 final class SpeciesBook: ObservableObject {
     @Published var items: [SpeciesEntry] = [] { didSet { save() } }
 
-    private let url: URL = {
-        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return dir.appendingPathComponent("species_book.json")
-    }()
-
     init(defaultSpecies: [String] = SpeciesCatalog.defaultSpecies) {
-        if let data = try? Data(contentsOf: url),
-           let decoded = try? JSONDecoder().decode([SpeciesEntry].self, from: data) {
-            items = decoded
-        } else {
+        let existing = SpeciesCatalog.load()
+        if existing.isEmpty {
             items = defaultSpecies.map { SpeciesEntry(name: $0) }
             save()
+        } else {
+            items = existing.map { SpeciesEntry(name: $0.name, aliases: $0.aliases) }
         }
     }
 
@@ -49,8 +44,7 @@ final class SpeciesBook: ObservableObject {
     }
 
     private func save() {
-        if let data = try? JSONEncoder().encode(items) {
-            try? data.write(to: url, options: .atomic)
-        }
+        let species = items.map { Species(name: $0.name, aliases: $0.aliases) }
+        SpeciesCatalog.save(species)
     }
 }
