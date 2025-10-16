@@ -31,6 +31,13 @@ Fischbestand/
 │   ├── SpeciesBook.swift       // Persistenter Artenkatalog mit Aliassen
 │   └── Survey.swift            // SwiftData-Modelle (Survey, CountEntry)
 ├── Services/
+│   ├── Speech/
+│   │   ├── AppleSpeechBackend.swift   // Apple Speech (SFSpeechRecognizer) Wrapper mit Kontext-Hints
+│   │   ├── SpeechBackend.swift        // Gemeinsame Schnittstelle + Fehlerdefinitionen
+│   │   ├── SpeechHints.swift          // Kontextwörter für Spracherkennung
+│   │   ├── UtteranceAggregator.swift  // Debounce & stillebasierte Commit-Logik
+│   │   ├── WhisperBackend.swift       // WhisperKit-Schnittstelle (Platzhalter für Streaming)
+│   │   └── WhisperModelManager.swift  // Download & Pflege der Whisper-Modelle
 │   └── VoiceParser.swift       // Parser für gesprochene Größen & Mengen
 ├── Utilities/
 │   ├── Exporters.swift         // CSV-/JSON-Erzeugung & Temp-Dateien
@@ -59,10 +66,17 @@ Fischbestand/
 
 ## Erste Schritte
 
-1. `Fischbestand.xcodeproj` in Xcode 15 (oder neuer) öffnen.
-2. Ziel-Schema `Fischbestand` auswählen.
-3. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
-4. Auf einem iOS 17 Gerät oder Simulator ausführen.
+1. Einmalig `brew install xcodegen` ausführen (oder das Binary von <https://github.com/yonaskolb/XcodeGen> beziehen).
+2. Im Repo-Root `xcodegen generate --spec project.yml` starten, um das Xcode-Projekt samt SPM-Dependencies (WhisperKit, ZIPFoundation) zu erzeugen.
+3. `Fischbestand.xcodeproj` in Xcode 15 (oder neuer) öffnen und das Schema `Fischbestand` wählen.
+4. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
+5. Auf einem iOS 17 Gerät oder Simulator ausführen.
+
+## Whisper-Integration
+
+- `SpeechManager` kapselt jetzt austauschbare Backends. Standardmäßig nutzt die App weiterhin das Apple Speech Framework (`AppleSpeechBackend`).
+- Über `SpeechManager.setWhisperEnabled(true, remoteURL: ...)` kann Whisper aktiviert werden. Der Aufruf triggert `WhisperModelManager`, der ein konfiguriertes Modellpaket (z. B. `whisper-small-int8.mlmodelc` in einem ZIP) in den Application-Support lädt.
+- Das Repository bringt einen Stub für `WhisperBackend` mit. Sobald WhisperKit eingebunden ist, kann dort die projektspezifische Streaming-Initialisierung ergänzt werden. Ohne WhisperKit fällt `SpeechManager` automatisch auf das Apple-Backend zurück.
 
 ## Tests
 
@@ -71,7 +85,7 @@ Fischbestand/
 
 ## Continuous Integration
 
-Ein GitHub Actions Workflow (`.github/workflows/ios-ci.yml`) baut das Projekt auf `macos-14` mit Xcode 15.4. Der Job führt `xcodebuild` gegen das geteilte Schema aus und deaktiviert Codesigning, so dass ein schneller Plausibilitäts-Check für Pull Requests entsteht.
+Der GitHub-Actions-Workflow `.github/workflows/ios-testflight.yml` baut das Projekt auf `macos-14` mit Xcode 16.1. Vor dem Archive-Lauf wird via `xcodegen generate --spec project.yml` ein frisches Xcode-Projekt mit WhisperKit- und ZIPFoundation-Abhängigkeiten erzeugt. Der Job deaktiviert Codesigning beim Build, exportiert anschließend aber ein unterschriftsfähiges IPA für TestFlight.
 
 ## Git & Merge-Tipps
 
