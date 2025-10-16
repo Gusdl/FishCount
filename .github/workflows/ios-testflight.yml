@@ -184,7 +184,7 @@ jobs:
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
       #       CODE_SIGNING_ALLOWED=NO build
 
-      - name: Remove test Info.plist from app target (once-off fix)
+      - name: Sanitize project: remove stray Info.plist from app resources
         run: |
           set -euxo pipefail
           gem install xcodeproj
@@ -192,20 +192,27 @@ jobs:
           require 'xcodeproj'
           proj_path = 'Fischbestand.xcodeproj'
           proj = Xcodeproj::Project.open(proj_path)
-          app_target = proj.targets.find { |t| t.name == 'Fischbestand' }
-          test_info = proj.files.find { |f| f.path&.end_with?('FischbestandTests/Info.plist') }
-          if test_info && app_target
-            app_target.resources_build_phase.files.each do |bf|
-              if bf.file_ref == test_info
-                app_target.resources_build_phase.remove_build_file(bf)
-                puts "Removed #{test_info.path} from app target resources"
-              end
+          app = proj.targets.find { |t| t.name == 'Fischbestand' }
+          rbp = app&.resources_build_phase
+          removed = 0
+          if rbp
+            rbp.files.dup.each do |bf|
+              ref = bf.file_ref
+              next unless ref && ref.path && File.basename(ref.path) == 'Info.plist'
+              rbp.remove_build_file(bf)
+              removed += 1
             end
-          else
-            puts 'No test Info.plist found (nothing to fix)'
           end
           proj.save
+          puts "Removed #{removed} Info.plist from app resources"
           RUBY
+
+      - name: Build (simulator, debug - diagnostics)
+        run: |
+          set -euxo pipefail
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
+            CODE_SIGNING_ALLOWED=NO build
 
       - name: Archive (device, Release, manual signing)
         run: |
@@ -220,6 +227,7 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
             PROVISIONING_PROFILE="$PP_UUID" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
+            INFOPLIST_FILE=Fischbestand/Resources/Info.plist \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
             IPHONEOS_DEPLOYMENT_TARGET=16.0
 
