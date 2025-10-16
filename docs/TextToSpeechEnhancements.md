@@ -7,9 +7,9 @@ challenging soundscapes.
 
 ## 1. Start from a Playback-Centric Audio Session
 
-`SpeechManager` currently configures an `.record` category with
+`AppleSpeechBackend` currently configures an `.record` session with
 `.duckOthers` when starting recognition so that surrounding apps lower their
-volume.【F:Fischbestand/Managers/SpeechManager.swift†L66-L103】 When the app
+volume.【F:Fischbestand/Services/Speech/AppleSpeechBackend.swift†L24-L34】 When the app
 needs to speak, temporarily switching to a playback-friendly session
 configuration—such as `.playAndRecord` or `.spokenAudio` with
 `.defaultToSpeaker`, `.allowBluetooth`, and `.duckOthers`—ensures the prompt is
@@ -19,12 +19,13 @@ finishes preserves the recognition pipeline.
 
 ## 2. Dynamically Boost Synthesizer Output
 
-The RMS analysis in `bufferContainsSpeech(_:)` already calculates ambient power
-levels to detect speech events.【F:Fischbestand/Managers/SpeechManager.swift†L108-L144】
-Reusing that rolling noise estimate lets you scale the `AVSpeechUtterance`
-`volume` and `preUtteranceDelay` on the fly: boost volume or pause longer before
-playback when outdoor noise exceeds a defined threshold. This keeps cues audible
-without hard-coding a single gain level.
+The audio tap inside `AppleSpeechBackend` already receives raw buffers before
+they are forwarded to the speech recogniser.【F:Fischbestand/Services/Speech/AppleSpeechBackend.swift†L36-L44】
+By extending that closure to compute RMS power levels you can derive a rolling
+noise estimate and scale the `AVSpeechUtterance.volume` or
+`preUtteranceDelay` on the fly. Boost volume—or pause longer—whenever outdoor
+noise exceeds a defined threshold. This keeps cues audible without hard-coding a
+single gain level.
 
 ## 3. Prefer High-Intelligibility Voices
 

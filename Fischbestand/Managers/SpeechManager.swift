@@ -1,21 +1,14 @@
-import AVFoundation
-import Speech
+import Foundation
 
 @MainActor
 final class SpeechManager: ObservableObject {
     @Published var isRecording = false
     @Published var latestText: String = ""
     @Published var lastInfo: String?
-
-    private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "de-DE"))
-    private var audioEngine = AVAudioEngine()
-    private var request: SFSpeechAudioBufferRecognitionRequest?
-    private var task: SFSpeechRecognitionTask?
-
-    private var bufferText: String = ""
-    private var debounceWorkItem: DispatchWorkItem?
-    private var currentTranscript: String = ""
-    private var processedTranscript: String = ""
+    @Published private(set) var useWhisper = false
+    @Published var isLoadingWhisperModel = false
+    @Published var whisperDownloadProgress: Double = 0
+    @Published var whisperError: String?
 
     var speciesCatalog: [String] = SpeciesCatalog.all
     var activeDefaultSize: SizeRange?
@@ -23,102 +16,164 @@ final class SpeechManager: ObservableObject {
     var onCommands: (([ParsedCommand]) -> Void)?
     var onUnrecognized: ((String) -> Void)?
 
+    private var backend: SpeechBackend
+    private var pendingBuffer: String = ""
+    private var whisperRemoteURL: URL?
+
+    init() {
+        backend = AppleSpeechBackend()
+
+        #if canImport(WhisperKit)
+        if let whisperBackend = makeWhisperBackend() {
+            backend = whisperBackend
+            useWhisper = true
+        } else {
+            backend = makeAppleBackend()
+        }
+        #else
+        backend = makeAppleBackend()
+        #endif
+
+        wireBackend()
+    }
+
+    func configureWhisper(modelName: String? = nil, remoteURL: URL? = nil) {
+        if let modelName, !modelName.isEmpty {
+            WhisperModelManager.shared.modelName = modelName
+        }
+        if let remoteURL {
+            whisperRemoteURL = remoteURL
+            WhisperModelManager.shared.remoteArchiveURL = remoteURL
+        }
+    }
+
+    func setWhisperEnabled(_ enabled: Bool, remoteURL: URL? = nil) {
+        if let remoteURL {
+            configureWhisper(remoteURL: remoteURL)
+        }
+
+        guard enabled else {
+            switchBackend(useWhisper: false)
+            return
+        }
+
+        guard !isRecording else {
+            lastInfo = "Bitte Aufnahme beenden, bevor Whisper aktiviert wird."
+            return
+        }
+
+        let manager = WhisperModelManager.shared
+        if manager.remoteArchiveURL == nil, let whisperRemoteURL {
+            manager.remoteArchiveURL = whisperRemoteURL
+        }
+
+        if manager.isModelAvailable {
+            switchBackend(useWhisper: true)
+            return
+        }
+
+        guard manager.remoteArchiveURL != nil else {
+            let message = "Keine Download-Quelle für Whisper konfiguriert."
+            whisperError = message
+            lastInfo = message
+            switchBackend(useWhisper: false)
+            return
+        }
+
+        isLoadingWhisperModel = true
+        whisperDownloadProgress = 0
+        whisperError = nil
+
+        manager.ensureModelAvailable(progress: { [weak self] value in
+            Task { @MainActor in
+                self?.whisperDownloadProgress = value
+            }
+        }, completion: { [weak self] result in
+            Task { @MainActor in
+                guard let self else { return }
+                self.isLoadingWhisperModel = false
+                switch result {
+                case .success:
+                    self.switchBackend(useWhisper: true)
+                case .failure(let error):
+                    self.whisperError = error.localizedDescription
+                    self.lastInfo = "Whisper konnte nicht geladen werden: \(error.localizedDescription)"
+                    self.switchBackend(useWhisper: false)
+                }
+            }
+        })
+    }
+
     func start() throws {
         guard !isRecording else { return }
         lastInfo = "Höre zu …"
-        bufferText = ""
-        currentTranscript = ""
-        processedTranscript = ""
+        pendingBuffer = ""
         latestText = ""
-        try setupAudio()
-        isRecording = true
+        do {
+            try backend.start()
+            isRecording = true
+        } catch {
+            if useWhisper {
+                lastInfo = "Whisper nicht verfügbar (\(error.localizedDescription)), wechsle zu Apple Speech."
+                switchBackend(useWhisper: false)
+                do {
+                    try backend.start()
+                    isRecording = true
+                    lastInfo = "Höre zu …"
+                    return
+                } catch {
+                    lastInfo = "Spracherkennung fehlgeschlagen: \(error.localizedDescription)"
+                    throw error
+                }
+            } else {
+                lastInfo = "Spracherkennung fehlgeschlagen: \(error.localizedDescription)"
+                throw error
+            }
+        }
     }
 
-    func stop() {
-        guard isRecording else { return }
-        debounceWorkItem?.cancel()
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
-        request?.endAudio()
-        task?.cancel()
-        task = nil
-        request = nil
+    func stop(reason: String? = nil) {
+        backend.stop()
+        let wasRecording = isRecording
         isRecording = false
-        bufferText = ""
-        currentTranscript = ""
-        processedTranscript = ""
-        lastInfo = "Aufnahme gestoppt."
+        pendingBuffer = ""
+        if let reason {
+            lastInfo = reason
+        } else if wasRecording {
+            lastInfo = "Aufnahme gestoppt."
+        }
     }
 
-    private func setupAudio() throws {
-        guard let recognizer else { throw NSError(domain: "Speech", code: -1) }
-
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth])
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
-
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        self.request = request
-
-        let inputNode = audioEngine.inputNode
-        let format = inputNode.outputFormat(forBus: 0)
-        inputNode.removeTap(onBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak request] buffer, _ in
-            request?.append(buffer)
+    private func wireBackend() {
+        backend.onPartial = { [weak self] transcript in
+            Task { @MainActor in
+                self?.latestText = transcript
+            }
         }
-
-        audioEngine.prepare()
-        try audioEngine.start()
-
-        task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                if let result {
-                    let transcript = result.bestTranscription.formattedString
-                    self.onPartial(transcript: transcript)
-                    if result.isFinal {
-                        self.flush()
-                    }
-                }
-                if let error {
-                    self.lastInfo = "Spracherkennung beendet (\(error.localizedDescription))"
-                    self.stop()
-                }
+        backend.onUtterance = { [weak self] utterance in
+            Task { @MainActor in
+                self?.handleUtterance(utterance)
+            }
+        }
+        backend.onError = { [weak self] error in
+            Task { @MainActor in
+                self?.handleBackendError(error)
             }
         }
     }
 
-    private func onPartial(transcript: String) {
-        latestText = transcript
-        let lower = transcript.lowercased()
-        currentTranscript = lower
-
-        if !processedTranscript.isEmpty, lower.hasPrefix(processedTranscript) {
-            let startIndex = lower.index(lower.startIndex, offsetBy: processedTranscript.count)
-            let suffix = lower[startIndex...]
-            bufferText = suffix.trimmingCharacters(in: .whitespacesAndNewlines)
-        } else {
-            bufferText = lower.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !processedTranscript.isEmpty, !lower.hasPrefix(processedTranscript) {
-                processedTranscript = ""
-            }
+    private func handleUtterance(_ utterance: String) {
+        latestText = utterance
+        let normalized = utterance.lowercased()
+        if !pendingBuffer.isEmpty {
+            pendingBuffer.append(" ")
         }
-
-        debounceWorkItem?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            self?.processBuffer()
-        }
-        debounceWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: work)
+        pendingBuffer.append(normalized)
+        processPending(force: true)
     }
 
-    private func flush() {
-        processBuffer(force: true)
-    }
-
-    private func processBuffer(force: Bool = false) {
-        let text = bufferText.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func processPending(force: Bool) {
+        let text = pendingBuffer.trimmingCharacters(in: .whitespacesAndNewlines)
         guard force || !text.isEmpty else { return }
 
         let result = VoiceParser.extractCommands(from: text,
@@ -128,13 +183,49 @@ final class SpeechManager: ObservableObject {
         if !result.commands.isEmpty {
             onCommands?(result.commands)
             lastInfo = "Erfasst: " + result.commands.map { "\($0.species) – \($0.sizeRange.label) – \($0.count)×" }.joined(separator: ", ")
-            bufferText = result.remainder
-            processedTranscript = currentTranscript
+            pendingBuffer = result.remainder
         } else if force, !text.isEmpty {
             onUnrecognized?(text)
             lastInfo = "Nicht erkannt, als Notiz gespeichert."
-            bufferText = ""
-            processedTranscript = currentTranscript
+            pendingBuffer = ""
         }
+    }
+
+    private func handleBackendError(_ error: Error) {
+        stop(reason: "Spracherkennung beendet (\(error.localizedDescription))")
+    }
+
+    private func switchBackend(useWhisper: Bool) {
+        backend.stop()
+        pendingBuffer = ""
+
+        if useWhisper, let whisperBackend = makeWhisperBackend() {
+            backend = whisperBackend
+            self.useWhisper = true
+            lastInfo = "Whisper aktiv."
+        } else {
+            if useWhisper {
+                lastInfo = "WhisperKit nicht verfügbar, nutze Apple Speech."
+            }
+            backend = makeAppleBackend()
+            self.useWhisper = false
+        }
+
+        wireBackend()
+    }
+
+    private func makeWhisperBackend() -> SpeechBackend? {
+        #if canImport(WhisperKit)
+        return WhisperBackend(modelURL: WhisperModelManager.shared.localModelURL)
+        #else
+        return nil
+        #endif
+    }
+
+    private func makeAppleBackend() -> SpeechBackend {
+        AppleSpeechBackend(contextWordsProvider: { [weak self] in
+            guard let self else { return SpeechHints.contextWords() }
+            return SpeechHints.contextWords(speciesCatalog: self.speciesCatalog)
+        })
     }
 }

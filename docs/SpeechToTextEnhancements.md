@@ -7,9 +7,9 @@ challenging soundscapes.
 
 ## 1. Anchor the Audio Session on Voice Capture Needs
 
-`SpeechManager` currently promotes a `.record` session with `.duckOthers` before
-starting recognition, prioritising microphone input while lowering surrounding
-app volumes.【F:Fischbestand/Managers/SpeechManager.swift†L66-L103】 Maintain that
+`AppleSpeechBackend` currently promotes a `.record` session with `.duckOthers`
+before starting recognition, prioritising microphone input while lowering
+surrounding app volumes.【F:Fischbestand/Services/Speech/AppleSpeechBackend.swift†L24-L34】 Maintain that
 profile as the default, but add explicit fallbacks:
 
 - When the ambient noise floor spikes, temporarily enable
@@ -21,9 +21,9 @@ profile as the default, but add explicit fallbacks:
 
 ## 2. Reuse RMS Analysis for Dynamic Noise Suppression
 
-The helper `bufferContainsSpeech(_:)` already computes RMS values to detect
-speech activity.【F:Fischbestand/Managers/SpeechManager.swift†L108-L144】 Persist
-that rolling average and feed it into:
+The audio tap in `AppleSpeechBackend` provides raw microphone buffers before
+they are appended to the recognition request.【F:Fischbestand/Services/Speech/AppleSpeechBackend.swift†L36-L44】 Persist a rolling
+RMS average there and feed it into:
 
 - Adaptive input gain adjustments via `AVAudioSession.setInputGain(_:)` where
   supported, lowering mic sensitivity when wind gusts clip.
