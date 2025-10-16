@@ -182,7 +182,7 @@ jobs:
       #     set -euxo pipefail
       #     xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
-      #       IPHONEOS_DEPLOYMENT_TARGET=17.0 build
+      #       CODE_SIGNING_ALLOWED=NO build
 
       - name: Remove test Info.plist from app target (once-off fix)
         run: |
@@ -212,11 +212,22 @@ jobs:
           set -euxo pipefail
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
             -destination 'generic/platform=iOS' -sdk iphoneos \
+            -resultBundlePath build/Build.xcresult \
             -archivePath "$PWD/build/$SCHEME.xcarchive" archive \
+            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGNING_ALLOWED=NO
+            PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
+            PROVISIONING_PROFILE="$PP_UUID" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
+            IPHONEOS_DEPLOYMENT_TARGET=16.0
+
+      - name: Upload build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: build/Build.xcresult
 
       - name: Export IPA
         run: |
