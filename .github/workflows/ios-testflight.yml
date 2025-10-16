@@ -181,7 +181,7 @@ jobs:
       #   run: |
       #     set -euxo pipefail
       #     xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
-      #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
+      #       -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
       #       CODE_SIGNING_ALLOWED=NO build
 
       - name: Sanitize project
@@ -211,7 +211,7 @@ jobs:
         run: |
           set -euxo pipefail
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
-            -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build
 
       - name: Archive (device, Release, manual signing)
