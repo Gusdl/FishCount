@@ -18,6 +18,9 @@ targets:
     platform: iOS
     sources:
       - path: Fischbestand
+        excludes:
+          - FischbestandTests/**
+          - FischbestandUITests/**
     resources:
       - path: Fischbestand/Resources
     info:
