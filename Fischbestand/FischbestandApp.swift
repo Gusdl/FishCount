@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 
+@available(iOS 17.0, *)
 @main
 struct FischbestandApp: App {
     @StateObject private var book = SpeciesBook()
