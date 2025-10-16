@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import Observation
 import CoreLocation
+import UIKit
 
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss
