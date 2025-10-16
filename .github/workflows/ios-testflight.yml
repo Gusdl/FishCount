@@ -99,12 +99,12 @@ jobs:
           RUBY
 
       # --- Archive (nur device, mit Signatur) ---
-      - name: Archive (device, Release)
+      - name: Build (device) with full log
         run: |
           set -euxo pipefail
+          mkdir -p build
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
             -destination 'generic/platform=iOS' -sdk iphoneos \
-            -resultBundlePath build/Build.xcresult \
             -archivePath "$PWD/build/$SCHEME.xcarchive" archive \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$TEAM_ID" \
@@ -113,7 +113,14 @@ jobs:
             PROVISIONING_PROFILE="$PP_UUID" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
-            IPHONEOS_DEPLOYMENT_TARGET=16.0
+            IPHONEOS_DEPLOYMENT_TARGET=16.0 \
+            | tee build/xcodebuild.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xcodebuild-log
+          path: build/xcodebuild.log
 
       # --- Export IPA ---
       - name: Export IPA
