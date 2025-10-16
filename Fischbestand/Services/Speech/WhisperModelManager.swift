@@ -80,16 +80,7 @@ final class WhisperModelManager {
             try fm.createDirectory(at: extractDir, withIntermediateDirectories: true)
             defer { try? fm.removeItem(at: extractDir) }
 
-            let archive: Archive
-            do {
-                archive = try Archive(url: url, accessMode: .read)
-            } catch {
-                if let fallbackArchive = try? Archive(url: url, accessMode: .read, preferredEncoding: .utf8) {
-                    archive = fallbackArchive
-                } else {
-                    throw error
-                }
-            }
+            let archive = try makeArchive(from: url)
 
             for entry in archive {
                 let destinationURL = extractDir.appendingPathComponent(entry.path)
@@ -109,6 +100,17 @@ final class WhisperModelManager {
             }
         } else {
             try finalizeArtifact(at: url)
+        }
+    }
+
+    private func makeArchive(from url: URL) throws -> Archive {
+        do {
+            return try Archive(url: url, accessMode: .read)
+        } catch {
+            if let fallbackArchive = try? Archive(url: url, accessMode: .read, preferredEncoding: .utf8) {
+                return fallbackArchive
+            }
+            throw error
         }
     }
 

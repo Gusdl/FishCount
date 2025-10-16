@@ -184,6 +184,29 @@ jobs:
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
       #       IPHONEOS_DEPLOYMENT_TARGET=17.0 build
 
+      - name: Remove test Info.plist from app target (once-off fix)
+        run: |
+          set -euxo pipefail
+          gem install xcodeproj
+          ruby - <<'RUBY'
+          require 'xcodeproj'
+          proj_path = 'Fischbestand.xcodeproj'
+          proj = Xcodeproj::Project.open(proj_path)
+          app_target = proj.targets.find { |t| t.name == 'Fischbestand' }
+          test_info = proj.files.find { |f| f.path&.end_with?('FischbestandTests/Info.plist') }
+          if test_info && app_target
+            app_target.resources_build_phase.files.each do |bf|
+              if bf.file_ref == test_info
+                app_target.resources_build_phase.remove_build_file(bf)
+                puts "Removed #{test_info.path} from app target resources"
+              end
+            end
+          else
+            puts 'No test Info.plist found (nothing to fix)'
+          end
+          proj.save
+          RUBY
+
       - name: Archive (device, Release, manual signing)
         run: |
           set -euxo pipefail
