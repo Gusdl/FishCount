@@ -34,6 +34,9 @@ final class WhisperModelManager {
             return
         }
 
+        let baseDirectory = self.baseDirectory
+        let localModelURL = self.localModelURL
+
         let fm = FileManager.default
         do {
             try fm.createDirectory(at: baseDirectory, withIntermediateDirectories: true)
@@ -42,8 +45,7 @@ final class WhisperModelManager {
             return
         }
 
-        let task = URLSession.shared.downloadTask(with: remoteArchiveURL) { [weak self] tempURL, response, error in
-            guard let self else { return }
+        let task = URLSession.shared.downloadTask(with: remoteArchiveURL) { tempURL, _, error in
             if let error {
                 completion(.failure(error))
                 return
@@ -54,15 +56,18 @@ final class WhisperModelManager {
             }
 
             do {
-                let downloadURL = self.baseDirectory.appendingPathComponent("download-\(UUID().uuidString)")
+                let fm = FileManager.default
+                let downloadURL = baseDirectory.appendingPathComponent("download-\(UUID().uuidString)")
                 if fm.fileExists(atPath: downloadURL.path) {
                     try fm.removeItem(at: downloadURL)
                 }
                 try fm.moveItem(at: tempURL, to: downloadURL)
 
-                try self.unpack(at: downloadURL)
+                try Self.unpack(at: downloadURL,
+                                baseDirectory: baseDirectory,
+                                localModelURL: localModelURL)
                 progress?(1.0)
-                completion(.success(self.localModelURL))
+                completion(.success(localModelURL))
             } catch {
                 completion(.failure(error))
             }
@@ -71,7 +76,9 @@ final class WhisperModelManager {
         task.resume()
     }
 
-    private func unpack(at url: URL) throws {
+    private static func unpack(at url: URL,
+                               baseDirectory: URL,
+                               localModelURL: URL) throws {
         let fm = FileManager.default
         defer { try? fm.removeItem(at: url) }
 
@@ -93,17 +100,17 @@ final class WhisperModelManager {
                 }
             }
 
-            if let artifact = locateModelArtifact(in: extractDir) {
-                try finalizeArtifact(at: artifact)
+            if let artifact = locateModelArtifact(in: extractDir, localModelURL: localModelURL) {
+                try finalizeArtifact(at: artifact, localModelURL: localModelURL)
             } else {
                 throw SpeechBackendError.backendUnavailable("Kein Whisper-Modell im Archiv gefunden.")
             }
         } else {
-            try finalizeArtifact(at: url)
+            try finalizeArtifact(at: url, localModelURL: localModelURL)
         }
     }
 
-    private func makeArchive(from url: URL) throws -> Archive {
+    private static func makeArchive(from url: URL) throws -> Archive {
         do {
             return try Archive(url: url, accessMode: .read)
         } catch {
@@ -114,7 +121,8 @@ final class WhisperModelManager {
         }
     }
 
-    private func locateModelArtifact(in directory: URL) -> URL? {
+    private static func locateModelArtifact(in directory: URL,
+                                            localModelURL: URL) -> URL? {
         let fm = FileManager.default
         if fm.fileExists(atPath: localModelURL.path) {
             return localModelURL
@@ -128,7 +136,8 @@ final class WhisperModelManager {
         return nil
     }
 
-    private func finalizeArtifact(at url: URL) throws {
+    private static func finalizeArtifact(at url: URL,
+                                         localModelURL: URL) throws {
         let fm = FileManager.default
         if fm.fileExists(atPath: localModelURL.path) {
             try fm.removeItem(at: localModelURL)
