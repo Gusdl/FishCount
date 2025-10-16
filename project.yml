@@ -36,11 +36,3 @@ targets:
     dependencies:
       - package: WhisperKit
       - package: ZIPFoundation
-  FischbestandTests:
-    type: bundle.unit-test
-    platform: iOS
-    deploymentTarget: "17.0"
-    sources:
-      - path: Fischbestand/FischbestandTests
-    dependencies:
-      - target: Fischbestand
