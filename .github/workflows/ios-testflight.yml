@@ -119,12 +119,25 @@ jobs:
           puts "Removed #{removed} Info.plist from app resources"
           RUBY
 
+      - name: Preflight (list targets and schemes)
+        run: |
+          set -euxo pipefail
+          xcodebuild -list -project "$PROJECT"
+
       - name: Build (device only, no signing) – sanity check
         run: |
           set -euxo pipefail
+          mkdir -p build
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
             -destination 'generic/platform=iOS' -sdk iphoneos \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
+            | tee build/first-build.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first-build-log
+          path: build/first-build.log
 
       # --- Archive (nur device, mit Signatur) ---
       - name: Build (device) with full log
