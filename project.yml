@@ -1,41 +1,45 @@
 name: Fischbestand
 options:
-  bundleIdPrefix: com.simonmaiwald
-  deploymentTarget:
-    iOS: "16.0"
-
+  createIntermediateGroups: true
+  indentWidth: 2
 packages:
   WhisperKit:
     url: https://github.com/argmaxinc/WhisperKit
-    from: "0.14.0"
+    branch: main
   ZIPFoundation:
     url: https://github.com/weichsel/ZIPFoundation
-    from: "0.9.0"
+    from: 0.9.20
 
 targets:
   Fischbestand:
     type: application
     platform: iOS
+    deploymentTarget: "17.0"
+    info:
+      path: Fischbestand/Resources/Info.plist
     sources:
       - path: Fischbestand
         excludes:
           - FischbestandTests/**
-          - FischbestandUITests/**
     resources:
       - path: Fischbestand/Resources
-    info:
-      path: Fischbestand/Resources/Info.plist
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.simonmaiwald.fischbestand
         DEVELOPMENT_TEAM: XDLCKT3P87
+        CODE_SIGN_STYLE: Manual
+        SWIFT_VERSION: 5.10
+        IPHONEOS_DEPLOYMENT_TARGET: 17.0
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0
     dependencies:
       - package: WhisperKit
       - package: ZIPFoundation
   FischbestandTests:
     type: bundle.unit-test
     platform: iOS
+    deploymentTarget: "17.0"
     sources:
       - path: Fischbestand/FischbestandTests
     dependencies:
