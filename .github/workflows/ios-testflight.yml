@@ -1,10 +1,8 @@
----
-name: iOS TestFlight CI
+name: iOS TestFlight CI (device only)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -26,95 +24,11 @@ jobs:
         with:
           xcode-version: "16.1"
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode project
-        run: xcodegen generate --spec project.yml
-
-      # --- Robuster Placeholder-Assetkatalog (Universal + AccentColor) ---
-      - name: Reset asset catalog to universal placeholder
-        run: |
-          set -euxo pipefail
-          AC="Fischbestand/Resources/Assets.xcassets"
-          rm -rf "$AC"
-          mkdir -p "$AC/AppIcon.appiconset" "$AC/AccentColor.colorset"
-
-          /usr/bin/python3 - <<'PY'
-          import json, os
-          root="Fischbestand/Resources/Assets.xcassets"
-          os.makedirs(root, exist_ok=True)
-          with open(os.path.join(root,"Contents.json"),"w") as f:
-              json.dump({"info":{"version":1,"author":"xcode"}}, f)
-          PY
-
-          printf '%s' iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgqPoPAAH3AXo0SMxpAAAAAElFTkSuQmCC | base64 --decode > "$AC/AppIcon.appiconset/_base.png"
-          /usr/bin/sips -s format png --resampleWidth 1024 "$AC/AppIcon.appiconset/_base.png" --out "$AC/AppIcon.appiconset/Icon-1024.png"
-
-          # iPhone
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 60  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-20x20@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 87  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-29x29@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-40x40@3x.png"
-          /usr/bin/sips -s format png --resampleWidth 120 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 180 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-iphone-60x60@3x.png"
-
-          # iPad
-          /usr/bin/sips -s format png --resampleWidth 20  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-20x20@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 29  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 58  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-29x29@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 40  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 80  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-40x40@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 76  "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@1x.png"
-          /usr/bin/sips -s format png --resampleWidth 152 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-76x76@2x.png"
-          /usr/bin/sips -s format png --resampleWidth 167 "$AC/AppIcon.appiconset/Icon-1024.png" --out "$AC/AppIcon.appiconset/Icon-ipad-83.5x83.5@2x.png"
-
-          /usr/bin/python3 - <<'PY'
-          import json, os
-          p="Fischbestand/Resources/Assets.xcassets/AppIcon.appiconset"
-          imgs=[
-            {"idiom":"iphone","size":"20x20","scale":"2x","filename":"Icon-iphone-20x20@2x.png"},
-            {"idiom":"iphone","size":"20x20","scale":"3x","filename":"Icon-iphone-20x20@3x.png"},
-            {"idiom":"iphone","size":"29x29","scale":"2x","filename":"Icon-iphone-29x29@2x.png"},
-            {"idiom":"iphone","size":"29x29","scale":"3x","filename":"Icon-iphone-29x29@3x.png"},
-            {"idiom":"iphone","size":"40x40","scale":"2x","filename":"Icon-iphone-40x40@2x.png"},
-            {"idiom":"iphone","size":"40x40","scale":"3x","filename":"Icon-iphone-40x40@3x.png"},
-            {"idiom":"iphone","size":"60x60","scale":"2x","filename":"Icon-iphone-60x60@2x.png"},
-            {"idiom":"iphone","size":"60x60","scale":"3x","filename":"Icon-iphone-60x60@3x.png"},
-            {"idiom":"ipad","size":"20x20","scale":"1x","filename":"Icon-ipad-20x20@1x.png"},
-            {"idiom":"ipad","size":"20x20","scale":"2x","filename":"Icon-ipad-20x20@2x.png"},
-            {"idiom":"ipad","size":"29x29","scale":"1x","filename":"Icon-ipad-29x29@1x.png"},
-            {"idiom":"ipad","size":"29x29","scale":"2x","filename":"Icon-ipad-29x29@2x.png"},
-            {"idiom":"ipad","size":"40x40","scale":"1x","filename":"Icon-ipad-40x40@1x.png"},
-            {"idiom":"ipad","size":"40x40","scale":"2x","filename":"Icon-ipad-40x40@2x.png"},
-            {"idiom":"ipad","size":"76x76","scale":"1x","filename":"Icon-ipad-76x76@1x.png"},
-            {"idiom":"ipad","size":"76x76","scale":"2x","filename":"Icon-ipad-76x76@2x.png"},
-            {"idiom":"ipad","size":"83.5x83.5","scale":"2x","filename":"Icon-ipad-83.5x83.5@2x.png"},
-            {"idiom":"ios-marketing","size":"1024x1024","scale":"1x","filename":"Icon-1024.png"}
-          ]
-          with open(os.path.join(p,"Contents.json"),"w") as f:
-            json.dump({"images":imgs,"info":{"version":1,"author":"xcode"}}, f, indent=2)
-          PY
-
-          cat > "$AC/AccentColor.colorset/Contents.json" <<'JSON'
-          {
-            "colors": [
-              { "idiom":"universal",
-                "color":{"color-space":"srgb","components":{"red":"0.00","green":"0.48","blue":"1.00","alpha":"1.0"}}
-              }
-            ],
-            "info":{"version":1,"author":"xcode"}
-          }
-          JSON
-
-      # --- Zertifikat importieren (neu packen -> stabiler Import) ---
-      - name: Import signing identity (manual keychain)
+      # --- Signing: Zertifikat importieren (robust, repackage) ---
+      - name: Import signing identity
         env:
-          CERT_P12: ${{ secrets.CERT_P12 }}  # base64 der .p12
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}  # Passwort der .p12
+          CERT_P12: ${{ secrets.CERT_P12 }}         # base64 der .p12
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }} # Passwort der .p12
         run: |
           set -euxo pipefail
           printf '%s' "$CERT_P12" | base64 --decode > /tmp/orig.p12
@@ -123,17 +37,12 @@ jobs:
           security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/^[ \t]*//')
           security default-keychain -s "$KEYCHAIN"
           security unlock-keychain -p "" "$KEYCHAIN"
-
           P12_PASS_TRIMMED="$(printf '%s' "$P12_PASSWORD" | tr -d '\r\n')"
-
-          # Kann die P12 gelesen werden? -> ggf. legacy
           if /usr/bin/openssl pkcs12 -in /tmp/orig.p12 -passin pass:"$P12_PASS_TRIMMED" -nokeys -clcerts -info >/dev/null 2>&1; then
             LEG=0
           else
             LEG=1
           fi
-
-          # Cert/Key extrahieren
           if [ "$LEG" = "1" ]; then
             /usr/bin/openssl pkcs12 -legacy -in /tmp/orig.p12 -passin pass:"$P12_PASS_TRIMMED" -nodes -nocerts -out /tmp/key.pem
             /usr/bin/openssl pkcs12 -legacy -in /tmp/orig.p12 -passin pass:"$P12_PASS_TRIMMED" -nokeys -out /tmp/cert.pem
@@ -141,18 +50,13 @@ jobs:
             /usr/bin/openssl pkcs12 -in /tmp/orig.p12 -passin pass:"$P12_PASS_TRIMMED" -nodes -nocerts -out /tmp/key.pem
             /usr/bin/openssl pkcs12 -in /tmp/orig.p12 -passin pass:"$P12_PASS_TRIMMED" -nokeys -out /tmp/cert.pem
           fi
-
-          # Frische P12 bauen mit neuem PW (um Apple-Import-Probleme zu umgehen)
           /usr/bin/openssl pkcs12 -export -inkey /tmp/key.pem -in /tmp/cert.pem -out /tmp/fresh.p12 -passout pass:temp123
-
-          # Import
           security import /tmp/fresh.p12 -k "$KEYCHAIN" -f pkcs12 -P temp123 -A \
             -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
-
           security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN"
           security find-identity -v -p codesigning "$KEYCHAIN"
 
-      # --- Provisioning Profile installieren + validieren ---
+      # --- Provisioning Profile installieren + prüfen ---
       - name: Install provisioning profile
         env:
           MOBILEPROVISION: ${{ secrets.MOBILEPROVISION }}  # base64 des App-Store-Profils
@@ -168,53 +72,34 @@ jobs:
           GET_TASK_ALLOW=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' profile.plist || echo false)
           PP_TEAMID="${APP_ID%%.*}"
           PP_BUNDLEID="${APP_ID#*.}"
-
           echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
           echo "PP_NAME=$PP_NAME" >> $GITHUB_ENV
-
           [ "$GET_TASK_ALLOW" = "false" ] || { echo "::error ::Profil ist kein App-Store-Profil."; exit 1; }
           [ "$PP_TEAMID" = "$TEAM_ID" ] || { echo "::error ::TeamID mismatch: $PP_TEAMID != $TEAM_ID"; exit 1; }
           [ "$PP_BUNDLEID" = "$BUNDLE_ID" ] || { echo "::error ::BundleID mismatch: $PP_BUNDLEID != $BUNDLE_ID"; exit 1; }
 
-      # Optional: Simulator-Build für klare Swift-Fehler (bei Bedarf aktivieren)
-      # - name: Build (simulator, to surface Swift errors)
-      #   run: |
-      #     set -euxo pipefail
-      #     xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
-      #       -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-      #       CODE_SIGNING_ALLOWED=NO build
-
-      - name: Sanitize project
+      # --- Sanitize: entferne versehentlich kopierte Info.plist aus App-Ressourcen ---
+      - name: Sanitize project (remove stray Info.plist from resources)
         run: |
           set -euxo pipefail
           gem install xcodeproj
           ruby - <<'RUBY'
           require 'xcodeproj'
-          proj_path = 'Fischbestand.xcodeproj'
-          proj = Xcodeproj::Project.open(proj_path)
+          proj = Xcodeproj::Project.open('Fischbestand.xcodeproj')
           app = proj.targets.find { |t| t.name == 'Fischbestand' }
-          rbp = app&.resources_build_phase
+          rbp = app.resources_build_phase
           removed = 0
-          if rbp
-            rbp.files.dup.each do |bf|
-              ref = bf.file_ref
-              next unless ref && ref.path && File.basename(ref.path) == 'Info.plist'
-              rbp.remove_build_file(bf)
-              removed += 1
-            end
+          rbp.files.dup.each do |bf|
+            ref = bf.file_ref
+            next unless ref && ref.path && File.basename(ref.path) == 'Info.plist'
+            rbp.remove_build_file(bf); removed += 1
           end
           proj.save
           puts "Removed #{removed} Info.plist from app resources"
           RUBY
 
-      - name: Build (simulator, debug - diagnostics)
-        run: |
-          set -euxo pipefail
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build
-
-      - name: Archive (device, Release, manual signing)
+      # --- Archive (nur device, mit Signatur) ---
+      - name: Archive (device, Release)
         run: |
           set -euxo pipefail
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
@@ -227,16 +112,10 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
             PROVISIONING_PROFILE="$PP_UUID" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            INFOPLIST_FILE=Fischbestand/Resources/Info.plist \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
             IPHONEOS_DEPLOYMENT_TARGET=16.0
 
-      - name: Upload build logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcresult
-          path: build/Build.xcresult
-
+      # --- Export IPA ---
       - name: Export IPA
         run: |
           cat > ExportOptions.plist <<PLIST
@@ -245,16 +124,6 @@ jobs:
           <plist version="1.0"><dict>
             <key>method</key><string>app-store</string>
             <key>teamID</key><string>${TEAM_ID}</string>
-            <key>signingStyle</key><string>manual</string>
-            <key>signingCertificate</key><string>Apple Distribution</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <!-- Name ODER UUID des Profils ist erlaubt. Wir nehmen den Namen -->
-              <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
-              <!-- Falls du lieber die UUID nutzen willst:
-              <key>${BUNDLE_ID}</key><string>${PP_UUID}</string>
-              -->
-            </dict>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
           </dict></plist>
@@ -265,6 +134,7 @@ jobs:
             -exportOptionsPlist ExportOptions.plist
           ls -la build
 
+      # --- Fastlane Upload zu TestFlight (API Key, non-interactive) ---
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -274,16 +144,15 @@ jobs:
       - name: Install fastlane
         run: gem install fastlane
 
-      - name: Upload to TestFlight (non-interactive)
+      - name: Upload to TestFlight
         env:
-          APP_STORE_CONNECT_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY: ${{ secrets.ASC_API_KEY_CONTENTS }}
+          APP_STORE_CONNECT_KEY_ID:     ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID:  ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY:    ${{ secrets.ASC_API_KEY_CONTENTS }}
           CI: true
           FASTLANE_DISABLE_COLORS: 1
           FASTLANE_SKIP_UPDATE_CHECK: 1
           FASTLANE_OPT_OUT_USAGE: 1
-          FASTLANE_DISABLE_PROMPTS: 1      # statt --non-interactive
         run: |
           set -euxo pipefail
           mkdir -p fastlane
@@ -297,10 +166,19 @@ jobs:
                 issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
                 key_content: ENV["APP_STORE_CONNECT_API_KEY"]
               )
-              pilot(api_key: api_key, ipa: "build/#{ENV['SCHEME']}.ipa",
+              pilot(api_key: api_key,
+                    ipa: "build/#{ENV['SCHEME']}.ipa",
                     skip_waiting_for_build_processing: true)
             end
           end
           RUBY
           test -f "build/${SCHEME}.ipa"
-          fastlane ios beta
+          fastlane ios beta --non-interactive
+
+      # --- Logs als Artefakt (für Diagnose bei Fehlern) ---
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: build/Build.xcresult
