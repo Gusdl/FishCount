@@ -184,7 +184,7 @@ jobs:
       #       -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' \
       #       CODE_SIGNING_ALLOWED=NO build
 
-      - name: Sanitize project: remove stray Info.plist from app resources
+      - name: Sanitize project
         run: |
           set -euxo pipefail
           gem install xcodeproj
