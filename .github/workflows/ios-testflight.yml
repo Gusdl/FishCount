@@ -24,6 +24,19 @@ jobs:
         with:
           xcode-version: "16.1"
 
+      - name: Install XcodeGen
+        run: |
+          set -euxo pipefail
+          brew install xcodegen
+
+      - name: Generate Xcode project from project.yml
+        run: |
+          set -euxo pipefail
+          xcodegen generate
+          grep -q "WhisperModelManager.swift" Fischbestand.xcodeproj/project.pbxproj
+          grep -q "AppleSpeechBackend.swift" Fischbestand.xcodeproj/project.pbxproj
+          grep -q "SpeechBackend.swift" Fischbestand.xcodeproj/project.pbxproj
+
       # --- Signing: Zertifikat importieren (robust, repackage) ---
       - name: Import signing identity
         env:
@@ -97,6 +110,13 @@ jobs:
           proj.save
           puts "Removed #{removed} Info.plist from app resources"
           RUBY
+
+      - name: Build (device only, no signing) – sanity check
+        run: |
+          set -euxo pipefail
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -destination 'generic/platform=iOS' -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
 
       # --- Archive (nur device, mit Signatur) ---
       - name: Build (device) with full log

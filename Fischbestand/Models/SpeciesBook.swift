@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct SpeciesEntry: Identifiable, Codable, Equatable {
     var id = UUID()

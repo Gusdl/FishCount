@@ -15,6 +15,12 @@ B4D9F0012C6B2E7A00AA1234 /* VoiceParser.swift in Sources */ = {isa = PBXBuildFil
 B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */; };
 B4D9F0032C6B2E7A00AA1234 /* SpeciesBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */; };
 B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9EFF52C6B2E2E00AA1234 /* SurveyStore.swift */; };
+F12F748BDEB49D501AA8D586 /* SpeechBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2F357FC20D7BB8AF9ACAE4 /* SpeechBackend.swift */; };
+3AEA0A51BBC77ED3E897F160 /* SpeechHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFAD7EF4B1CF01B5B35D34D8 /* SpeechHints.swift */; };
+1FFDDA002FE0BC099CAD50A8 /* AppleSpeechBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B151EA9A7CFE7A70937865B /* AppleSpeechBackend.swift */; };
+80118E4259B4FBC87F8D5FCF /* UtteranceAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D852106C4571EC643A1280 /* UtteranceAggregator.swift */; };
+5EEC50445D6EF34069258CD4 /* WhisperBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA460DC1B4A9EBC3F752403 /* WhisperBackend.swift */; };
+A82E06698F5332437C3CA99B /* WhisperModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC7FC179FE8229ED5D200528 /* WhisperModelManager.swift */; };
 B4E0AAA32C8B12340000AAAA /* SizeBin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E0AAA12C8B12340000AAAA /* SizeBin.swift */; };
 B4E0AAA42C8B12340000AAAA /* SurveyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E0AAA22C8B12340000AAAA /* SurveyEntry.swift */; };
 3D3F7A3404A54778BE2AEBD5 /* SizeBuckets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BCF108A32A345F684B9E133 /* SizeBuckets.swift */; };
@@ -47,6 +53,12 @@ B4F1D6B22C5A2E9B00F5F4D1 /* LocationManager.swift */ = {isa = PBXFileReference; 
 B4E0AAA12C8B12340000AAAA /* SizeBin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeBin.swift; sourceTree = "<group>"; };
 B4E0AAA22C8B12340000AAAA /* SurveyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyEntry.swift; sourceTree = "<group>"; };
 B4D9EFF22C6B2E2E00AA1234 /* VoiceParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceParser.swift; sourceTree = "<group>"; };
+2D2F357FC20D7BB8AF9ACAE4 /* SpeechBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBackend.swift; sourceTree = "<group>"; };
+DFAD7EF4B1CF01B5B35D34D8 /* SpeechHints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechHints.swift; sourceTree = "<group>"; };
+3B151EA9A7CFE7A70937865B /* AppleSpeechBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechBackend.swift; sourceTree = "<group>"; };
+F5D852106C4571EC643A1280 /* UtteranceAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtteranceAggregator.swift; sourceTree = "<group>"; };
+4CA460DC1B4A9EBC3F752403 /* WhisperBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperBackend.swift; sourceTree = "<group>"; };
+DC7FC179FE8229ED5D200528 /* WhisperModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperModelManager.swift; sourceTree = "<group>"; };
 0BCF108A32A345F684B9E133 /* SizeBuckets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeBuckets.swift; sourceTree = "<group>"; };
 B4D9EFF32C6B2E2E00AA1234 /* SpeciesBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBook.swift; sourceTree = "<group>"; };
 B4D9EFF42C6B2E2E00AA1234 /* SpeciesBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesBookView.swift; sourceTree = "<group>"; };
@@ -169,6 +181,12 @@ sourceTree = "<group>";
 5F15C8EB2B1EFD1C009A2F11 /* Services */ = {
     isa = PBXGroup;
     children = (
+        3B151EA9A7CFE7A70937865B /* AppleSpeechBackend.swift */,
+        2D2F357FC20D7BB8AF9ACAE4 /* SpeechBackend.swift */,
+        DFAD7EF4B1CF01B5B35D34D8 /* SpeechHints.swift */,
+        F5D852106C4571EC643A1280 /* UtteranceAggregator.swift */,
+        4CA460DC1B4A9EBC3F752403 /* WhisperBackend.swift */,
+        DC7FC179FE8229ED5D200528 /* WhisperModelManager.swift */,
         B4D9EFF22C6B2E2E00AA1234 /* VoiceParser.swift */
     );
     name = Services;
@@ -381,9 +399,15 @@ isa = PBXSourcesBuildPhase;
 buildActionMask = 2147483647;
 files = (
 5F15C9202B1EFD1C009A2F11 /* FischbestandApp.swift in Sources */,
-B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
-5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
-5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
+        B4F1D6B32C5A2E9B00F5F4D1 /* LocationManager.swift in Sources */,
+        5F15C9212B1EFD1C009A2F11 /* SpeechManager.swift in Sources */,
+        F12F748BDEB49D501AA8D586 /* SpeechBackend.swift in Sources */,
+        3AEA0A51BBC77ED3E897F160 /* SpeechHints.swift in Sources */,
+        1FFDDA002FE0BC099CAD50A8 /* AppleSpeechBackend.swift in Sources */,
+        80118E4259B4FBC87F8D5FCF /* UtteranceAggregator.swift in Sources */,
+        5EEC50445D6EF34069258CD4 /* WhisperBackend.swift in Sources */,
+        A82E06698F5332437C3CA99B /* WhisperModelManager.swift in Sources */,
+        5F15C9222B1EFD1C009A2F11 /* Survey.swift in Sources */,
         B4D9F0042C6B2E7A00AA1234 /* SurveyStore.swift in Sources */,
         B4D9F0022C6B2E7A00AA1234 /* SpeciesBook.swift in Sources */,
         B4D9F0012C6B2E7A00AA1234 /* VoiceParser.swift in Sources */,
