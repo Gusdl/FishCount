@@ -32,10 +32,18 @@ jobs:
       - name: Generate Xcode project from project.yml
         run: |
           set -euxo pipefail
+          rm -rf Fischbestand.xcodeproj
           xcodegen generate
-          grep -q "WhisperModelManager.swift" Fischbestand.xcodeproj/project.pbxproj
-          grep -q "AppleSpeechBackend.swift" Fischbestand.xcodeproj/project.pbxproj
-          grep -q "SpeechBackend.swift" Fischbestand.xcodeproj/project.pbxproj
+          PBX="Fischbestand.xcodeproj/project.pbxproj"
+          for f in \
+            Fischbestand/Services/Speech/SpeechBackend.swift \
+            Fischbestand/Services/Speech/AppleSpeechBackend.swift \
+            Fischbestand/Services/Speech/WhisperBackend.swift \
+            Fischbestand/Services/Speech/WhisperModelManager.swift \
+          ; do
+            test -f "$f" || { echo "::error file=$f::missing file"; exit 1; }
+            grep -q "$(basename "$f")" "$PBX" || { echo "::error ::$f not in target sources"; exit 1; }
+          done
 
       # --- Signing: Zertifikat importieren (robust, repackage) ---
       - name: Import signing identity
