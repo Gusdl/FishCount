@@ -80,8 +80,15 @@ final class WhisperModelManager {
             try fm.createDirectory(at: extractDir, withIntermediateDirectories: true)
             defer { try? fm.removeItem(at: extractDir) }
 
-            guard let archive = Archive(url: url, accessMode: .read) else {
-                throw SpeechBackendError.backendUnavailable("ZIP-Archiv konnte nicht geöffnet werden.")
+            let archive: Archive
+            do {
+                archive = try Archive(url: url, accessMode: .read)
+            } catch {
+                if let fallbackArchive = try? Archive(url: url, accessMode: .read, preferredEncoding: .utf8) {
+                    archive = fallbackArchive
+                } else {
+                    throw error
+                }
             }
 
             for entry in archive {
@@ -91,7 +98,7 @@ final class WhisperModelManager {
                 if entry.type == .directory {
                     try fm.createDirectory(at: destinationURL, withIntermediateDirectories: true)
                 } else {
-                    _ = try archive.extract(entry, to: destinationURL)
+                    try archive.extract(entry, to: destinationURL)
                 }
             }
 
