@@ -506,11 +506,11 @@ struct CaptureView: View {
     private func configureSpeechHandler() {
         speech.speciesCatalog = book.namesAndAliases()
         speech.activeDefaultSize = activeSizeBin.sizeRange
-        speech.onCommands = { [weak self] commands in
-            self?.handleCommands(commands)
+        speech.onCommands = { commands in
+            handleCommands(commands)
         }
-        speech.onUnrecognized = { [weak self] text in
-            self?.handleUnrecognized(text: text)
+        speech.onUnrecognized = { text in
+            handleUnrecognized(text: text)
         }
     }
 
