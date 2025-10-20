@@ -72,6 +72,13 @@ Fischbestand/
 4. Optional: In den Geräteeinstellungen des Simulators `Mikrofon` & `Spracherkennung` erlauben.
 5. Auf einem iOS 17 Gerät oder Simulator ausführen.
 
+## Clean Build & manueller Testlauf
+
+- Für einen kompletten Neuaufbau empfiehlt sich vor dem ersten Start ein `Shift` + `⌘` + `K` ("Clean Build Folder") im gewählten Schema `Fischbestand`.
+- Anschließend lässt sich die App mit `⌘` + `B` lokal kompilieren und direkt auf einem verbundenen Gerät oder Simulator starten (`⌘` + `R`).
+- Wer die CI-Pipeline nachvollziehen möchte, kann im Terminal `xcodebuild -project Fischbestand.xcodeproj -scheme Fischbestand -configuration Release -destination 'generic/platform=iOS' -archivePath build/Fischbestand.xcarchive archive` ausführen. Dieser Befehl entspricht dem GitHub-Actions-Archivlauf und erzeugt ein installierbares `.xcarchive` im Verzeichnis `build/`.
+- Das exportierte Archiv kann – wie im Workflow – mit `xcodebuild -exportArchive -archivePath build/Fischbestand.xcarchive -exportPath build -exportOptionsPlist ExportOptions.plist` in eine `.ipa` überführt werden, sodass sich der komplette End-to-End-Test auch lokal nachvollziehen lässt.
+
 ## Whisper-Integration
 
 - `SpeechManager` kapselt jetzt austauschbare Backends. Standardmäßig nutzt die App weiterhin das Apple Speech Framework (`AppleSpeechBackend`).
