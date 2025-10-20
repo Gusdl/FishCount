@@ -34,7 +34,9 @@ struct ExportView: View {
         }
         .navigationTitle("Export")
         .onAppear(perform: populateDefaults)
-        .onChange(of: store.currentSurvey?.id) { _ in populateDefaults() }
+        .onChange(of: store.currentSurvey?.id) {
+            populateDefaults()
+        }
         .sheet(isPresented: $showShare) {
             ShareSheet(activityItems: shareItems)
         }
