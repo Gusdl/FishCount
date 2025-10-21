@@ -46,6 +46,27 @@ jobs:
             grep -q "$(basename "$f")" "$PBX" || { echo "::error ::$f not in target sources"; exit 1; }
           done
 
+      - name: Set unique build number
+        run: |
+          set -euxo pipefail
+          NOW=$(date -u +%Y%m%d%H%M%S)
+          MIN_BASE=20251015171655
+          RUN_NUMBER=${GITHUB_RUN_NUMBER:-0}
+          MINIMUM=$((MIN_BASE + RUN_NUMBER))
+          if [ "$NOW" -gt "$MINIMUM" ]; then
+            BUILD_NUMBER=$NOW
+          else
+            BUILD_NUMBER=$MINIMUM
+          fi
+          echo "::notice ::Using build number $BUILD_NUMBER"
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+
+      - name: Apply build number to project settings
+        run: |
+          set -euxo pipefail
+          rm -rf build
+          xcrun agvtool new-version -all "$BUILD_NUMBER"
+
       # --- Signing: Zertifikat importieren (robust, repackage) ---
       - name: Import signing identity
         env:
@@ -133,7 +154,9 @@ jobs:
           mkdir -p build
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
             -destination 'generic/platform=iOS' -sdk iphoneos \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            build \
             | tee build/first-build.log
 
       - uses: actions/upload-artifact@v4
@@ -157,6 +180,7 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PP_NAME" \
             PROVISIONING_PROFILE="$PP_UUID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon \
             | tee build/xcodebuild.log
 
@@ -175,6 +199,12 @@ jobs:
           <plist version="1.0"><dict>
             <key>method</key><string>app-store</string>
             <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
+            </dict>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
           </dict></plist>
@@ -205,6 +235,7 @@ jobs:
           FASTLANE_DISABLE_COLORS: 1
           FASTLANE_SKIP_UPDATE_CHECK: 1
           FASTLANE_OPT_OUT_USAGE: 1
+          FASTLANE_SKIP_CONFIRMATION: 1
         run: |
           set -euxo pipefail
           mkdir -p fastlane
@@ -220,12 +251,13 @@ jobs:
               )
               pilot(api_key: api_key,
                     ipa: "build/#{ENV['SCHEME']}.ipa",
+                    build_number: ENV['BUILD_NUMBER'],
                     skip_waiting_for_build_processing: true)
             end
           end
           RUBY
           test -f "build/${SCHEME}.ipa"
-          fastlane ios beta --non-interactive
+          fastlane ios beta
 
       # --- Logs als Artefakt (für Diagnose bei Fehlern) ---
       - name: Upload build logs
