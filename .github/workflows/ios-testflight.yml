@@ -175,6 +175,12 @@ jobs:
           <plist version="1.0"><dict>
             <key>method</key><string>app-store</string>
             <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${BUNDLE_ID}</key><string>${PP_NAME}</string>
+            </dict>
             <key>uploadSymbols</key><true/>
             <key>stripSwiftSymbols</key><true/>
           </dict></plist>
@@ -205,6 +211,7 @@ jobs:
           FASTLANE_DISABLE_COLORS: 1
           FASTLANE_SKIP_UPDATE_CHECK: 1
           FASTLANE_OPT_OUT_USAGE: 1
+          FASTLANE_SKIP_CONFIRMATION: 1
         run: |
           set -euxo pipefail
           mkdir -p fastlane
@@ -225,7 +232,7 @@ jobs:
           end
           RUBY
           test -f "build/${SCHEME}.ipa"
-          fastlane ios beta --non-interactive
+          fastlane ios beta
 
       # --- Logs als Artefakt (für Diagnose bei Fehlern) ---
       - name: Upload build logs
