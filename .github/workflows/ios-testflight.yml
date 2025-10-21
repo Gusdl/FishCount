@@ -61,6 +61,12 @@ jobs:
           echo "::notice ::Using build number $BUILD_NUMBER"
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
 
+      - name: Apply build number to project settings
+        run: |
+          set -euxo pipefail
+          rm -rf build
+          xcrun agvtool new-version -all "$BUILD_NUMBER"
+
       # --- Signing: Zertifikat importieren (robust, repackage) ---
       - name: Import signing identity
         env:
@@ -245,6 +251,7 @@ jobs:
               )
               pilot(api_key: api_key,
                     ipa: "build/#{ENV['SCHEME']}.ipa",
+                    build_number: ENV['BUILD_NUMBER'],
                     skip_waiting_for_build_processing: true)
             end
           end
