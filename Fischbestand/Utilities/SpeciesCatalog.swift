@@ -7,20 +7,28 @@ struct Species: Codable, Hashable {
 
 enum SpeciesCatalog {
     static let defaults: [Species] = [
-        Species(name: "Barsch"),
-        Species(name: "Hecht"),
-        Species(name: "Karpfen"),
-        Species(name: "Zander"),
+        Species(name: "Äsche"),
+        Species(name: "Bachforelle"),
+        Species(name: "Regenbogenforelle"),
+        Species(name: "Elritze"),
+        Species(name: "Grundel"),
+        Species(name: "Schmerle"),
+        Species(name: "Groppe"),
+        Species(name: "Döbel"),
+        Species(name: "Hasel"),
+        Species(name: "Schneider"),
         Species(name: "Rotauge"),
         Species(name: "Rotfeder"),
-        Species(name: "Bachforelle"),
-        Species(name: "Saibling"),
-        Species(name: "Schleie"),
         Species(name: "Aal"),
-        Species(name: "Äsche"),
-        Species(name: "Döbel"),
-        Species(name: "Forelle"),
-        Species(name: "Wels")
+        Species(name: "Hecht"),
+        Species(name: "Zander"),
+        Species(name: "Wels"),
+        Species(name: "Karpfen"),
+        Species(name: "Brachse"),
+        Species(name: "Schleie"),
+        Species(name: "Stichling"),
+        Species(name: "Bitterling"),
+        Species(name: "Rapfen")
     ]
 
     private static let prioritizedFeatured = ["Barsch", "Hecht", "Karpfen", "Zander", "Rotfeder"]
