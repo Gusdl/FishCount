@@ -38,6 +38,9 @@ targets:
           CODE_SIGN_IDENTITY[sdk=iphoneos*]: "Apple Development"
         Release:
           CODE_SIGN_IDENTITY[sdk=iphoneos*]: "Apple Distribution"
+          CODE_SIGN_STYLE: Manual
+          PROVISIONING_PROFILE_SPECIFIER: Fischbestand
+          PROVISIONING_PROFILE: eb799562-a844-4f79-95cd-812a86fca9f8
     dependencies:
       - package: WhisperKit
       - package: ZIPFoundation
