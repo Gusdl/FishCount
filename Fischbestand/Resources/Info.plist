@@ -27,6 +27,31 @@
     </dict>
     <key>UILaunchScreen</key>
     <dict/>
+    <!-- AppIcon-Set verwenden -->
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
+    
+    <!-- Launch Screen als Storyboard -->
+    <key>UILaunchStoryboardName</key>
+    string>Launch-Screen</string>
+    
+    <!-- iPhone-Ausrichtungen -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- iPad-Ausrichtungen (für Multitasking Pflicht) -->
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationPortraitUpsideDown</string>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
     <key>UIRequiredDeviceCapabilities</key>
     <array>
         <string>arm64</string>
