@@ -43,4 +43,6 @@ targets:
           PROVISIONING_PROFILE: eb799562-a844-4f79-95cd-812a86fca9f8
     dependencies:
       - package: WhisperKit
+        product: WhisperKit
       - package: ZIPFoundation
+        product: ZIPFoundation
