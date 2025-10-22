@@ -15,44 +15,48 @@ struct SurveyListView: View {
                 AppTheme.backgroundGradient
                     .ignoresSafeArea()
 
-                List {
-                    if !surveys.isEmpty {
-                        Section {
+                if surveys.isEmpty {
+                    ContentUnavailableView("Noch keine Zählung",
+                                           systemImage: "list.bullet",
+                                           description: Text("Lege deine erste Session mit dem Plus-Button an."))
+                    .foregroundStyle(.white)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 28) {
                             HeroHeader(totalSurveys: surveys.count,
                                        totalEntries: totalEntries,
                                        uniqueSpecies: uniqueSpecies)
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
-                        }
-                        .textCase(nil)
-                    }
 
-                    Section {
-                        ForEach(surveys) { survey in
-                            NavigationLink(value: survey) {
-                                SurveyRow(survey: survey)
+                            SectionHeader(title: "Meine Sessions")
+                                .padding(.horizontal, 4)
+
+                            LazyVStack(spacing: 18) {
+                                ForEach(surveys) { survey in
+                                    NavigationLink(value: survey) {
+                                        SurveyRow(survey: survey)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            withAnimation { delete(survey) }
+                                        } label: {
+                                            Label("Löschen", systemImage: "trash")
+                                        }
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            withAnimation { delete(survey) }
+                                        } label: {
+                                            Label("Löschen", systemImage: "trash")
+                                        }
+                                    }
+                                }
                             }
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
-                            .listRowSeparator(.hidden)
                         }
-                        .onDelete(perform: delete)
-                    } header: {
-                        SectionHeader(title: "Meine Sessions")
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 28)
                     }
-                }
-                .listStyle(.insetGrouped)
-                .listSectionSpacing(24)
-                .scrollContentBackground(.hidden)
-                .scrollIndicators(.hidden)
-                .overlay {
-                    if surveys.isEmpty {
-                        ContentUnavailableView("Noch keine Zählung",
-                                               systemImage: "list.bullet",
-                                               description: Text("Lege deine erste Session mit dem Plus-Button an."))
-                        .foregroundStyle(.white)
-                    }
+                    .scrollIndicators(.hidden)
                 }
             }
             .navigationDestination(for: Survey.self) { survey in
@@ -101,8 +105,8 @@ struct SurveyListView: View {
         try? context.save()
     }
 
-    private func delete(at offsets: IndexSet) {
-        offsets.map { surveys[$0] }.forEach(context.delete)
+    private func delete(_ survey: Survey) {
+        context.delete(survey)
         try? context.save()
     }
 }
