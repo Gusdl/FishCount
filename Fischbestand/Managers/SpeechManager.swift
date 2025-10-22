@@ -22,17 +22,14 @@ final class SpeechManager: ObservableObject {
     private var whisperRemoteURL: URL?
 
     init() {
-        backend = AppleSpeechBackend()
+        backend = makeAppleBackend()
 
         #if canImport(WhisperKit)
-        if let whisperBackend = makeWhisperBackend() {
+        if WhisperModelManager.shared.isModelAvailable,
+           let whisperBackend = makeWhisperBackend() {
             backend = whisperBackend
             useWhisper = true
-        } else {
-            backend = makeAppleBackend()
         }
-        #else
-        backend = makeAppleBackend()
         #endif
 
         wireBackend()

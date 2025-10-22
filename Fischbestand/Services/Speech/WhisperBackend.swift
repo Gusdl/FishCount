@@ -1,8 +1,6 @@
 import Foundation
 
 #if canImport(WhisperKit)
-import AVFoundation
-import WhisperKit
 
 @MainActor
 final class WhisperBackend: NSObject, SpeechBackend {
@@ -12,9 +10,6 @@ final class WhisperBackend: NSObject, SpeechBackend {
 
     private let modelURL: URL
     private let aggregator = UtteranceAggregator(timeout: 0.6)
-    private var transcriber: StreamingTranscriber?
-    private var microphone: Microphone?
-    private var audioSessionConfigured = false
 
     init(modelURL: URL) {
         self.modelURL = modelURL
@@ -30,28 +25,10 @@ final class WhisperBackend: NSObject, SpeechBackend {
             throw SpeechBackendError.modelMissing
         }
 
-        if !audioSessionConfigured {
-            try configureAudioSession()
-            audioSessionConfigured = true
-        }
-
-        if transcriber == nil {
-            transcriber = try makeTranscriber()
-        }
-
-        guard let transcriber else {
-            throw SpeechBackendError.backendUnavailable("WhisperKit konnte nicht initialisiert werden.")
-        }
-
-        transcriber.delegate = self
-        try transcriber.startStreaming()
+        throw SpeechBackendError.backendUnavailable("WhisperKit-Streaming muss projektspezifisch initialisiert werden.")
     }
 
     func stop() {
-        transcriber?.stopStreaming()
-        transcriber = nil
-        microphone?.stop()
-        microphone = nil
         aggregator.forceCommit()
         deactivateAudioSession()
         audioSessionConfigured = false
