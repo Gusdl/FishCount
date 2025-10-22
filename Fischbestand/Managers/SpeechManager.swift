@@ -24,6 +24,8 @@ final class SpeechManager: ObservableObject {
     init() {
         backend = makeAppleBackend()
 
+        backend = makeAppleBackend()
+
         #if canImport(WhisperKit)
         if WhisperModelManager.shared.isModelAvailable,
            let whisperBackend = makeWhisperBackend() {
