@@ -1,0 +1,3 @@
+"NSSpeechRecognitionUsageDescription" = "We use speech recognition to transcribe spoken counts automatically.";
+"NSMicrophoneUsageDescription" = "We need microphone access to record your spoken counts in the field.";
+"NSLocationWhenInUseUsageDescription" = "We use your location to add the waterbody location to the log.";
