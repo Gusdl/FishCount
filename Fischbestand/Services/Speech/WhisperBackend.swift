@@ -1,8 +1,6 @@
 import Foundation
 
 #if canImport(WhisperKit)
-import AVFoundation
-import WhisperKit
 
 final class WhisperBackend: SpeechBackend {
     var onUtterance: ((String) -> Void)?
@@ -11,7 +9,6 @@ final class WhisperBackend: SpeechBackend {
 
     private let modelURL: URL
     private let aggregator = UtteranceAggregator(timeout: 0.6)
-    private var teardownHandler: (() -> Void)?
 
     init(modelURL: URL) {
         self.modelURL = modelURL
@@ -25,13 +22,10 @@ final class WhisperBackend: SpeechBackend {
             throw SpeechBackendError.modelMissing
         }
 
-        // Placeholder implementation. Replace with the appropriate WhisperKit streaming setup.
         throw SpeechBackendError.backendUnavailable("WhisperKit-Streaming muss projektspezifisch initialisiert werden.")
     }
 
     func stop() {
-        teardownHandler?()
-        teardownHandler = nil
         aggregator.forceCommit()
     }
 }
