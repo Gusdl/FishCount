@@ -1,11 +1,18 @@
 import Foundation
 
 enum SpeechHints {
+    private static let fallbackSpecies: [String] = [
+        "Äsche", "Bachforelle", "Regenbogenforelle", "Elritze", "Grundel",
+        "Schmerle", "Groppe", "Döbel", "Hasel", "Schneider", "Rotauge",
+        "Rotfeder", "Aal", "Hecht", "Zander", "Wels", "Karpfen",
+        "Brachse", "Schleie", "Stichling", "Bitterling", "Rapfen"
+    ]
+
     static func species(_ override: [String]? = nil) -> [String] {
         if let override, !override.isEmpty {
             return override
         }
-        return SpeciesCatalog.searchableNames
+        return fallbackSpecies
     }
 
     static let sizeWords: [String] = [
