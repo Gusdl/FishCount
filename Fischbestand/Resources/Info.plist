@@ -23,11 +23,11 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Der Standort hilft dabei, deine Zählungen mit einem Gewässer zu verknüpfen.</string>
+    <string>Wir verwenden Ihren Standort, um den Gewässer-Standort zum Protokoll hinzuzufügen.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Die App nutzt das Mikrofon, um deine Sprachbefehle aufzunehmen.</string>
+    <string>Wir benötigen das Mikrofon, um Ihre Sprachzählungen im Feld aufzunehmen.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Die App benötigt Zugriff auf die Spracherkennung, um Fänge per Stimme zu erfassen.</string>
+    <string>Wir verwenden Spracherkennung, um gesprochene Zählungen automatisch zu transkribieren.</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>

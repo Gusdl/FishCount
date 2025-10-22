@@ -1,0 +1,3 @@
+"NSSpeechRecognitionUsageDescription" = "Wir verwenden Spracherkennung, um gesprochene Zählungen automatisch zu transkribieren.";
+"NSMicrophoneUsageDescription" = "Wir benötigen das Mikrofon, um Ihre Sprachzählungen im Feld aufzunehmen.";
+"NSLocationWhenInUseUsageDescription" = "Wir verwenden Ihren Standort, um den Gewässer-Standort zum Protokoll hinzuzufügen.";
