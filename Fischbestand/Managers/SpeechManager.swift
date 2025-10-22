@@ -22,7 +22,11 @@ final class SpeechManager: ObservableObject {
     private var whisperRemoteURL: URL?
 
     init() {
-        backend = AppleSpeechBackend()
+        backend = makeAppleBackend()
+
+        backend = makeAppleBackend()
+
+        backend = makeAppleBackend()
 
         backend = makeAppleBackend()
 
