@@ -22,17 +22,17 @@ final class SpeechManager: ObservableObject {
     private var whisperRemoteURL: URL?
 
     init() {
-        backend = AppleSpeechBackend()
+        backend = AppleSpeechBackend(contextWordsProvider: { [weak self] in
+            guard let self else { return SpeechHints.contextWords() }
+            return SpeechHints.contextWords(speciesCatalog: self.speciesCatalog)
+        })
 
         #if canImport(WhisperKit)
-        if let whisperBackend = makeWhisperBackend() {
+        if WhisperModelManager.shared.isModelAvailable,
+           let whisperBackend = makeWhisperBackend() {
             backend = whisperBackend
             useWhisper = true
-        } else {
-            backend = makeAppleBackend()
         }
-        #else
-        backend = makeAppleBackend()
         #endif
 
         wireBackend()
