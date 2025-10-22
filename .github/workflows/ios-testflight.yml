@@ -46,6 +46,17 @@ jobs:
             grep -q "$(basename "$f")" "$PBX" || { echo "::error ::$f not in target sources"; exit 1; }
           done
 
+      - name: Ensure privacy usage descriptions
+        run: |
+          set -euxo pipefail
+          PLIST="Fischbestand/Resources/Info.plist"
+          /usr/libexec/PlistBuddy -c "Delete :NSSpeechRecognitionUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'Wir verwenden Spracherkennung, um gesprochene Zählungen automatisch zu transkribieren.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :NSMicrophoneUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'Wir benötigen das Mikrofon, um Ihre Sprachzählungen im Feld aufzunehmen.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :NSLocationWhenInUseUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string 'Wir verwenden Ihren Standort, um den Gewässer-Standort zum Protokoll hinzuzufügen.'" "$PLIST"
+
       - name: Set unique build number
         run: |
           set -euxo pipefail
